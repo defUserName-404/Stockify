@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/widget/placeholder/placeholder_widget.dart';
+
+import 'common/theme/controller/theme_controller.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => ThemeController())],
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -9,13 +15,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeController>(context);
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const Scaffold(),
+      title: 'Stockify',
+      theme: themeProvider.themeData,
+      home: const AppPlaceholder(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
