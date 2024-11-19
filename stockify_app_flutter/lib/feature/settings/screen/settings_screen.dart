@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stockify_app_flutter/common/theme/controller/theme_controller.dart';
 
+import '../../../common/shared-preference/shared_preference_service.dart';
+import '../../../common/theme/controller/theme_controller.dart';
 import '../../../common/theme/theme.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -9,28 +10,26 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeController>(context);
-    final currentTheme = themeProvider.themeData.brightness;
+    final sharedPrefs = Provider.of<SharedPrefsService>(context);
+    final themeProvider = Provider.of<ThemeController>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: ListView(children: [
-        ListTile(
-          leading: Icon(Icons.dark_mode),
-          title: Text('Dark Mode'),
-          trailing: Switch(
-              value: currentTheme == Brightness.dark,
+      appBar: AppBar(title: const Text('Settings')),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.dark_mode),
+            title: const Text('Dark Mode'),
+            trailing: Switch(
+              value: sharedPrefs.isDarkMode,
               onChanged: (isDarkMode) {
-                if (isDarkMode) {
-                  themeProvider.setThemeData(AppTheme.dark);
-                } else {
-                  themeProvider.setThemeData(AppTheme.light);
-                }
-              }),
-          dense: true,
-        )
-      ]),
+                sharedPrefs.toggleDarkMode(isDarkMode);
+                themeProvider
+                    .setThemeData(isDarkMode ? AppTheme.dark : AppTheme.light);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

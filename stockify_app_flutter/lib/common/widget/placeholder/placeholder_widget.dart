@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:stockify_app_flutter/common/theme/colors.dart';
+import 'package:provider/provider.dart';
 
 import '../../../feature/home/screen/home_screen.dart';
 import '../../../feature/settings/screen/settings_screen.dart';
+import '../../shared-preference/shared_preference_service.dart';
+import '../../theme/colors.dart';
 
 class AppPlaceholder extends StatefulWidget {
   const AppPlaceholder({super.key});
@@ -13,12 +15,31 @@ class AppPlaceholder extends StatefulWidget {
 
 class _AppPlaceholderState extends State<AppPlaceholder> {
   int _selectedIndex = 0;
-  double _railWidth = 72;
+  late double _railWidth;
   bool _isExtended = false;
   bool _showLabels = false;
-  final double _minWidth = 72;
-  final double _maxWidth = 250;
-  final double _labelThreshold = 100;
+  final double _minRailWidth = 72;
+  final double _maxRailWidth = 250;
+  final double _minRailLabelThreshold = 100;
+
+  @override
+  void initState() {
+    super.initState();
+    final sharedPrefs = Provider.of<SharedPrefsService>(context, listen: false);
+    _railWidth = sharedPrefs.railWidth;
+    _isExtended = _railWidth > _minRailWidth;
+    _showLabels = _railWidth > _minRailLabelThreshold;
+  }
+
+  void _updateRailWidth(double newWidth) {
+    final sharedPrefs = Provider.of<SharedPrefsService>(context, listen: false);
+    setState(() {
+      _railWidth = newWidth.clamp(_minRailWidth, _maxRailWidth);
+      _showLabels = _railWidth > _minRailLabelThreshold;
+      _isExtended = _railWidth > _minRailWidth;
+      sharedPrefs.setRailWidth(_railWidth);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +51,7 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
             child: NavigationRail(
               leading: IconButton(
                 onPressed: () {
-                  setState(() {
-                    _isExtended = !_isExtended;
-                    _railWidth = _isExtended ? _maxWidth : _minWidth;
-                    _showLabels = _railWidth > _labelThreshold;
-                  });
+                  _updateRailWidth(_isExtended ? _minRailWidth : _maxRailWidth);
                 },
                 icon: const Icon(Icons.menu, color: AppColors.colorBackground),
               ),
@@ -60,14 +77,7 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
           ),
           GestureDetector(
             onHorizontalDragUpdate: (details) {
-              setState(() {
-                _railWidth += details.primaryDelta!;
-                _railWidth = _railWidth.clamp(_minWidth, _maxWidth);
-                bool shouldShowLabels = _railWidth > _labelThreshold;
-                if (shouldShowLabels != _showLabels) {
-                  _showLabels = shouldShowLabels;
-                }
-              });
+              _updateRailWidth(_railWidth + details.primaryDelta!);
             },
             child: MouseRegion(
               cursor: SystemMouseCursors.resizeLeftRight,
