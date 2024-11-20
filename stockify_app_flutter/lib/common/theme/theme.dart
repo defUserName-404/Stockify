@@ -5,6 +5,23 @@ import 'colors.dart';
 class AppTheme {
   AppTheme._();
 
+  static final _buttonStyleLight = ButtonStyle(
+    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+    ),
+    backgroundColor: WidgetStateProperty.all<Color>(AppColors.colorPrimary),
+    foregroundColor: WidgetStateProperty.all<Color>(AppColors.colorAccent),
+    minimumSize: WidgetStateProperty.all<Size>(Size(64, 64)),
+    overlayColor:
+        WidgetStateProperty.all<Color>(AppColors.colorBackground.withAlpha(10)),
+  );
+
+  static final _buttonStyleDark = _buttonStyleLight.copyWith(
+    backgroundColor: WidgetStateProperty.all<Color>(AppColors.colorPrimaryDark),
+    overlayColor: WidgetStateProperty.all<Color>(
+        AppColors.colorBackgroundDark.withAlpha(10)),
+  );
+
   static final light = ThemeData(
     useMaterial3: true,
     primaryColor: AppColors.colorPrimary,
@@ -77,8 +94,19 @@ class AppTheme {
       selectedLabelTextStyle: const TextStyle(
         color: AppColors.colorAccent,
       ),
-      minExtendedWidth: 200,
-      minWidth: 56,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: _buttonStyleLight),
+    iconButtonTheme: IconButtonThemeData(style: _buttonStyleLight),
+    searchBarTheme: SearchBarThemeData(
+      elevation: WidgetStateProperty.all<double>(2.0),
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+      ),
+      backgroundColor:
+          WidgetStateProperty.all<Color>(AppColors.colorTextSemiLight),
+      textStyle: WidgetStateProperty.all<TextStyle>(
+        TextStyle(color: AppColors.colorTextDark),
+      ),
     ),
   );
 
@@ -158,6 +186,19 @@ class AppTheme {
       ),
       minExtendedWidth: 200,
       minWidth: 56,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: _buttonStyleDark),
+    iconButtonTheme: IconButtonThemeData(style: _buttonStyleDark),
+    searchBarTheme: SearchBarThemeData(
+      elevation: WidgetStateProperty.all<double>(2.0),
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+      ),
+      backgroundColor:
+          WidgetStateProperty.all<Color>(AppColors.colorTextSemiLight),
+      textStyle: WidgetStateProperty.all<TextStyle>(
+        TextStyle(color: AppColors.colorTextDark),
+      ),
     ),
   );
 }

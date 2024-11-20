@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/feature/item/screen/item_screen.dart';
 
-import '../../../feature/home/screen/home_screen.dart';
+import '../../../feature/dashboard/screen/dashboard_screen.dart';
 import '../../../feature/settings/screen/settings_screen.dart';
 import '../../shared-preference/shared_preference_service.dart';
 import '../../theme/colors.dart';
@@ -43,6 +44,7 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Row(
         children: <Widget>[
@@ -55,13 +57,31 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
                 },
                 icon: const Icon(Icons.menu, color: AppColors.colorBackground),
               ),
-              destinations: const [
-                NavigationRailDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home),
-                  label: Text('Home'),
+              // Top items
+              destinations: [
+                const NavigationRailDestination(
+                  icon: Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard),
+                  label: Text('Dashboard'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.inventory_2_outlined),
+                  selectedIcon: Icon(Icons.inventory_2),
+                  label: Text('Items'),
                 ),
                 NavigationRailDestination(
+                  icon: const Icon(Icons.account_circle_outlined),
+                  selectedIcon: const Icon(Icons.account_circle),
+                  label: const Text('Users'),
+                  padding: EdgeInsets.only(bottom: screenHeight * 0.61),
+                ),
+                // Bottom items
+                const NavigationRailDestination(
+                  icon: Icon(Icons.notifications_outlined),
+                  selectedIcon: Icon(Icons.notifications),
+                  label: Text('Notifications'),
+                ),
+                const NavigationRailDestination(
                   icon: Icon(Icons.settings_outlined),
                   selectedIcon: Icon(Icons.settings),
                   label: Text('Settings'),
@@ -104,8 +124,10 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
   Widget _getSelectedScreen(int index) {
     switch (index) {
       case 0:
-        return const HomeScreen();
+        return const DashboardScreen();
       case 1:
+        return const ItemScreen();
+      case 4:
         return const SettingsScreen();
       default:
         return const Center(child: Text("Page not found"));

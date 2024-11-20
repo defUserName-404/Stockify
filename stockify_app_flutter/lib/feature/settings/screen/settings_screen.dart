@@ -13,7 +13,10 @@ class SettingsScreen extends StatelessWidget {
     final sharedPrefs = Provider.of<SharedPrefsService>(context);
     final themeProvider = Provider.of<ThemeController>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(
+        title: const Text('Settings'),
+        titleSpacing: 0,
+      ),
       body: ListView(
         children: [
           ListTile(
