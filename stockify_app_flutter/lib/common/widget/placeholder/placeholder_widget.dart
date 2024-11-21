@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/feature/item/screen/item_screen.dart';
+import 'package:stockify_app_flutter/feature/notification/screen/notification_screen.dart';
+import 'package:stockify_app_flutter/feature/user/screen/user_screen.dart';
 
 import '../../../feature/dashboard/screen/dashboard_screen.dart';
 import '../../../feature/settings/screen/settings_screen.dart';
@@ -44,7 +46,6 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Row(
         children: <Widget>[
@@ -73,7 +74,6 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
                   icon: const Icon(Icons.account_circle_outlined),
                   selectedIcon: const Icon(Icons.account_circle),
                   label: const Text('Users'),
-                  padding: EdgeInsets.only(bottom: screenHeight * 0.61),
                 ),
                 // Bottom items
                 const NavigationRailDestination(
@@ -126,7 +126,11 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
       case 0:
         return const DashboardScreen();
       case 1:
-        return const ItemScreen();
+        return ItemScreen();
+      case 2:
+        return const UserScreen();
+      case 3:
+        return const NotificationScreen();
       case 4:
         return const SettingsScreen();
       default:
