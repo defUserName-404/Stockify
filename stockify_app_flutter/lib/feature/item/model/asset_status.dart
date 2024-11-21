@@ -1,1 +1,1 @@
-enum AssetStatus { ACTIVE, INACTIVE, DISPOSED }
+enum AssetStatus { Active, Inactive, Disposed }
