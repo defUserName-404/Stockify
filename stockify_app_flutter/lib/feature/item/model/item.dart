@@ -1,6 +1,6 @@
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
-import 'package:stockify_app_flutter/feature/notification/model/user.dart';
 
+import '../../user/model/user.dart';
 import 'device_type.dart';
 
 class Item {
@@ -40,4 +40,27 @@ class Item {
       this.switchIpAddress,
       this.isPasswordProtected,
       this.assignedTo});
+
+  @override
+  String toString() {
+    return 'Item{'
+        'id: $id, '
+        'assetNo: $assetNo, '
+        'modelNo: $modelNo, '
+        'deviceType: $deviceType, '
+        'serialNo: $serialNo, '
+        'receivedDate: $receivedDate, '
+        'warrantyDate: $warrantyDate, '
+        'assetStatus: $assetStatus, '
+        'hostName: $hostName, '
+        'macAddress: $macAddress, '
+        'ipPort: $ipPort, '
+        'osVersion: $osVersion, '
+        'facePlateName: $facePlateName, '
+        'switchPort: $switchPort, '
+        'switchIpAddress: $switchIpAddress, '
+        'isPasswordProtected: $isPasswordProtected, '
+        'assignedTo: $assignedTo'
+        '}';
+  }
 }

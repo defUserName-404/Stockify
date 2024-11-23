@@ -15,4 +15,11 @@ class User {
       this.ipPhone,
       this.roomNo,
       this.floor});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is User && other.id == id);
+
+  @override
+  int get hashCode => id.hashCode;
 }

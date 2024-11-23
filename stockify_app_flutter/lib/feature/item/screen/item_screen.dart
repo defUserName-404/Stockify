@@ -8,8 +8,10 @@ import 'package:stockify_app_flutter/common/widget/app_button.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/util/item_validator.dart';
+import 'package:stockify_app_flutter/feature/item/widget/item_action.dart';
+import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 
-import '../../notification/model/user.dart';
+import '../../user/model/user.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
 
@@ -65,7 +67,45 @@ class _ItemScreenState extends State<ItemScreen> {
     });
   }
 
-  void _saveItem() {}
+  void _saveItem() {
+    final assetNo = _assetInputController.text;
+    final modelNo = _modelInputController.text;
+    final serialNo = _serialInputController.text;
+    final deviceType = _selectedDeviceType;
+    final assetStatus = _selectedAssetStatus;
+    final warrantyDate = _selectedWarrantyDate;
+    final receivedDate = _selectedReceivedDate;
+    final isPasswordProtected = _isPasswordProtected;
+    final assignedTo = _assignedUser;
+    final item = Item(
+      id: (int.parse(_itemService.getAllItems().last.id) + 1).toString(),
+      assetNo: assetNo,
+      modelNo: modelNo,
+      serialNo: serialNo,
+      deviceType: deviceType!,
+      assetStatus: assetStatus!,
+      warrantyDate: warrantyDate!,
+      receivedDate: receivedDate,
+      isPasswordProtected: isPasswordProtected,
+      assignedTo: assignedTo,
+    );
+    log(item.toString());
+    _itemService.addItem(item);
+    _clearFields();
+    _togglePanel();
+  }
+
+  void _clearFields() {
+    _assetInputController.clear();
+    _modelInputController.clear();
+    _serialInputController.clear();
+    _selectedDeviceType = null;
+    _selectedAssetStatus = null;
+    _selectedWarrantyDate = null;
+    _selectedReceivedDate = null;
+    _isPasswordProtected = null;
+    _assignedUser = null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +182,7 @@ class _ItemScreenState extends State<ItemScreen> {
                       DataColumn(label: Text('Asset Status')),
                       DataColumn(label: Text('Actions'))
                     ],
-                    source: ItemData(),
+                    source: ItemData(context: context),
                   ),
                 ),
               ],
@@ -390,9 +430,9 @@ class _ItemScreenState extends State<ItemScreen> {
                                 value: _assignedUser,
                                 decoration:
                                     InputDecoration(labelText: 'Assigned User'),
-                                items: usersList.map((type) {
+                                items: usersList.map((user) {
                                   return DropdownMenuItem(
-                                      value: type, child: Text(type.userName));
+                                      value: user, child: Text(user.userName));
                                 }).toList(),
                                 onChanged: (newValue) {
                                   setState(() {
@@ -411,7 +451,7 @@ class _ItemScreenState extends State<ItemScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       AppButton(
-                          onPressed: () {},
+                          onPressed: _saveItem,
                           icon: Icons.add,
                           text: _editingItem == null
                               ? 'Add Item'
@@ -438,8 +478,12 @@ class _ItemScreenState extends State<ItemScreen> {
 
 class ItemData extends DataTableSource {
   final List<Item> _items = ItemService.instance.getAllItems();
+  final ItemService _itemService = ItemService.instance;
+  final BuildContext _context;
 
   final Set<int> _selectedRows = {};
+
+  ItemData({required BuildContext context}) : _context = context;
 
   @override
   DataRow getRow(int index) {
@@ -463,17 +507,40 @@ class ItemData extends DataTableSource {
         DataCell(Text(item.serialNo)),
         DataCell(Text(item.deviceType.name)),
         DataCell(Text(item.warrantyDate.toLocal().toString())),
-        DataCell(Text(item.assetStatus.name)),
+        DataCell(ItemStatus(assetStatus: item.assetStatus)),
         DataCell(Row(
           children: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
-            IconButton(
-                onPressed: () {
-                  for (int i = 0; i < _selectedRows.length; i++) {
-                    log(_selectedRows.toList()[i].toString());
+            ItemActionWidget(icon: Icons.remove_red_eye_rounded, onTap: () {}),
+            const SizedBox(width: 10.0),
+            ItemActionWidget(icon: Icons.edit, onTap: () {}),
+            const SizedBox(width: 10.0),
+            ItemActionWidget(
+                icon: Icons.delete,
+                onTap: () async {
+                  final confirmDelete = await showDialog<bool>(
+                    context: _context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Confirm Deletion'),
+                      content: const Text(
+                          'Are you sure you want to delete this item?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Yes'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmDelete == true) {
+                    _itemService.deleteItem(item.id);
+                    _items.removeWhere((element) => element.id == item.id);
+                    notifyListeners();
                   }
-                },
-                icon: const Icon(Icons.delete)),
+                })
           ],
         ))
       ],
