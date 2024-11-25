@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/theme/controller/theme_controller.dart';
 import 'package:stockify_app_flutter/common/widget/app_button.dart';
@@ -14,6 +15,7 @@ import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 import '../../user/model/user.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
+import '../widget/item_details_text.dart';
 
 class ItemScreen extends StatefulWidget {
   ItemScreen({super.key});
@@ -29,7 +31,14 @@ class _ItemScreenState extends State<ItemScreen> {
   Item? _editingItem;
   late final TextEditingController _assetInputController,
       _modelInputController,
-      _serialInputController;
+      _serialInputController,
+      _hostNameInputController,
+      _ipPortInputController,
+      _macAddressInputController,
+      _osVersionInputController,
+      _facePlateNameInputController,
+      _switchPortInputController,
+      _switchIpAddressInputController;
   DeviceType? _selectedDeviceType;
   AssetStatus? _selectedAssetStatus;
   DateTime? _selectedWarrantyDate;
@@ -43,6 +52,13 @@ class _ItemScreenState extends State<ItemScreen> {
     _assetInputController = TextEditingController();
     _modelInputController = TextEditingController();
     _serialInputController = TextEditingController();
+    _hostNameInputController = TextEditingController();
+    _ipPortInputController = TextEditingController();
+    _macAddressInputController = TextEditingController();
+    _osVersionInputController = TextEditingController();
+    _facePlateNameInputController = TextEditingController();
+    _switchPortInputController = TextEditingController();
+    _switchIpAddressInputController = TextEditingController();
     _selectedDeviceType = _editingItem?.deviceType;
     _selectedAssetStatus = _editingItem?.assetStatus;
     _selectedWarrantyDate = _editingItem?.warrantyDate;
@@ -57,12 +73,55 @@ class _ItemScreenState extends State<ItemScreen> {
     _assetInputController.dispose();
     _modelInputController.dispose();
     _serialInputController.dispose();
+    _hostNameInputController.dispose();
+    _ipPortInputController.dispose();
+    _macAddressInputController.dispose();
+    _osVersionInputController.dispose();
+    _facePlateNameInputController.dispose();
+    _switchPortInputController.dispose();
+    _switchIpAddressInputController.dispose();
     super.dispose();
   }
 
   void _togglePanel({Item? item}) {
     setState(() {
-      _editingItem = item; // Set the item being edited (null for new item)
+      if (item != null) {
+        _editingItem = item;
+        _assetInputController.text = item.assetNo;
+        _modelInputController.text = item.modelNo;
+        _serialInputController.text = item.serialNo;
+        _selectedDeviceType = item.deviceType;
+        _selectedReceivedDate = item.receivedDate;
+        _selectedWarrantyDate = item.warrantyDate;
+        _selectedAssetStatus = item.assetStatus;
+        _hostNameInputController.text = item.hostName ?? '';
+        _ipPortInputController.text = item.ipPort ?? '';
+        _macAddressInputController.text = item.macAddress ?? '';
+        _osVersionInputController.text = item.osVersion ?? '';
+        _facePlateNameInputController.text = item.facePlateName ?? '';
+        _switchPortInputController.text = item.switchPort ?? '';
+        _switchIpAddressInputController.text = item.switchIpAddress ?? '';
+        _isPasswordProtected = item.isPasswordProtected;
+        _assignedUser = item.assignedTo;
+      } else {
+        _editingItem = null;
+        _assetInputController.clear();
+        _modelInputController.clear();
+        _serialInputController.clear();
+        _selectedDeviceType = null;
+        _selectedReceivedDate = null;
+        _selectedWarrantyDate = null;
+        _selectedAssetStatus = null;
+        _hostNameInputController.clear();
+        _ipPortInputController.clear();
+        _macAddressInputController.clear();
+        _osVersionInputController.clear();
+        _facePlateNameInputController.clear();
+        _switchPortInputController.clear();
+        _switchIpAddressInputController.clear();
+        _isPasswordProtected = null;
+        _assignedUser = null;
+      }
       _isPanelOpen = !_isPanelOpen;
     });
   }
@@ -73,24 +132,44 @@ class _ItemScreenState extends State<ItemScreen> {
     final serialNo = _serialInputController.text;
     final deviceType = _selectedDeviceType;
     final assetStatus = _selectedAssetStatus;
-    final warrantyDate = _selectedWarrantyDate;
     final receivedDate = _selectedReceivedDate;
+    final warrantyDate = _selectedWarrantyDate;
+    final hostName = _hostNameInputController.text;
+    final ipPort = _ipPortInputController.text;
+    final macAddress = _macAddressInputController.text;
+    final osVersion = _osVersionInputController.text;
+    final facePlateName = _facePlateNameInputController.text;
+    final switchPort = _switchPortInputController.text;
+    final switchIpAddress = _switchIpAddressInputController.text;
     final isPasswordProtected = _isPasswordProtected;
     final assignedTo = _assignedUser;
     final item = Item(
-      id: (int.parse(_itemService.getAllItems().last.id) + 1).toString(),
+      id: _editingItem == null
+          ? (int.parse(_itemService.getAllItems().last.id) + 1).toString()
+          : _editingItem!.id,
       assetNo: assetNo,
       modelNo: modelNo,
       serialNo: serialNo,
       deviceType: deviceType!,
       assetStatus: assetStatus!,
-      warrantyDate: warrantyDate!,
       receivedDate: receivedDate,
+      warrantyDate: warrantyDate!,
+      hostName: hostName,
+      ipPort: ipPort,
+      macAddress: macAddress,
+      osVersion: osVersion,
+      facePlateName: facePlateName,
+      switchPort: switchPort,
+      switchIpAddress: switchIpAddress,
       isPasswordProtected: isPasswordProtected,
       assignedTo: assignedTo,
     );
     log(item.toString());
-    _itemService.addItem(item);
+    if (_editingItem != null) {
+      _itemService.updateItem(item);
+    } else {
+      _itemService.addItem(item);
+    }
     _clearFields();
     _togglePanel();
   }
@@ -99,6 +178,13 @@ class _ItemScreenState extends State<ItemScreen> {
     _assetInputController.clear();
     _modelInputController.clear();
     _serialInputController.clear();
+    _hostNameInputController.clear();
+    _ipPortInputController.clear();
+    _macAddressInputController.clear();
+    _osVersionInputController.clear();
+    _facePlateNameInputController.clear();
+    _switchPortInputController.clear();
+    _switchIpAddressInputController.clear();
     _selectedDeviceType = null;
     _selectedAssetStatus = null;
     _selectedWarrantyDate = null;
@@ -182,7 +268,9 @@ class _ItemScreenState extends State<ItemScreen> {
                       DataColumn(label: Text('Asset Status')),
                       DataColumn(label: Text('Actions'))
                     ],
-                    source: ItemData(context: context),
+                    source: ItemData(
+                        context: context,
+                        onEdit: (item) => _togglePanel(item: item)),
                   ),
                 ),
               ],
@@ -272,7 +360,8 @@ class _ItemScreenState extends State<ItemScreen> {
                           ),
                           controller: TextEditingController(
                             text: _selectedReceivedDate != null
-                                ? "${_selectedReceivedDate!.year}-${_selectedReceivedDate!.month}-${_selectedReceivedDate!.day}"
+                                ? DateFormatter.extractDateFromDateTime(
+                                    _selectedReceivedDate!)
                                 : "",
                           ),
                           onTap: () async {
@@ -303,7 +392,8 @@ class _ItemScreenState extends State<ItemScreen> {
                           ),
                           controller: TextEditingController(
                             text: _selectedWarrantyDate != null
-                                ? "${_selectedWarrantyDate!.year}-${_selectedWarrantyDate!.month}-${_selectedWarrantyDate!.day}"
+                                ? DateFormatter.extractDateFromDateTime(
+                                    _selectedWarrantyDate!)
                                 : "",
                           ),
                           onTap: () async {
@@ -349,18 +439,21 @@ class _ItemScreenState extends State<ItemScreen> {
                       Expanded(
                         child: TextFormField(
                           decoration: InputDecoration(labelText: 'Host Name'),
+                          controller: _hostNameInputController,
                         ),
                       ),
                       const SizedBox(width: 10.0),
                       Expanded(
                         child: TextFormField(
                           decoration: InputDecoration(labelText: 'IP Port'),
+                          controller: _ipPortInputController,
                         ),
                       ),
                       const SizedBox(width: 10.0),
                       Expanded(
                         child: TextFormField(
                           decoration: InputDecoration(labelText: 'MAC Address'),
+                          controller: _macAddressInputController,
                         ),
                       ),
                     ],
@@ -371,6 +464,7 @@ class _ItemScreenState extends State<ItemScreen> {
                       Expanded(
                         child: TextFormField(
                           decoration: InputDecoration(labelText: 'OS Version'),
+                          controller: _osVersionInputController,
                         ),
                       ),
                       const SizedBox(width: 10.0),
@@ -378,12 +472,14 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           decoration:
                               InputDecoration(labelText: 'Face Plate Name'),
+                          controller: _facePlateNameInputController,
                         ),
                       ),
                       const SizedBox(width: 10.0),
                       Expanded(
                         child: TextFormField(
                           decoration: InputDecoration(labelText: 'Switch Port'),
+                          controller: _switchPortInputController,
                         ),
                       ),
                       const SizedBox(width: 10.0),
@@ -391,6 +487,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           decoration:
                               InputDecoration(labelText: 'Switch IP Address'),
+                          controller: _switchIpAddressInputController,
                         ),
                       ),
                     ],
@@ -480,10 +577,11 @@ class ItemData extends DataTableSource {
   final List<Item> _items = ItemService.instance.getAllItems();
   final ItemService _itemService = ItemService.instance;
   final BuildContext _context;
+  final void Function(Item)? onEdit;
 
   final Set<int> _selectedRows = {};
 
-  ItemData({required BuildContext context}) : _context = context;
+  ItemData({required BuildContext context, this.onEdit}) : _context = context;
 
   @override
   DataRow getRow(int index) {
@@ -506,13 +604,92 @@ class ItemData extends DataTableSource {
         DataCell(Text(item.modelNo)),
         DataCell(Text(item.serialNo)),
         DataCell(Text(item.deviceType.name)),
-        DataCell(Text(item.warrantyDate.toLocal().toString())),
+        DataCell(
+            Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
         DataCell(ItemStatus(assetStatus: item.assetStatus)),
         DataCell(Row(
           children: [
-            ItemActionWidget(icon: Icons.remove_red_eye_rounded, onTap: () {}),
+            ItemActionWidget(
+                icon: Icons.remove_red_eye_rounded,
+                onTap: () {
+                  showDialog(
+                    context: _context,
+                    builder: (_) => AlertDialog(
+                      title: Text('Item Details'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ItemDetailsText(
+                              label: 'Asset No', itemText: '${item.assetNo}'),
+                          ItemDetailsText(
+                              label: 'Model No', itemText: '${item.modelNo}'),
+                          ItemDetailsText(
+                              label: 'Serial No', itemText: '${item.serialNo}'),
+                          ItemDetailsText(
+                              label: 'Device Type',
+                              itemText: '${item.deviceType.name}'),
+                          if (item.receivedDate != null)
+                            ItemDetailsText(
+                                label: 'Warranty Date',
+                                itemText:
+                                    '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
+                          ItemDetailsText(
+                              label: 'Warranty Date',
+                              itemText:
+                                  '${DateFormatter.extractDateFromDateTime(item.warrantyDate)}'),
+                          ItemDetailsText(
+                              label: 'Status',
+                              itemText: '${item.assetStatus.name}'),
+                          if (item.hostName != null)
+                            ItemDetailsText(
+                                label: 'Host Name',
+                                itemText: '${item.hostName}'),
+                          if (item.ipPort != null)
+                            ItemDetailsText(
+                                label: 'IP Address',
+                                itemText: '${item.ipPort}'),
+                          if (item.macAddress != null)
+                            ItemDetailsText(
+                                label: 'MAC Address',
+                                itemText: '${item.macAddress}'),
+                          if (item.osVersion != null)
+                            ItemDetailsText(
+                                label: 'OS Version',
+                                itemText: '${item.osVersion}'),
+                          if (item.facePlateName != null)
+                            ItemDetailsText(
+                                label: 'Face Plate Name',
+                                itemText: '${item.facePlateName}'),
+                          if (item.switchPort != null)
+                            ItemDetailsText(
+                                label: 'Switch Port',
+                                itemText: '${item.switchPort}'),
+                          if (item.switchIpAddress != null)
+                            ItemDetailsText(
+                                label: 'Switch IP Address',
+                                itemText: '${item.switchIpAddress}'),
+                          if (item.assignedTo != null)
+                            ItemDetailsText(
+                                label: 'Assigned User',
+                                itemText: '${item.assignedTo!.userName}'),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text('Close'),
+                          onPressed: () => Navigator.of(_context).pop(),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
             const SizedBox(width: 10.0),
-            ItemActionWidget(icon: Icons.edit, onTap: () {}),
+            ItemActionWidget(
+                icon: Icons.edit,
+                onTap: () {
+                  onEdit!(item);
+                }),
             const SizedBox(width: 10.0),
             ItemActionWidget(
                 icon: Icons.delete,
@@ -521,8 +698,12 @@ class ItemData extends DataTableSource {
                     context: _context,
                     builder: (context) => AlertDialog(
                       title: const Text('Confirm Deletion'),
-                      content: const Text(
-                          'Are you sure you want to delete this item?'),
+                      content: (_selectedRows.length == 0 ||
+                              _selectedRows.length == 1)
+                          ? const Text(
+                              'Are you sure you want to delete this item?')
+                          : Text(
+                              'Are you sure you want to delete these ${_selectedRows.length} items?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -530,15 +711,26 @@ class ItemData extends DataTableSource {
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Yes'),
+                          child: const Text('Yes',
+                              style: TextStyle(color: AppColors.colorPink)),
                         ),
                       ],
                     ),
                   );
                   if (confirmDelete == true) {
-                    _itemService.deleteItem(item.id);
-                    _items.removeWhere((element) => element.id == item.id);
-                    notifyListeners();
+                    if (selectedRowCount == 0) {
+                      _itemService.deleteItem(item.id);
+                      notifyListeners();
+                    } else {}
+                    final selectedItems = _items
+                        .where((element) =>
+                            _selectedRows.contains(int.parse(element.id)))
+                        .toList();
+                    for (final currentlySelectedItem in selectedItems) {
+                      _itemService.deleteItem(currentlySelectedItem.id);
+                      _selectedRows.remove(int.parse(currentlySelectedItem.id));
+                      notifyListeners();
+                    }
                   }
                 })
           ],
