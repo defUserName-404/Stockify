@@ -128,7 +128,7 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
       case 1:
         return ItemScreen();
       case 2:
-        return const UserScreen();
+        return UserScreen();
       case 3:
         return const NotificationScreen();
       case 4:

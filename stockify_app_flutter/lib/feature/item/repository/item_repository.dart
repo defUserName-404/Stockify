@@ -33,6 +33,8 @@ class ItemRepository {
 
   List<Item> getAllItems() => _items;
 
+  Item getItem(String id) => _items.firstWhere((element) => element.id == id);
+
   void addItem(Item item) {
     _items.add(item);
   }

@@ -8,6 +8,7 @@ import 'package:stockify_app_flutter/common/theme/controller/theme_controller.da
 import 'package:stockify_app_flutter/common/widget/app_button.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
+import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/item/util/item_validator.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_action.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
@@ -48,7 +49,7 @@ class _ItemScreenState extends State<ItemScreen> {
 
   @override
   void initState() {
-    _itemService = ItemService.instance;
+    _itemService = ItemServiceImplementation.instance;
     _assetInputController = TextEditingController();
     _modelInputController = TextEditingController();
     _serialInputController = TextEditingController();
@@ -224,6 +225,7 @@ class _ItemScreenState extends State<ItemScreen> {
                       AppButton(
                           onPressed: _togglePanel,
                           icon: Icons.add,
+                          iconColor: AppColors.colorAccent,
                           text: 'Add New Item'),
                     ],
                     header: Row(
@@ -245,6 +247,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         AppButton(
                           onPressed: () {},
                           icon: Icons.filter_list_rounded,
+                          iconColor: AppColors.colorTextDark,
                           text: 'Sort & Filter',
                           backgroundColor: AppColors.colorTextSemiLight,
                           foregroundColor: AppColors.colorTextDark,
@@ -550,6 +553,7 @@ class _ItemScreenState extends State<ItemScreen> {
                       AppButton(
                           onPressed: _saveItem,
                           icon: Icons.add,
+                          iconColor: AppColors.colorAccent,
                           text: _editingItem == null
                               ? 'Add Item'
                               : 'Save Changes'),
@@ -557,6 +561,7 @@ class _ItemScreenState extends State<ItemScreen> {
                       AppButton(
                         onPressed: _togglePanel,
                         icon: Icons.cancel,
+                        iconColor: AppColors.colorTextDark,
                         text: 'Cancel',
                         backgroundColor: AppColors.colorTextSemiLight,
                         foregroundColor: AppColors.colorTextDark,
@@ -574,14 +579,17 @@ class _ItemScreenState extends State<ItemScreen> {
 }
 
 class ItemData extends DataTableSource {
-  final List<Item> _items = ItemService.instance.getAllItems();
-  final ItemService _itemService = ItemService.instance;
-  final BuildContext _context;
+  final ItemService _itemService = ItemServiceImplementation.instance;
+  late final List<Item> _items;
+  late final BuildContext _context;
   final void Function(Item)? onEdit;
 
   final Set<int> _selectedRows = {};
 
-  ItemData({required BuildContext context, this.onEdit}) : _context = context;
+  ItemData({required BuildContext context, this.onEdit}) {
+    _items = _itemService.getAllItems();
+    _context = context;
+  }
 
   @override
   DataRow getRow(int index) {

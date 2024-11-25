@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppButton extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData icon;
+  final Color? iconColor;
   final String text;
   final Color? backgroundColor;
   final Color? foregroundColor;
@@ -11,6 +12,7 @@ class AppButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     required this.icon,
+    this.iconColor,
     required this.text,
     this.backgroundColor,
     this.foregroundColor,
@@ -26,7 +28,7 @@ class AppButton extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon),
+          Icon(icon, color: iconColor),
           SizedBox(width: 8.0),
           Text(text),
         ],

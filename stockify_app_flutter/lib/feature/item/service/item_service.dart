@@ -1,28 +1,13 @@
 import '../model/item.dart';
-import '../repository/item_repository.dart';
 
-class ItemService {
-  ItemService._privateConstructor();
+abstract class ItemService {
+  void addItem(Item item);
 
-  static final ItemService _instance = ItemService._privateConstructor();
+  void updateItem(Item item);
 
-  static ItemService get instance => _instance;
+  void deleteItem(String id);
 
-  final ItemRepository _itemRepository = ItemRepository.instance;
+  List<Item> getAllItems();
 
-  void addItem(Item item) {
-    _itemRepository.addItem(item);
-  }
-
-  void updateItem(Item item) {
-    _itemRepository.updateItem(item);
-  }
-
-  void deleteItem(String id) {
-    _itemRepository.deleteItem(id);
-  }
-
-  List<Item> getAllItems() {
-    return _itemRepository.getAllItems();
-  }
+  Item getItem(String id);
 }
