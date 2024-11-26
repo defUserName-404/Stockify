@@ -1,0 +1,22 @@
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Go build files
+/bin/
+/pkg/
+**/*.db
+
+# Go coverage files
+/coverage/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Other files
+*.log
+*.tmp
+*.bak
