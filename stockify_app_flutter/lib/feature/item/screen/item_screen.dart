@@ -5,12 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/theme/controller/theme_controller.dart';
+import 'package:stockify_app_flutter/common/widget/action_widget.dart';
 import 'package:stockify_app_flutter/common/widget/app_button.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/item/util/item_validator.dart';
-import 'package:stockify_app_flutter/feature/item/widget/item_action.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 
 import '../../user/model/user.dart';
@@ -617,7 +617,7 @@ class ItemData extends DataTableSource {
         DataCell(ItemStatus(assetStatus: item.assetStatus)),
         DataCell(Row(
           children: [
-            ItemActionWidget(
+            ActionWidget(
                 icon: Icons.remove_red_eye_rounded,
                 onTap: () {
                   showDialog(
@@ -693,13 +693,13 @@ class ItemData extends DataTableSource {
                   );
                 }),
             const SizedBox(width: 10.0),
-            ItemActionWidget(
+            ActionWidget(
                 icon: Icons.edit,
                 onTap: () {
                   onEdit!(item);
                 }),
             const SizedBox(width: 10.0),
-            ItemActionWidget(
+            ActionWidget(
                 icon: Icons.delete,
                 onTap: () async {
                   final confirmDelete = await showDialog<bool>(

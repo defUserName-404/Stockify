@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 
-class ItemActionWidget extends StatelessWidget {
+class ActionWidget extends StatelessWidget {
   final IconData icon;
   final Function() onTap;
 
-  const ItemActionWidget({super.key, required this.icon, required this.onTap});
+  const ActionWidget({super.key, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
