@@ -2,27 +2,31 @@ package model
 
 import (
 	"fmt"
+	"gorm.io/gorm"
+	"stockify_backend_golang/src/feature/user/model"
 	"time"
 )
 
 type Item struct {
-	ID                  string
+	gorm.Model
+	ID                  uint64 `gorm:"primaryKey;autoIncrement"`
 	AssetNo             string
 	ModelNo             string
 	DeviceType          DeviceType
 	SerialNo            string
-	ReceivedDate        time.Time
+	ReceivedDate        *time.Time
 	WarrantyDate        time.Time
 	AssetStatus         AssetStatus
-	HostName            string
-	IpPort              string
-	MacAddress          string
-	OsVersion           string
-	FacePlateName       string
-	SwitchPort          string
-	SwitchIpAddress     string
-	IsPasswordProtected bool
-	AssignedTo          string
+	HostName            *string
+	IpPort              *string
+	MacAddress          *string
+	OsVersion           *string
+	FacePlateName       *string
+	SwitchPort          *string
+	SwitchIpAddress     *string
+	IsPasswordProtected *bool
+	AssignedToID        *uint64
+	AssignedTo          *model.User `gorm:"foreignKey:AssignedToID"`
 }
 
 func (i *Item) String() string {

@@ -21,7 +21,7 @@ func (s *itemService) GetAllItems() []model.Item {
 	return s.repo.GetAllItems()
 }
 
-func (s *itemService) GetItemById(id string) model.Item {
+func (s *itemService) GetItemById(id uint64) model.Item {
 	return s.repo.GetItemById(id)
 }
 
@@ -29,6 +29,6 @@ func (s *itemService) UpdateItem(item model.Item) {
 	s.repo.UpdateItem(item)
 }
 
-func (s *itemService) DeleteItem(item model.Item) {
-	s.repo.DeleteItem(item)
+func (s *itemService) DeleteItemById(id uint64) {
+	s.repo.DeleteItemById(id)
 }

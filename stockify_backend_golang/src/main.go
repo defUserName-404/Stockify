@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	model2 "stockify_backend_golang/src/feature/item/model"
+	"stockify_backend_golang/src/feature/item/model"
 	"stockify_backend_golang/src/feature/item/repository"
 	"stockify_backend_golang/src/feature/item/service"
 	"time"
@@ -23,41 +23,45 @@ func main() {
 	fmt.Println()
 	fmt.Println()
 
-	item := itemService.GetItemById("1")
+	item := itemService.GetItemById(1)
 	fmt.Print(item.String())
 }
 
 func addItem() {
-	itemService.AddItem(model2.Item{
+	receivedTime := time.Now()
+	hostName := "123"
+	ipPort := "123"
+	mac := "123"
+	assignedToID := uint64(123)
+	itemService.AddItem(model.Item{
 		AssetNo:             "456",
 		ModelNo:             "123",
-		DeviceType:          model2.PRINTER,
+		DeviceType:          model.PRINTER,
 		SerialNo:            "123",
-		ReceivedDate:        time.Now(),
+		ReceivedDate:        &receivedTime,
 		WarrantyDate:        time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
-		AssetStatus:         model2.INACTIVE,
-		HostName:            "123",
-		IpPort:              "123",
-		MacAddress:          "123",
-		OsVersion:           "123",
-		FacePlateName:       "123",
-		SwitchPort:          "123",
-		SwitchIpAddress:     "123",
-		IsPasswordProtected: true,
-		AssignedTo:          "123",
+		AssetStatus:         model.INACTIVE,
+		HostName:            &hostName,
+		IpPort:              &ipPort,
+		MacAddress:          &mac,
+		OsVersion:           nil,
+		FacePlateName:       nil,
+		SwitchPort:          nil,
+		SwitchIpAddress:     nil,
+		IsPasswordProtected: nil,
+		AssignedToID:        &assignedToID,
 	})
 }
 
 func deleteItem() {
-	itemService.DeleteItem(model2.Item{
-		ID: "1",
-	})
+	itemService.DeleteItemById(1)
 }
 
 func updateItem() {
-	itemService.UpdateItem(model2.Item{
-		ID:                  "4",
-		IsPasswordProtected: false,
-		AssetStatus:         model2.ACTIVE,
+	isPasswordProtected := false
+	itemService.UpdateItem(model.Item{
+		ID:                  4,
+		IsPasswordProtected: &isPasswordProtected,
+		AssetStatus:         model.ACTIVE,
 	})
 }

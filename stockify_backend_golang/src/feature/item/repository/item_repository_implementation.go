@@ -1,8 +1,18 @@
 package repository
 
 import (
+	"stockify_backend_golang/src/common/db"
 	"stockify_backend_golang/src/feature/item/model"
 )
+
+var DB = db.DB
+
+func init() {
+	err := db.DB.AutoMigrate(&model.Item{})
+	if err != nil {
+		panic("Failed to migrate Item table: " + err.Error())
+	}
+}
 
 type itemRepository struct{}
 
@@ -11,25 +21,30 @@ func ItemRepositoryImplementation() ItemRepository {
 }
 
 func (r *itemRepository) AddItem(item model.Item) {
-	db.Create(&item)
+	DB.Create(&item)
 }
 
 func (r *itemRepository) GetAllItems() []model.Item {
 	var items []model.Item
-	db.Find(&items)
+	DB.Find(&items)
 	return items
 }
 
-func (r *itemRepository) GetItemById(id string) model.Item {
+func (r *itemRepository) GetItemById(id uint64) model.Item {
 	var item model.Item
-	db.First(&item, id)
+	DB.First(&item, id)
 	return item
 }
 
 func (r *itemRepository) UpdateItem(item model.Item) {
-	db.Select("IsPasswordProtected").Updates(&item)
+	DB.Select("IsPasswordProtected").Updates(&item)
 }
 
-func (r *itemRepository) DeleteItem(item model.Item) {
-	db.Delete(&item)
+func (r *itemRepository) DeleteItemById(id uint64) {
+	var item model.Item
+	result := db.DB.First(&item, id)
+	if result.Error != nil {
+		panic("Item not found")
+	}
+	db.DB.Delete(&item)
 }
