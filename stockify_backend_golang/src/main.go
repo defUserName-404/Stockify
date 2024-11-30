@@ -16,29 +16,43 @@ func main() {
 	//updateItem()
 	//deleteItem()
 
-	for _, item := range itemService.GetAllItems() {
+	//for _, item := range itemService.GetAllItems() {
+	//	fmt.Print(item.String() + "\n")
+	//}
+	//
+	//fmt.Println()
+	//fmt.Println()
+	//
+	//item := itemService.GetItemById(1)
+	//fmt.Print(item.String())
+	//
+	//deviceType := model.PRINTER
+	items, err := itemRepository.GetFilteredItems(repository.ItemQueryParams{Search: "", Page: 1,
+		PageSize:    10,
+		SortBy:      "received_date",
+		SortOrder:   "desc",
+		DeviceType:  nil,
+		AssetStatus: nil})
+	if err != nil {
+		return
+	}
+	for _, item := range items {
 		fmt.Print(item.String() + "\n")
 	}
-
-	fmt.Println()
-	fmt.Println()
-
-	item := itemService.GetItemById(1)
-	fmt.Print(item.String())
 }
 
 func addItem() {
-	receivedTime := time.Now()
+	//receivedTime := time.Now()
 	hostName := "123"
 	ipPort := "123"
 	mac := "123"
 	assignedToID := uint64(123)
 	itemService.AddItem(model.Item{
-		AssetNo:             "456",
-		ModelNo:             "123",
-		DeviceType:          model.PRINTER,
-		SerialNo:            "123",
-		ReceivedDate:        &receivedTime,
+		AssetNo:             "123",
+		ModelNo:             "456",
+		DeviceType:          model.CPU,
+		SerialNo:            "345",
+		ReceivedDate:        nil,
 		WarrantyDate:        time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
 		AssetStatus:         model.INACTIVE,
 		HostName:            &hostName,
