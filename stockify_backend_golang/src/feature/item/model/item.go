@@ -32,7 +32,6 @@ type Item struct {
 
 func (i *Item) String() string {
 	var sb strings.Builder
-
 	sb.WriteString(fmt.Sprintf("Item{ID: %d, AssetNo: %s, ModelNo: %s, SerialNo: %s, DeviceType: %s, WarrantyDate: %s, AssetStatus: %s",
 		i.ID, i.AssetNo, i.ModelNo, i.SerialNo, i.DeviceType, i.WarrantyDate.Format(time.DateOnly), i.AssetStatus))
 	if i.ReceivedDate != nil {
@@ -66,7 +65,6 @@ func (i *Item) String() string {
 	if i.AssignedTo != nil {
 		sb.WriteString(fmt.Sprintf(", AssignedTo: %s", i.AssignedTo.UserName))
 	}
-
 	sb.WriteString("}")
 	return sb.String()
 }
