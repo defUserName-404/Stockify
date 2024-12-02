@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"log"
 	"stockify_backend_golang/src/common/db"
 	"stockify_backend_golang/src/feature/item/model"
 )
@@ -42,26 +43,39 @@ func (r *itemRepository) DeleteItemById(id uint64) {
 	var item model.Item
 	result := db.DB.First(&item, id)
 	if result.Error != nil {
-		panic("Item not found")
+		log.Fatal("Item not found")
+		return
 	}
 	db.DB.Delete(&item)
 }
 
-func (r *itemRepository) GetFilteredItems(params ItemQueryParams) ([]model.Item, error) {
+func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]model.Item, error) {
 	database := db.DB.Model(&model.Item{})
-	// Filter by device type
+	// Filtering
 	if params.DeviceType != nil {
 		database = database.Where("device_type = ?", *params.DeviceType)
 	}
-	// Filter by status
 	if params.AssetStatus != nil {
 		database = database.Where("asset_status = ?", *params.AssetStatus)
 	}
-	// Search in asset no, model no, hostname, etc.
+	if params.WarrantyDate != nil {
+		database = database.Where("warranty_date = ?", *params.WarrantyDate)
+	}
+	// Searching
 	if params.Search != "" {
 		searchTerm := "%" + params.Search + "%"
-		database = database.Where("asset_no LIKE ? OR model_no LIKE ? OR host_name LIKE ?", searchTerm, searchTerm, searchTerm)
+		database = database.Where(
+			"asset_no LIKE ?",
+			searchTerm,
+		).Or(
+			"model_no LIKE ?",
+			searchTerm,
+		).Or(
+			"serial_no LIKE ?",
+			searchTerm,
+		).Or("host_name LIKE ?", searchTerm).Or("ip_port LIKE ?", searchTerm).Or("mac_address LIKE ?", searchTerm)
 	}
+	// Sorting
 	sortColumn := map[string]string{
 		"asset_no":      "asset_no",
 		"model_no":      "model_no",
@@ -85,14 +99,4 @@ func (r *itemRepository) GetFilteredItems(params ItemQueryParams) ([]model.Item,
 		return nil, err
 	}
 	return items, nil
-}
-
-type ItemQueryParams struct {
-	Search      string
-	DeviceType  *model.DeviceType
-	AssetStatus *model.AssetStatus
-	SortBy      string
-	SortOrder   string
-	Page        int
-	PageSize    int
 }

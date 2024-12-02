@@ -10,5 +10,5 @@ type ItemRepository interface {
 	AddItem(item model.Item)
 	UpdateItem(item model.Item)
 	DeleteItemById(id uint64)
-	GetFilteredItems(params ItemQueryParams) ([]model.Item, error)
+	GetFilteredItems(params model.ItemFilterParams) ([]model.Item, error)
 }

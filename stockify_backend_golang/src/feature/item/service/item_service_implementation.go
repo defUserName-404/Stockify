@@ -32,3 +32,7 @@ func (s *itemService) UpdateItem(item model.Item) {
 func (s *itemService) DeleteItemById(id uint64) {
 	s.repo.DeleteItemById(id)
 }
+
+func (s *itemService) GetFilteredItems(params model.ItemFilterParams) ([]model.Item, error) {
+	return s.repo.GetFilteredItems(params)
+}

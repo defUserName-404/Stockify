@@ -8,4 +8,5 @@ type ItemService interface {
 	GetItemById(id uint64) model.Item
 	UpdateItem(item model.Item)
 	DeleteItemById(id uint64)
+	GetFilteredItems(params model.ItemFilterParams) ([]model.Item, error)
 }
