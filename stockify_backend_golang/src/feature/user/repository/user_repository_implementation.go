@@ -46,3 +46,34 @@ func (r *userRepository) DeleteUserById(id uint64) {
 	}
 	db.DB.Delete(&user)
 }
+
+func (r *userRepository) GetFilteredUsers(params model.UserQueryParams) ([]model.User, error) {
+	database := db.DB.Model(&model.User{})
+	// Searching
+	if params.Search != "" {
+		searchTerm := "%" + params.Search + "%"
+		database = database.Where("user_name LIKE ?", searchTerm).Or("sap_id LIKE ?", searchTerm).Or(
+			"room_no LIKE ?", searchTerm,
+		).Or("floor_no LIKE ?", searchTerm)
+	}
+	// Sortinq
+	sortColumn := map[string]string{
+		"user_name": "user_name",
+		"sap_id":    "sap_id",
+	}[params.SortBy]
+	if sortColumn != "" {
+		order := "ASC"
+		if params.SortOrder == "DESC" {
+			order = "DESC"
+		}
+		database = database.Order(sortColumn + " " + order)
+	}
+	// Pagination
+	database = database.Offset((params.Page - 1) * params.PageSize).Limit(params.PageSize)
+	var users []model.User
+	err := database.Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}

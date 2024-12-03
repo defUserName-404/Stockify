@@ -10,4 +10,5 @@ type UserRepository interface {
 	AddUser(item model.User)
 	UpdateUser(item model.User)
 	DeleteUserById(id uint64)
+	GetFilteredUsers(params model.UserQueryParams) ([]model.User, error)
 }

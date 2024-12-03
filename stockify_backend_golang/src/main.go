@@ -21,64 +21,59 @@ func main() {
 	//updateItem()
 	//deleteItem()
 
-	for _, item := range itemService.GetAllItems() {
-		fmt.Print(item.String() + "\n")
-	}
-
-	fmt.Println()
-	fmt.Println()
+	//for _, item := range itemService.GetAllItems() {
+	//	fmt.Print(item.String() + "\n")
+	//}
+	//fmt.Println()
+	//fmt.Println()
 	//
 	//item := itemService.GetItemById(1)
 	//fmt.Print(item.String())
 	//
-	//deviceType := model.PRINTER
-	//items, err := itemRepository.GetFilteredItems(itemrepository.ItemQueryParams{Search: "", Page: 1,
-	//	PageSize:    10,
-	//	SortBy:      "received_date",
-	//	SortOrder:   "desc",
-	//	DeviceType:  nil,
-	//	AssetStatus: nil})
-	//if err != nil {
-	//	return
-	//}
-	//for _, item := range items {
-	//	fmt.Print(item.String() + "\n")
-	//}
+	getFilteredItems()
 
 	//addUser()
-	//for _, user := range userService.GetAllUsers() {
-	//	fmt.Print(user.String() + "\n")
-	//}
+	//getAllUsers()
+	//getFilteredUsers()
 }
 
 func addUser() {
-	userService.AddUser(usermodel.User{UserName: "John Smith"})
+	userSapId := "123"
+	userService.AddUser(usermodel.User{UserName: "Alice Smith", SapId: &userSapId})
 }
 
 func addItem() {
-	//receivedTime := time.Now()
-	hostName := "123"
-	ipPort := "123"
-	mac := "123"
 	assignedToID := uint64(1)
-	itemService.AddItem(itemmodel.Item{
-		AssetNo:             "123",
-		ModelNo:             "456",
-		DeviceType:          itemmodel.CPU,
-		SerialNo:            "345",
-		ReceivedDate:        nil,
-		WarrantyDate:        time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
-		AssetStatus:         itemmodel.INACTIVE,
-		HostName:            &hostName,
-		IpPort:              &ipPort,
-		MacAddress:          &mac,
-		OsVersion:           nil,
-		FacePlateName:       nil,
-		SwitchPort:          nil,
-		SwitchIpAddress:     nil,
-		IsPasswordProtected: nil,
-		AssignedToID:        &assignedToID,
-	})
+	itemService.AddItem(
+		itemmodel.Item{
+			AssetNo:      "6234",
+			ModelNo:      "455589",
+			DeviceType:   itemmodel.CPU,
+			SerialNo:     "345544235",
+			WarrantyDate: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			AssetStatus:  itemmodel.INACTIVE,
+			AssignedToID: &assignedToID,
+		},
+	)
+}
+
+func getFilteredItems() {
+	//deviceType := itemmodel.PRINTER
+	//warrantyDate := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	items, err := itemService.GetFilteredItems(
+		itemmodel.ItemFilterParams{
+			Search: "", Page: 1,
+			PageSize:  10,
+			SortBy:    "model_no",
+			SortOrder: "DESC",
+		},
+	)
+	if err != nil {
+		return
+	}
+	for _, item := range items {
+		fmt.Print(item.String() + "\n")
+	}
 }
 
 func deleteItem() {
@@ -87,9 +82,31 @@ func deleteItem() {
 
 func updateItem() {
 	isPasswordProtected := false
-	itemService.UpdateItem(itemmodel.Item{
-		ID:                  4,
-		IsPasswordProtected: &isPasswordProtected,
-		AssetStatus:         itemmodel.ACTIVE,
-	})
+	itemService.UpdateItem(
+		itemmodel.Item{
+			ID:                  4,
+			IsPasswordProtected: &isPasswordProtected,
+			AssetStatus:         itemmodel.ACTIVE,
+		},
+	)
+}
+
+func getAllUsers() {
+	for _, user := range userService.GetAllUsers() {
+		fmt.Print(user.String() + "\n")
+	}
+}
+
+func getFilteredUsers() {
+	users, err := userService.GetFilteredUsers(
+		usermodel.UserQueryParams{
+			Search: "", Page: 1, PageSize: 10, SortBy: "user_name", SortOrder: "ASC",
+		},
+	)
+	if err != nil {
+		return
+	}
+	for _, user := range users {
+		fmt.Print(user.String() + "\n")
+	}
 }

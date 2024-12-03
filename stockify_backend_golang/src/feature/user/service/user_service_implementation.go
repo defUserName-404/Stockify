@@ -32,3 +32,7 @@ func (s *userService) UpdateUser(user model.User) {
 func (s *userService) DeleteUserById(id uint64) {
 	s.repo.DeleteUserById(id)
 }
+
+func (s *userService) GetFilteredUsers(params model.UserQueryParams) ([]model.User, error) {
+	return s.repo.GetFilteredUsers(params)
+}
