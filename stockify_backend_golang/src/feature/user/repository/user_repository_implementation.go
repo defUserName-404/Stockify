@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"log"
 	"stockify_backend_golang/src/common/db"
 	"stockify_backend_golang/src/feature/user/model"
 )
@@ -8,7 +9,7 @@ import (
 func init() {
 	err := db.DB.AutoMigrate(&model.User{})
 	if err != nil {
-		panic("Failed to migrate Item table: " + err.Error())
+		log.Fatal("Failed to migrate Item table: " + err.Error())
 	}
 }
 
@@ -42,7 +43,7 @@ func (r *userRepository) DeleteUserById(id uint64) {
 	var user model.User
 	result := db.DB.First(&user, id)
 	if result.Error != nil {
-		panic("User not found")
+		log.Fatal("User not found")
 	}
 	db.DB.Delete(&user)
 }
@@ -56,7 +57,7 @@ func (r *userRepository) GetFilteredUsers(params model.UserQueryParams) ([]model
 			"room_no LIKE ?", searchTerm,
 		).Or("floor_no LIKE ?", searchTerm)
 	}
-	// Sortinq
+	// Sorting
 	sortColumn := map[string]string{
 		"user_name": "user_name",
 		"sap_id":    "sap_id",

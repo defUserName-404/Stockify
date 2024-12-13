@@ -9,7 +9,7 @@ import (
 func init() {
 	err := db.DB.AutoMigrate(&model.Item{})
 	if err != nil {
-		panic("Failed to migrate Item table: " + err.Error())
+		log.Fatal("Failed to migrate Item table: " + err.Error())
 	}
 }
 
