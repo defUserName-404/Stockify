@@ -1,14 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	itemmodel "stockify_backend_golang/src/feature/item/model"
 	itemrepository "stockify_backend_golang/src/feature/item/repository"
 	itemservice "stockify_backend_golang/src/feature/item/service"
 	usermodel "stockify_backend_golang/src/feature/user/model"
 	userrepository "stockify_backend_golang/src/feature/user/repository"
 	userservice "stockify_backend_golang/src/feature/user/service"
-	"time"
 )
 
 var itemRepository = itemrepository.ItemRepositoryImplementation()
@@ -17,96 +16,59 @@ var userRepository = userrepository.UserRepositoryImplementation()
 var userService = userservice.UserServiceImplementation(userRepository)
 
 func main() {
-	//addItem()
-	//updateItem()
-	//deleteItem()
-
-	//for _, item := range itemService.GetAllItems() {
-	//	fmt.Print(item.String() + "\n")
-	//}
-	//fmt.Println()
-	//fmt.Println()
-	//
-	//item := itemService.GetItemById(1)
-	//fmt.Print(item.String())
-	//
-	getFilteredItems()
-
-	//addUser()
-	//getAllUsers()
-	//getFilteredUsers()
 }
 
-func addUser() {
-	userSapId := "123"
-	userService.AddUser(usermodel.User{UserName: "Alice Smith", SapId: &userSapId})
+func addUser(user usermodel.User) {
+	userService.AddUser(user)
 }
 
-func addItem() {
-	assignedToID := uint64(1)
-	itemService.AddItem(
-		itemmodel.Item{
-			AssetNo:      "6234",
-			ModelNo:      "455589",
-			DeviceType:   itemmodel.CPU,
-			SerialNo:     "345544235",
-			WarrantyDate: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
-			AssetStatus:  itemmodel.INACTIVE,
-			AssignedToID: &assignedToID,
-		},
-	)
+func getAllUsers() []usermodel.User {
+	return userService.GetAllUsers()
 }
 
-func getFilteredItems() {
-	//deviceType := itemmodel.PRINTER
-	//warrantyDate := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
-	items, err := itemService.GetFilteredItems(
-		itemmodel.ItemFilterParams{
-			Search: "", Page: 1,
-			PageSize:  10,
-			SortBy:    "model_no",
-			SortOrder: "DESC",
-		},
-	)
+func getUserById(id uint64) usermodel.User {
+	return userService.GetUserById(id)
+}
+
+func updateUser(updatedUser usermodel.User) {
+	userService.UpdateUser(updatedUser)
+}
+
+func deleteUserById(id uint64) {
+	userService.DeleteUserById(id)
+}
+
+func getFilteredUsers(params usermodel.UserQueryParams) []usermodel.User {
+	users, err := userService.GetFilteredUsers(params)
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
-	for _, item := range items {
-		fmt.Print(item.String() + "\n")
-	}
+	return users
 }
 
+func addItem(item itemmodel.Item) {
+	itemService.AddItem(item)
+}
+
+func getAllItems() []itemmodel.Item {
+	return itemService.GetAllItems()
+}
+
+func getItemById(id uint64) itemmodel.Item {
+	return itemService.GetItemById(id)
+}
+
+func updateItem(updatedItem itemmodel.Item) {
+	itemService.UpdateItem(updatedItem)
+}
 func deleteItem() {
 	itemService.DeleteItemById(1)
 }
 
-func updateItem() {
-	isPasswordProtected := false
-	itemService.UpdateItem(
-		itemmodel.Item{
-			ID:                  4,
-			IsPasswordProtected: &isPasswordProtected,
-			AssetStatus:         itemmodel.ACTIVE,
-		},
-	)
-}
-
-func getAllUsers() {
-	for _, user := range userService.GetAllUsers() {
-		fmt.Print(user.String() + "\n")
-	}
-}
-
-func getFilteredUsers() {
-	users, err := userService.GetFilteredUsers(
-		usermodel.UserQueryParams{
-			Search: "", Page: 1, PageSize: 10, SortBy: "user_name", SortOrder: "ASC",
-		},
-	)
+func getFilteredItems(params itemmodel.ItemFilterParams) []itemmodel.Item {
+	items, err := itemService.GetFilteredItems(params)
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
-	for _, user := range users {
-		fmt.Print(user.String() + "\n")
-	}
+	return items
 }
