@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
@@ -13,6 +14,7 @@ import 'package:stockify_app_flutter/feature/item/service/item_service_implement
 import 'package:stockify_app_flutter/feature/item/util/item_validator.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 
+import '../../../common/ffi/ffi_item.dart';
 import '../../user/model/user.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
@@ -144,6 +146,7 @@ class _ItemScreenState extends State<ItemScreen> {
     final switchIpAddress = _switchIpAddressInputController.text;
     final isPasswordProtected = _isPasswordProtected;
     final assignedTo = _assignedUser;
+    final itemFFI = ItemFFI();
     final item = Item(
       id: _editingItem == null
           ? (int.parse(_itemService.getAllItems().last.id) + 1).toString()
@@ -165,6 +168,39 @@ class _ItemScreenState extends State<ItemScreen> {
       isPasswordProtected: isPasswordProtected,
       assignedTo: assignedTo,
     );
+    itemFFI.addItemFull(
+      assetNo.toNativeUtf8(),
+      modelNo.toNativeUtf8(),
+      deviceType.toString().toNativeUtf8(),
+      serialNo.toNativeUtf8(),
+      receivedDate!.millisecondsSinceEpoch ~/ 1000,
+      warrantyDate.microsecondsSinceEpoch ~/ 1000,
+      assetStatus.toString().toNativeUtf8(),
+      hostName.toNativeUtf8(),
+      ipPort.toNativeUtf8(),
+      macAddress.toNativeUtf8(),
+      osVersion.toNativeUtf8(),
+      facePlateName.toNativeUtf8(),
+      switchPort.toNativeUtf8(),
+      switchIpAddress.toNativeUtf8(),
+      isPasswordProtected == false ? 0 : 1,
+      int.parse(assignedTo!.id),
+    );
+
+    // Free any allocated memory for inputs if needed.
+    malloc.free(assetNo.toNativeUtf8());
+    malloc.free(modelNo.toNativeUtf8());
+    malloc.free(deviceType.toString().toNativeUtf8());
+    malloc.free(serialNo.toNativeUtf8());
+    malloc.free(assetStatus.toString().toNativeUtf8());
+    malloc.free(hostName.toNativeUtf8());
+    malloc.free(ipPort.toNativeUtf8());
+    malloc.free(macAddress.toNativeUtf8());
+    malloc.free(osVersion.toNativeUtf8());
+    malloc.free(facePlateName.toNativeUtf8());
+    malloc.free(switchPort.toNativeUtf8());
+    malloc.free(switchIpAddress.toNativeUtf8());
+
     log(item.toString());
     if (_editingItem != null) {
       _itemService.updateItem(item);
