@@ -12,5 +12,6 @@ enum DeviceType {
   Camera,
   Keyboard,
   Mouse,
-  Speaker
+  Speaker,
+  Unknown
 }

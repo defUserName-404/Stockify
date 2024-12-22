@@ -22,4 +22,16 @@ class User {
 
   @override
   int get hashCode => id.hashCode;
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      userName: json['userName'],
+      designation: json['designation'],
+      sapId: json['sapId'],
+      ipPhone: json['ipPhone'],
+      roomNo: json['roomNo'],
+      floor: json['floor'],
+    );
+  }
 }
