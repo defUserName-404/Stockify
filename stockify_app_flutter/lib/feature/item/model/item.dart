@@ -1,12 +1,10 @@
-import 'dart:developer';
-
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 
 import '../../user/model/user.dart';
 import 'device_type.dart';
 
 class Item {
-  final int? id;
+  final int id;
   final String assetNo;
   final String modelNo;
   final DeviceType deviceType;
@@ -25,7 +23,7 @@ class Item {
   final User? assignedTo;
 
   Item(
-      {this.id,
+      {required this.id,
       required this.assetNo,
       required this.modelNo,
       required this.deviceType,
@@ -67,104 +65,36 @@ class Item {
   }
 
   factory Item.fromJson(Map<String, dynamic> json) {
-    log(json.toString());
     return Item(
-      id: json['ID'],
-      assetNo: json['AssetNo'],
-      modelNo: json['ModelNo'],
-      deviceType: DeviceType.values
-          .firstWhere((e) => e.toString() == json['DeviceType']),
-      serialNo: json['SerialNo'],
-      receivedDate: json['ReceivedDate'] != null
-          ? DateTime.parse(json['ReceivedDate']).toLocal()
+      id: int.parse(json['id']?.toString() ?? ''),
+      assetNo: json['assetNo'] ?? '',
+      modelNo: json['modelNo'] ?? '',
+      deviceType: DeviceType.values.firstWhere(
+        (e) => e.toString() == 'DeviceType.${json['deviceType']}',
+        orElse: () => DeviceType.Unknown,
+      ),
+      serialNo: json['serialNo'] ?? '',
+      receivedDate: json['receivedDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['receivedDate'] * 1000)
           : null,
-      warrantyDate: DateTime.parse(json['WarrantyDate']).toLocal(),
-      assetStatus: AssetStatus.values
-          .firstWhere((e) => e.toString() == json['AssetStatus']),
-      hostName: json['HostName'],
-      macAddress: json['MacAddress'],
-      ipPort: json['IpPort'],
-      osVersion: json['OsVersion'],
-      facePlateName: json['FacePlateName'],
-      switchPort: json['SwitchPort'],
-      switchIpAddress: json['SwitchIpAddress'],
-      isPasswordProtected: json['IsPasswordProtected'] == 1,
+      warrantyDate: json['warrantyDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['warrantyDate'] * 1000)
+          : DateTime.now(),
+      // Provide a default or handle as needed
+      assetStatus: AssetStatus.values.firstWhere(
+        (e) => e.toString() == 'AssetStatus.${json['assetStatus']}',
+        orElse: () => AssetStatus.Unknown,
+      ),
+      hostName: json['hostName'],
+      macAddress: json['macAddress'],
+      ipPort: json['ipPort'],
+      osVersion: json['osVersion'],
+      facePlateName: json['facePlateName'],
+      switchPort: json['switchPort'],
+      switchIpAddress: json['switchIpAddress'],
+      isPasswordProtected: json['isPasswordProtected'] == 1,
       assignedTo:
-          json['AssignedTo'] != null ? User.fromJson(json['AssignedTo']) : null,
+          json['assignedTo'] != null ? User.fromJson(json['assignedTo']) : null,
     );
   }
-}
-
-class ItemFilterParams {
-  final String search;
-  final DeviceType? deviceType;
-  final AssetStatus? assetStatus;
-  final DateTime? warrantyDate;
-  final String sortBy;
-  final String sortOrder;
-  final int page;
-  final int pageSize;
-
-  ItemFilterParams({
-    this.search = '',
-    this.deviceType,
-    this.assetStatus,
-    this.warrantyDate,
-    this.sortBy = 'assetNo',
-    this.sortOrder = 'ASC',
-    this.page = 1,
-    this.pageSize = 10,
-  });
-
-  ItemFilterParams copyWith({
-    Object? search = const _Sentinel(),
-    Object? sortBy = const _Sentinel(),
-    Object? sortOrder = const _Sentinel(),
-    Object? deviceType = const _Sentinel(),
-    Object? assetStatus = const _Sentinel(),
-    Object? page = const _Sentinel(),
-  }) {
-    return ItemFilterParams(
-      search:
-          identical(search, const _Sentinel()) ? this.search : search as String,
-      sortBy:
-          identical(sortBy, const _Sentinel()) ? this.sortBy : sortBy as String,
-      sortOrder: identical(sortOrder, const _Sentinel())
-          ? this.sortOrder
-          : sortOrder as String,
-      deviceType: identical(deviceType, const _Sentinel())
-          ? this.deviceType
-          : deviceType as DeviceType?,
-      assetStatus: identical(assetStatus, const _Sentinel())
-          ? this.assetStatus
-          : assetStatus as AssetStatus?,
-      page: identical(page, const _Sentinel()) ? this.page : page as int,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ItemFilterParams &&
-          runtimeType == other.runtimeType &&
-          search == other.search &&
-          sortBy == other.sortBy &&
-          sortOrder == other.sortOrder &&
-          deviceType == other.deviceType &&
-          assetStatus == other.assetStatus &&
-          page == other.page;
-
-  @override
-  int get hashCode =>
-      search.hashCode ^
-      sortBy.hashCode ^
-      sortOrder.hashCode ^
-      deviceType.hashCode ^
-      assetStatus.hashCode ^
-      page.hashCode;
-}
-
-// Sentinel class to distinguish between null and not provided values
-class _Sentinel {
-  const _Sentinel();
 }

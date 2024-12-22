@@ -40,7 +40,8 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID = (item.assignedTo?.id ?? 0) as int;
+    final assignedToID = 1;
+
     _ffi.addItemFull(
       assetNoPtr,
       modelNoPtr,
@@ -59,6 +60,7 @@ class ItemRepository {
       isPasswordProtected,
       assignedToID,
     );
+
     // Free allocated memory
     calloc.free(assetNoPtr);
     calloc.free(modelNoPtr);
@@ -92,7 +94,7 @@ class ItemRepository {
     return Item.fromJson(jsonMap);
   }
 
-  // Debug version of your Flutter updateItem function
+  // Update an existing item
   void updateItem(Item item) {
     final id = item.id;
     final assetNoPtr = _toUtf8(item.assetNo);
@@ -110,10 +112,10 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID =
-        item.assignedTo?.id != null ? int.parse(item.assignedTo!.id) : 0;
+    final assignedToID = 1;
+
     _ffi.updateItemFull(
-      id!,
+      id,
       assetNoPtr,
       modelNoPtr,
       deviceTypePtr,
@@ -131,6 +133,7 @@ class ItemRepository {
       isPasswordProtected,
       assignedToID,
     );
+
     // Free allocated memory
     calloc.free(assetNoPtr);
     calloc.free(modelNoPtr);
