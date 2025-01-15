@@ -13,8 +13,7 @@ class ItemStatus extends StatelessWidget {
     final color = switch (assetStatus) {
       AssetStatus.Active => AppColors.colorGreen,
       AssetStatus.Inactive => AppColors.colorOrange,
-      AssetStatus.Disposed => AppColors.colorPink,
-      AssetStatus.Unknown => AppColors.colorAccent
+      AssetStatus.Disposed => AppColors.colorPink
     };
     return Container(
       padding: const EdgeInsets.all(8.0),

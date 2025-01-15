@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
@@ -145,9 +143,7 @@ class _ItemScreenState extends State<ItemScreen> {
     final isPasswordProtected = _isPasswordProtected;
     final assignedTo = _assignedUser;
     final item = Item(
-      id: _editingItem == null
-          ? (_itemService.getAllItems().last.id + 1)
-          : _editingItem!.id,
+      id: _editingItem != null ? _editingItem!.id : null,
       assetNo: assetNo,
       modelNo: modelNo,
       serialNo: serialNo,
@@ -165,7 +161,6 @@ class _ItemScreenState extends State<ItemScreen> {
       isPasswordProtected: isPasswordProtected,
       assignedTo: assignedTo,
     );
-    log(item.toString());
     if (_editingItem != null) {
       _itemService.updateItem(item);
     } else {
@@ -305,7 +300,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           controller: _assetInputController,
                           validator: ItemInputValidator.validateAssetNo,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration: InputDecoration(labelText: 'Asset No'),
                         ),
                       ),
@@ -314,7 +309,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           controller: _modelInputController,
                           validator: ItemInputValidator.validateModelNo,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration: InputDecoration(labelText: 'Model No'),
                         ),
                       ),
@@ -327,7 +322,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           controller: _serialInputController,
                           validator: ItemInputValidator.validateSerialNo,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration: InputDecoration(labelText: 'Serial No'),
                         ),
                       ),
@@ -337,7 +332,7 @@ class _ItemScreenState extends State<ItemScreen> {
                           value: _selectedDeviceType,
                           decoration: InputDecoration(labelText: 'Device Type'),
                           validator: ItemInputValidator.validateDeviceType,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           items: DeviceType.values.map((type) {
                             return DropdownMenuItem(
                                 value: type, child: Text(type.name));
@@ -388,7 +383,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           readOnly: true,
                           validator: ItemInputValidator.validateWarrantyDate,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration: InputDecoration(
                             labelText: 'Warranty Date',
                             suffixIcon: Icon(Icons.calendar_today),
@@ -420,7 +415,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: DropdownButtonFormField<AssetStatus>(
                           value: _selectedAssetStatus,
                           validator: ItemInputValidator.validateAssetStatus,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration:
                               InputDecoration(labelText: 'Asset Status'),
                           items: AssetStatus.values.map((type) {
@@ -600,7 +595,7 @@ class ItemData extends DataTableSource {
       selected: _selectedRows.contains(selectedRowId),
       onSelectChanged: (selected) {
         if (selected == true) {
-          _selectedRows.add(selectedRowId);
+          _selectedRows.add(selectedRowId!);
         } else {
           _selectedRows.remove(selectedRowId);
         }
@@ -639,7 +634,7 @@ class ItemData extends DataTableSource {
                               itemText: '${item.deviceType.name}'),
                           if (item.receivedDate != null)
                             ItemDetailsText(
-                                label: 'Warranty Date',
+                                label: 'Received Date',
                                 itemText:
                                     '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
                           ItemDetailsText(
@@ -727,14 +722,14 @@ class ItemData extends DataTableSource {
                   );
                   if (confirmDelete == true) {
                     if (selectedRowCount == 0) {
-                      _itemService.deleteItem(item.id);
+                      _itemService.deleteItem(item.id!);
                       notifyListeners();
                     } else {}
                     final selectedItems = _items
                         .where((element) => _selectedRows.contains(element.id))
                         .toList();
                     for (final currentlySelectedItem in selectedItems) {
-                      _itemService.deleteItem(currentlySelectedItem.id);
+                      _itemService.deleteItem(currentlySelectedItem.id!);
                       _selectedRows.remove(currentlySelectedItem.id);
                       notifyListeners();
                     }

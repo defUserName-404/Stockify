@@ -40,8 +40,7 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID = 1;
-
+    final assignedToID = (item.assignedTo?.id ?? 0) as int;
     _ffi.addItemFull(
       assetNoPtr,
       modelNoPtr,
@@ -60,7 +59,6 @@ class ItemRepository {
       isPasswordProtected,
       assignedToID,
     );
-
     // Free allocated memory
     calloc.free(assetNoPtr);
     calloc.free(modelNoPtr);
@@ -112,10 +110,9 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID = 1;
-
+    final assignedToID = 0;
     _ffi.updateItemFull(
-      id,
+      id!,
       assetNoPtr,
       modelNoPtr,
       deviceTypePtr,
@@ -133,7 +130,6 @@ class ItemRepository {
       isPasswordProtected,
       assignedToID,
     );
-
     // Free allocated memory
     calloc.free(assetNoPtr);
     calloc.free(modelNoPtr);
