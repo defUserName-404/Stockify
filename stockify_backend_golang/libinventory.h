@@ -84,6 +84,7 @@ extern char* GetAllItems();
 extern char* GetItemById(long long unsigned int id);
 extern void UpdateItemFull(long long unsigned int id, char* assetNo, char* modelNo, char* deviceType, char* serialNo, long long int receivedDate, long long int warrantyDate, char* assetStatus, char* hostName, char* ipPort, char* macAddress, char* osVersion, char* facePlateName, char* switchPort, char* switchIpAddress, int isPasswordProtected, long long unsigned int assignedToID);
 extern void DeleteItemById(long long unsigned int id);
+extern char* GetFilteredItems(char* deviceType, char* assetStatus, long long int warrantyDate, char* search, char* sortBy, char* sortOrder, int page, int pageSize);
 extern void FreeCString(char* str);
 
 #ifdef __cplusplus
