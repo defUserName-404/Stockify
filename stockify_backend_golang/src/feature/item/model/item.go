@@ -27,13 +27,17 @@ type Item struct {
 	SwitchIpAddress     *string
 	IsPasswordProtected *bool
 	AssignedToID        *uint64
-	AssignedTo          *model.User `gorm:"foreignKey:AssignedToID"`
+	AssignedTo          *model.User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;foreignKey:AssignedToID"`
 }
 
 func (i *Item) String() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Item{ID: %d, AssetNo: %s, ModelNo: %s, SerialNo: %s, DeviceType: %s, WarrantyDate: %s, AssetStatus: %s",
-		i.ID, i.AssetNo, i.ModelNo, i.SerialNo, i.DeviceType, i.WarrantyDate.Format(time.DateOnly), i.AssetStatus))
+	sb.WriteString(
+		fmt.Sprintf(
+			"Item{ID: %d, AssetNo: %s, ModelNo: %s, SerialNo: %s, DeviceType: %s, WarrantyDate: %s, AssetStatus: %s",
+			i.ID, i.AssetNo, i.ModelNo, i.SerialNo, i.DeviceType, i.WarrantyDate.Format(time.DateOnly), i.AssetStatus,
+		),
+	)
 	if i.ReceivedDate != nil {
 		receivedDate := i.ReceivedDate.Format(time.DateOnly)
 		sb.WriteString(fmt.Sprintf(", ReceivedDate: %s", receivedDate))

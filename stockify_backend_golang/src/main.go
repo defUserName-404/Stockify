@@ -5,7 +5,6 @@ package main
 */
 import "C"
 import (
-	"C"
 	"encoding/json"
 	"log"
 	"stockify_backend_golang/src/feature/item/model"
@@ -25,6 +24,8 @@ var userService = userservice.UserServiceImplementation(userRepository)
 
 func main() {
 }
+
+// ========== User functions ==========
 
 func AddUser(user usermodel.User) {
 	userService.AddUser(user)
@@ -54,7 +55,9 @@ func GetFilteredUsers(params usermodel.UserQueryParams) []usermodel.User {
 	return users
 }
 
-// Helper function: returns nil if the C string is empty, otherwise a pointer to the Go string.
+// ========== Helper Functions ==========
+
+// Converts C string to Go *string, returns nil if empty
 func cStringOrNil(cStr *C.char) *string {
 	s := C.GoString(cStr)
 	if s == "" {
@@ -63,14 +66,23 @@ func cStringOrNil(cStr *C.char) *string {
 	return &s
 }
 
+// Quick helper to return JSON error
+func jsonError(message string) *C.char {
+	errorResponse := map[string]string{"error": message}
+	jsonData, _ := json.Marshal(errorResponse)
+	return C.CString(string(jsonData))
+}
+
+// ========== Item Functions ==========
+
 //export AddItemFull
 func AddItemFull(
 	assetNo *C.char,
 	modelNo *C.char,
 	deviceType *C.char,
 	serialNo *C.char,
-	receivedDate C.longlong, // Unix timestamp (seconds)
-	warrantyDate C.longlong, // Unix timestamp (seconds)
+	receivedDate C.longlong,
+	warrantyDate C.longlong,
 	assetStatus *C.char,
 	hostName *C.char,
 	ipPort *C.char,
@@ -79,30 +91,22 @@ func AddItemFull(
 	facePlateName *C.char,
 	switchPort *C.char,
 	switchIpAddress *C.char,
-	isPasswordProtected C.int, // 0 or 1
-	assignedToID C.ulonglong, // 0 if not assigned
+	isPasswordProtected C.int,
+	assignedToID C.ulonglong,
 ) {
-	// Convert received date (if provided)
 	var receivedTime *time.Time
 	if int64(receivedDate) > 0 {
 		t := time.Unix(int64(receivedDate), 0)
 		receivedTime = &t
 	}
-
-	// Convert warrantyDate (assume it must be provided)
 	warrantyTime := time.Unix(int64(warrantyDate), 0)
-
-	// Convert the boolean. Non-zero means true.
 	b := isPasswordProtected != 0
 	passwordProtected := &b
-
-	// Convert assignedToID: if zero, treat as nil.
 	var assignedTo *uint64
 	if assignedToID != 0 {
 		idVal := uint64(assignedToID)
 		assignedTo = &idVal
 	}
-
 	item := model.Item{
 		AssetNo:             C.GoString(assetNo),
 		ModelNo:             C.GoString(modelNo),
@@ -121,7 +125,6 @@ func AddItemFull(
 		IsPasswordProtected: passwordProtected,
 		AssignedToID:        assignedTo,
 	}
-
 	itemService.AddItem(item)
 }
 
@@ -130,7 +133,7 @@ func GetAllItems() *C.char {
 	items := itemService.GetAllItems()
 	jsonData, err := json.Marshal(items)
 	if err != nil {
-		return C.CString("[]")
+		return jsonError("Failed to marshal items")
 	}
 	return C.CString(string(jsonData))
 }
@@ -138,9 +141,12 @@ func GetAllItems() *C.char {
 //export GetItemById
 func GetItemById(id C.ulonglong) *C.char {
 	item := itemService.GetItemById(uint64(id))
+	if item.ID == 0 {
+		return jsonError("Item not found")
+	}
 	jsonData, err := json.Marshal(item)
 	if err != nil {
-		return C.CString("{}")
+		return jsonError("Failed to marshal item")
 	}
 	return C.CString(string(jsonData))
 }
@@ -170,18 +176,14 @@ func UpdateItemFull(
 		t := time.Unix(int64(receivedDate), 0)
 		receivedTime = &t
 	}
-
 	warrantyTime := time.Unix(int64(warrantyDate), 0)
-
 	b := isPasswordProtected != 0
 	passwordProtected := &b
-
 	var assignedTo *uint64
 	if assignedToID != 0 {
 		idVal := uint64(assignedToID)
 		assignedTo = &idVal
 	}
-
 	item := model.Item{
 		ID:                  uint64(id),
 		AssetNo:             C.GoString(assetNo),
@@ -201,12 +203,57 @@ func UpdateItemFull(
 		IsPasswordProtected: passwordProtected,
 		AssignedToID:        assignedTo,
 	}
+
 	itemService.UpdateItem(item)
 }
 
 //export DeleteItemById
 func DeleteItemById(id C.ulonglong) {
 	itemService.DeleteItemById(uint64(id))
+}
+
+//export GetFilteredItems
+func GetFilteredItems(
+	deviceType *C.char,
+	assetStatus *C.char,
+	warrantyDate C.longlong,
+	search *C.char,
+	sortBy *C.char,
+	sortOrder *C.char,
+	page C.int,
+	pageSize C.int,
+) *C.char {
+	searchStr := C.GoString(search)
+	sortByStr := C.GoString(sortBy)
+	sortOrderStr := C.GoString(sortOrder)
+	params := model.ItemFilterParams{
+		Search:    searchStr,
+		SortBy:    sortByStr,
+		SortOrder: sortOrderStr,
+		Page:      int(page),
+		PageSize:  int(pageSize),
+	}
+	if dt := C.GoString(deviceType); dt != "" {
+		tmp := model.DeviceType(dt)
+		params.DeviceType = &tmp
+	}
+	if as := C.GoString(assetStatus); as != "" {
+		tmp := model.AssetStatus(as)
+		params.AssetStatus = &tmp
+	}
+	if int64(warrantyDate) != 0 {
+		t := time.Unix(int64(warrantyDate), 0)
+		params.WarrantyDate = &t
+	}
+	items, err := itemService.GetFilteredItems(params)
+	if err != nil {
+		return jsonError("Failed to filter items")
+	}
+	jsonData, err := json.Marshal(items)
+	if err != nil {
+		return jsonError("Failed to marshal items")
+	}
+	return C.CString(string(jsonData))
 }
 
 //export FreeCString
