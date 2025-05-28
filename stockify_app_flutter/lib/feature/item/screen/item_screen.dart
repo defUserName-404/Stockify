@@ -268,7 +268,7 @@ class _ItemScreenState extends State<ItemScreen> {
                     ],
                     source: ItemData(
                         context: context,
-                        onEdit: (item) => _togglePanel(item: item)),
+                        onEdit: (item) => _saveItem()),
                   ),
                 ),
               ],
