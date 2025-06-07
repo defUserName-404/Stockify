@@ -28,6 +28,8 @@ class _ItemScreenState extends State<ItemScreen> {
   int _rowsPerPage = 10;
   bool _isPanelOpen = false;
   Item? _editingItem;
+  late ItemData _itemDataSource;
+
   late final TextEditingController _assetInputController,
       _modelInputController,
       _serialInputController,
@@ -48,6 +50,12 @@ class _ItemScreenState extends State<ItemScreen> {
   @override
   void initState() {
     _itemService = ItemServiceImplementation.instance;
+    _initializeControllers();
+    _initializeItemDataSource();
+    super.initState();
+  }
+
+  void _initializeControllers() {
     _assetInputController = TextEditingController();
     _modelInputController = TextEditingController();
     _serialInputController = TextEditingController();
@@ -64,7 +72,19 @@ class _ItemScreenState extends State<ItemScreen> {
     _selectedReceivedDate = _editingItem?.receivedDate;
     _isPasswordProtected = _editingItem?.isPasswordProtected;
     _assignedUser = _editingItem?.assignedTo;
-    super.initState();
+  }
+
+  void _initializeItemDataSource() {
+    _itemDataSource = ItemData(
+      context: context,
+      onEdit: (item) => _togglePanel(item: item),
+    );
+  }
+
+  void _refreshData() {
+    setState(() {
+      _itemDataSource.refreshData();
+    });
   }
 
   @override
@@ -168,6 +188,7 @@ class _ItemScreenState extends State<ItemScreen> {
     }
     _clearFields();
     _togglePanel();
+    _refreshData();
   }
 
   void _clearFields() {
@@ -266,9 +287,7 @@ class _ItemScreenState extends State<ItemScreen> {
                       DataColumn(label: Text('Asset Status')),
                       DataColumn(label: Text('Actions'))
                     ],
-                    source: ItemData(
-                        context: context,
-                        onEdit: (item) => _saveItem()),
+                    source: _itemDataSource, // Use the instance variable
                   ),
                 ),
               ],
@@ -575,15 +594,20 @@ class _ItemScreenState extends State<ItemScreen> {
 
 class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
-  late final List<Item> _items;
+  List<Item> _items = [];
   late final BuildContext _context;
   final void Function(Item)? onEdit;
 
   final Set<int> _selectedRows = {};
 
   ItemData({required BuildContext context, this.onEdit}) {
-    _items = _itemService.getAllItems();
     _context = context;
+    refreshData();
+  }
+
+  void refreshData() {
+    _items = _itemService.getAllItems();
+    notifyListeners();
   }
 
   @override
@@ -723,16 +747,17 @@ class ItemData extends DataTableSource {
                   if (confirmDelete == true) {
                     if (selectedRowCount == 0) {
                       _itemService.deleteItem(item.id!);
-                      notifyListeners();
-                    } else {}
-                    final selectedItems = _items
-                        .where((element) => _selectedRows.contains(element.id))
-                        .toList();
-                    for (final currentlySelectedItem in selectedItems) {
-                      _itemService.deleteItem(currentlySelectedItem.id!);
-                      _selectedRows.remove(currentlySelectedItem.id);
-                      notifyListeners();
+                    } else {
+                      final selectedItems = _items
+                          .where(
+                              (element) => _selectedRows.contains(element.id))
+                          .toList();
+                      for (final currentlySelectedItem in selectedItems) {
+                        _itemService.deleteItem(currentlySelectedItem.id!);
+                        _selectedRows.remove(currentlySelectedItem.id);
+                      }
                     }
+                    refreshData();
                   }
                 })
           ],

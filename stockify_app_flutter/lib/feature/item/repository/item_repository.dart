@@ -92,8 +92,17 @@ class ItemRepository {
     return Item.fromJson(jsonMap);
   }
 
-  // Update an existing item
+  // Debug version of your Flutter updateItem function
   void updateItem(Item item) {
+    print('=== UPDATE ITEM DEBUG ===');
+    print('Item ID: ${item.id}');
+    print('Asset No: ${item.assetNo}');
+    print('Model No: ${item.modelNo}');
+    print('Device Type: ${item.deviceType}');
+    print('Serial No: ${item.serialNo}');
+    print('Asset Status: ${item.assetStatus}');
+    print('Is Password Protected: ${item.isPasswordProtected}');
+    print('Assigned User: ${item.assignedTo?.id}');
     final id = item.id;
     final assetNoPtr = _toUtf8(item.assetNo);
     final modelNoPtr = _toUtf8(item.modelNo);
@@ -110,7 +119,8 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID = 0;
+    final assignedToID =
+        item.assignedTo?.id != null ? int.parse(item.assignedTo!.id) : 0;
     _ffi.updateItemFull(
       id!,
       assetNoPtr,
