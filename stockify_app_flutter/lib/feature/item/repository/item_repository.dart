@@ -40,8 +40,7 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID = 1;
-
+    final assignedToID = (item.assignedTo?.id ?? 0) as int;
     _ffi.addItemFull(
       assetNoPtr,
       modelNoPtr,
@@ -60,7 +59,6 @@ class ItemRepository {
       isPasswordProtected,
       assignedToID,
     );
-
     // Free allocated memory
     calloc.free(assetNoPtr);
     calloc.free(modelNoPtr);
@@ -94,8 +92,17 @@ class ItemRepository {
     return Item.fromJson(jsonMap);
   }
 
-  // Update an existing item
+  // Debug version of your Flutter updateItem function
   void updateItem(Item item) {
+    print('=== UPDATE ITEM DEBUG ===');
+    print('Item ID: ${item.id}');
+    print('Asset No: ${item.assetNo}');
+    print('Model No: ${item.modelNo}');
+    print('Device Type: ${item.deviceType}');
+    print('Serial No: ${item.serialNo}');
+    print('Asset Status: ${item.assetStatus}');
+    print('Is Password Protected: ${item.isPasswordProtected}');
+    print('Assigned User: ${item.assignedTo?.id}');
     final id = item.id;
     final assetNoPtr = _toUtf8(item.assetNo);
     final modelNoPtr = _toUtf8(item.modelNo);
@@ -112,10 +119,10 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID = 1;
-
+    final assignedToID =
+        item.assignedTo?.id != null ? int.parse(item.assignedTo!.id) : 0;
     _ffi.updateItemFull(
-      id,
+      id!,
       assetNoPtr,
       modelNoPtr,
       deviceTypePtr,
@@ -133,7 +140,6 @@ class ItemRepository {
       isPasswordProtected,
       assignedToID,
     );
-
     // Free allocated memory
     calloc.free(assetNoPtr);
     calloc.free(modelNoPtr);
@@ -152,42 +158,5 @@ class ItemRepository {
   // Delete an item by ID
   void deleteItem(int id) {
     _ffi.deleteItemById(id);
-  }
-
-  // Retrieve filtered items
-  Future<List<Item>> getFilteredItems(ItemFilterParams params) async {
-    final searchPtr = params.search.toNativeUtf8();
-    final deviceTypePtr =
-        params.deviceType?.toString().toNativeUtf8() ?? nullptr;
-    final assetStatusPtr =
-        params.assetStatus?.toString().toNativeUtf8() ?? nullptr;
-    final warrantyDateMs = params.warrantyDate?.millisecondsSinceEpoch ?? 0;
-    final sortByPtr = params.sortBy.toNativeUtf8();
-    final sortOrderPtr = params.sortOrder.toNativeUtf8();
-    try {
-      final resultPtr = _ffi.getFilteredItems(
-        searchPtr,
-        deviceTypePtr,
-        assetStatusPtr,
-        warrantyDateMs,
-        sortByPtr,
-        sortOrderPtr,
-        params.page,
-        params.pageSize,
-      );
-      if (resultPtr == nullptr) {
-        return [];
-      }
-      final jsonString = resultPtr.toDartString();
-      _ffi.freeCString(resultPtr);
-      final List<dynamic> jsonList = json.decode(jsonString);
-      return jsonList.map((json) => Item.fromJson(json)).toList();
-    } finally {
-      malloc.free(searchPtr);
-      if (deviceTypePtr != nullptr) malloc.free(deviceTypePtr);
-      if (assetStatusPtr != nullptr) malloc.free(assetStatusPtr);
-      malloc.free(sortByPtr);
-      malloc.free(sortOrderPtr);
-    }
   }
 }
