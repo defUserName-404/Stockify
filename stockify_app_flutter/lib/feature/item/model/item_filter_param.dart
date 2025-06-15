@@ -15,6 +15,7 @@ class ItemFilterParams {
   final DeviceType? deviceType;
   final AssetStatus? assetStatus;
   final bool isExpiring;
+  final bool isExpired;
   final DateTime? warrantyDate;
   final WarrantyDateFilterType? warrantyDateFilterType;
   final User? assignedTo;
@@ -26,6 +27,7 @@ class ItemFilterParams {
     this.deviceType,
     this.assetStatus,
     this.isExpiring = false,
+    this.isExpired = false,
     this.warrantyDate,
     this.warrantyDateFilterType,
     this.assignedTo,
@@ -38,6 +40,7 @@ class ItemFilterParams {
     Object? deviceType = const _Sentinel(),
     Object? assetStatus = const _Sentinel(),
     Object? isExpiring = const _Sentinel(),
+    Object? isExpired = const _Sentinel(),
     Object? warrantyDate = const _Sentinel(),
     Object? warrantyDateFilterType = const _Sentinel(),
     Object? assignedTo = const _Sentinel(),
@@ -60,6 +63,9 @@ class ItemFilterParams {
       isExpiring: identical(isExpiring, const _Sentinel())
           ? this.isExpiring
           : isExpiring as bool,
+      isExpired: identical(isExpired, const _Sentinel())
+          ? this.isExpired
+          : isExpired as bool,
       warrantyDate: identical(warrantyDate, const _Sentinel())
           ? this.warrantyDate
           : warrantyDate as DateTime?,
@@ -83,6 +89,7 @@ class ItemFilterParams {
           deviceType == other.deviceType &&
           assetStatus == other.assetStatus &&
           isExpiring == other.isExpiring &&
+          isExpired == other.isExpired &&
           warrantyDate == other.warrantyDate &&
           warrantyDateFilterType == other.warrantyDateFilterType &&
           assignedTo == other.assignedTo;
@@ -95,6 +102,7 @@ class ItemFilterParams {
       deviceType.hashCode ^
       assetStatus.hashCode ^
       isExpiring.hashCode ^
+      isExpired.hashCode ^
       warrantyDate.hashCode ^
       warrantyDateFilterType.hashCode ^
       assignedTo.hashCode;
