@@ -16,6 +16,7 @@ type ItemFilterParams struct {
 	WarrantyDate           *int64
 	WarrantyDateFilterType *WarrantyDateFilterType
 	IsExpiring             bool
+	IsExpired              bool
 	SortBy                 string
 	SortOrder              string
 }

@@ -104,6 +104,11 @@ func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]mode
 		query = query.Where("warranty_date <= ?", thirtyDaysFromNow.Unix())
 	}
 
+	// IsExpired filter
+	if params.IsExpired {
+		query = query.Where("warranty_date < ?", time.Now().Unix())
+	}
+
 	// Sorting
 	if params.SortBy != "" {
 		order := "ASC"
