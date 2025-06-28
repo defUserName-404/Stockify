@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 
 import '../../user/model/user.dart';
@@ -24,7 +22,8 @@ class Item {
   final bool? isPasswordProtected;
   final User? assignedTo;
 
-  Item({this.id,
+  Item(
+      {this.id,
       required this.assetNo,
       required this.modelNo,
       required this.deviceType,
@@ -66,7 +65,6 @@ class Item {
   }
 
   factory Item.fromJson(Map<String, dynamic> json) {
-    log(json.toString());
     return Item(
       id: json['ID'],
       assetNo: json['AssetNo'],
