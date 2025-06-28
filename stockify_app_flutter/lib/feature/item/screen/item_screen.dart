@@ -30,9 +30,6 @@ class _ItemScreenState extends State<ItemScreen> {
   bool _isPanelOpen = false;
   Item? _editingItem;
   late ItemData _itemDataSource;
-
-  // Add search and filter variables
-  final TextEditingController _searchController = TextEditingController();
   ItemFilterParams _filterParams = ItemFilterParams();
 
   late final TextEditingController _assetInputController,
@@ -44,7 +41,8 @@ class _ItemScreenState extends State<ItemScreen> {
       _osVersionInputController,
       _facePlateNameInputController,
       _switchPortInputController,
-      _switchIpAddressInputController;
+      _switchIpAddressInputController,
+      _searchInputController;
   DeviceType? _selectedDeviceType;
   AssetStatus? _selectedAssetStatus;
   DateTime? _selectedWarrantyDate;
@@ -71,6 +69,7 @@ class _ItemScreenState extends State<ItemScreen> {
     _facePlateNameInputController = TextEditingController();
     _switchPortInputController = TextEditingController();
     _switchIpAddressInputController = TextEditingController();
+    _searchInputController = TextEditingController();
     _selectedDeviceType = _editingItem?.deviceType;
     _selectedAssetStatus = _editingItem?.assetStatus;
     _selectedWarrantyDate = _editingItem?.warrantyDate;
@@ -96,7 +95,6 @@ class _ItemScreenState extends State<ItemScreen> {
     });
   }
 
-  // Add search functionality
   void _onSearchChanged(String query) {
     setState(() {
       _filterParams = _filterParams.copyWith(search: query, page: 1);
@@ -104,7 +102,6 @@ class _ItemScreenState extends State<ItemScreen> {
     _refreshData();
   }
 
-  // Add filter dialog
   void _showFilterDialog() {
     showDialog(
       context: context,
@@ -132,7 +129,7 @@ class _ItemScreenState extends State<ItemScreen> {
     _facePlateNameInputController.dispose();
     _switchPortInputController.dispose();
     _switchIpAddressInputController.dispose();
-    _searchController.dispose();
+    _searchInputController.dispose();
     super.dispose();
   }
 
@@ -265,7 +262,6 @@ class _ItemScreenState extends State<ItemScreen> {
           Column(
             children: <Widget>[
               const SizedBox(height: 16.0),
-              // Active Filters Display
               if (_filterParams.deviceType != null ||
                   _filterParams.assetStatus != null)
                 Container(
@@ -321,7 +317,7 @@ class _ItemScreenState extends State<ItemScreen> {
                           Expanded(
                             flex: 9,
                             child: SearchBar(
-                              controller: _searchController,
+                              controller: _searchInputController,
                               padding:
                                   WidgetStateProperty.all<EdgeInsetsGeometry>(
                                 const EdgeInsets.symmetric(horizontal: 16.0),
@@ -330,14 +326,12 @@ class _ItemScreenState extends State<ItemScreen> {
                                   color: AppColors.colorTextDark),
                               hintText:
                                   'Search for items by their Asset No, Model No or Serial No',
-                              onChanged:
-                                  _onSearchChanged, // Connect search functionality
+                              onChanged: _onSearchChanged,
                             ),
                           ),
                           const SizedBox(width: 8.0),
                           AppButton(
                             onPressed: _showFilterDialog,
-                            // Connect filter dialog
                             icon: Icons.filter_list_rounded,
                             iconColor: AppColors.colorTextDark,
                             text: 'Sort & Filter',
@@ -370,7 +364,6 @@ class _ItemScreenState extends State<ItemScreen> {
               ),
             ],
           ),
-          // Side Panel (Sliding in/out) - Keep your existing panel code
           AnimatedPositioned(
             duration: Duration(milliseconds: 300),
             right: _isPanelOpen ? 0 : -screenWidthHalf,
@@ -701,7 +694,6 @@ class ItemData extends DataTableSource {
 
   void _applyFilters() {
     _filteredItems = _items.where((item) {
-      // Apply search filter
       if (_filterParams.search.isNotEmpty) {
         final searchLower = _filterParams.search.toLowerCase();
         final matchesSearch =
@@ -713,19 +705,16 @@ class ItemData extends DataTableSource {
                 (item.macAddress?.toLowerCase().contains(searchLower) ?? false);
         if (!matchesSearch) return false;
       }
-      // Apply device type filter
       if (_filterParams.deviceType != null &&
           item.deviceType != _filterParams.deviceType) {
         return false;
       }
-      // Apply asset status filter
       if (_filterParams.assetStatus != null &&
           item.assetStatus != _filterParams.assetStatus) {
         return false;
       }
       return true;
     }).toList();
-    // Apply sorting
     _filteredItems.sort((a, b) {
       int comparison = 0;
       switch (_filterParams.sortBy) {

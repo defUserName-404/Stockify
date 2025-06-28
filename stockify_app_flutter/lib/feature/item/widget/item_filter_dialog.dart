@@ -36,7 +36,6 @@ class _FilterDialogState extends State<FilterDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Sort Section
             const Text('Sort By',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
@@ -58,14 +57,12 @@ class _FilterDialogState extends State<FilterDialog> {
               ],
               onChanged: (value) {
                 setState(() {
-                  // _params = _params.copyWith(sortBy: value);
                   final newParams = _params.copyWith(sortBy: value);
                   widget.onApplyFilter(newParams);
                 });
               },
             ),
             const SizedBox(height: 12),
-            // Sort Order
             Row(
               children: [
                 Expanded(
@@ -144,7 +141,6 @@ class _FilterDialogState extends State<FilterDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            // Reset filters
             setState(() {
               _params = ItemFilterParams();
             });
