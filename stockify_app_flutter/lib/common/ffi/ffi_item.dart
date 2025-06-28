@@ -9,8 +9,8 @@ typedef AddItemFullC = Void Function(
   Pointer<Utf8> modelNo,
   Pointer<Utf8> deviceType,
   Pointer<Utf8> serialNo,
-  Int64 receivedDate, // Unix timestamp
-  Int64 warrantyDate, // Unix timestamp
+  Int64 receivedDate,
+  Int64 warrantyDate,
   Pointer<Utf8> assetStatus,
   Pointer<Utf8> hostName,
   Pointer<Utf8> ipPort,
@@ -111,7 +111,6 @@ class ItemFFI {
     } else {
       throw UnsupportedError("Platform not supported");
     }
-
     addItemFull =
         _lib.lookupFunction<AddItemFullC, AddItemFullDart>('AddItemFull');
     getAllItems =

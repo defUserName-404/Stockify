@@ -36,7 +36,7 @@ func (r *itemRepository) GetItemById(id uint64) model.Item {
 }
 
 func (r *itemRepository) UpdateItem(item model.Item) {
-	db.DB.Select("IsPasswordProtected").Updates(&item)
+	db.DB.Save(&item)
 }
 
 func (r *itemRepository) DeleteItemById(id uint64) {

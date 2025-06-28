@@ -1,6 +1,3 @@
-import 'dart:developer';
-
-import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
@@ -14,7 +11,6 @@ import 'package:stockify_app_flutter/feature/item/service/item_service_implement
 import 'package:stockify_app_flutter/feature/item/util/item_validator.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 
-import '../../../common/ffi/ffi_item.dart';
 import '../../user/model/user.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
@@ -32,6 +28,8 @@ class _ItemScreenState extends State<ItemScreen> {
   int _rowsPerPage = 10;
   bool _isPanelOpen = false;
   Item? _editingItem;
+  late ItemData _itemDataSource;
+
   late final TextEditingController _assetInputController,
       _modelInputController,
       _serialInputController,
@@ -52,6 +50,12 @@ class _ItemScreenState extends State<ItemScreen> {
   @override
   void initState() {
     _itemService = ItemServiceImplementation.instance;
+    _initializeControllers();
+    _initializeItemDataSource();
+    super.initState();
+  }
+
+  void _initializeControllers() {
     _assetInputController = TextEditingController();
     _modelInputController = TextEditingController();
     _serialInputController = TextEditingController();
@@ -68,7 +72,19 @@ class _ItemScreenState extends State<ItemScreen> {
     _selectedReceivedDate = _editingItem?.receivedDate;
     _isPasswordProtected = _editingItem?.isPasswordProtected;
     _assignedUser = _editingItem?.assignedTo;
-    super.initState();
+  }
+
+  void _initializeItemDataSource() {
+    _itemDataSource = ItemData(
+      context: context,
+      onEdit: (item) => _togglePanel(item: item),
+    );
+  }
+
+  void _refreshData() {
+    setState(() {
+      _itemDataSource.refreshData();
+    });
   }
 
   @override
@@ -146,11 +162,8 @@ class _ItemScreenState extends State<ItemScreen> {
     final switchIpAddress = _switchIpAddressInputController.text;
     final isPasswordProtected = _isPasswordProtected;
     final assignedTo = _assignedUser;
-    final itemFFI = ItemFFI();
     final item = Item(
-      id: _editingItem == null
-          ? (int.parse(_itemService.getAllItems().last.id) + 1).toString()
-          : _editingItem!.id,
+      id: _editingItem != null ? _editingItem!.id : null,
       assetNo: assetNo,
       modelNo: modelNo,
       serialNo: serialNo,
@@ -168,40 +181,6 @@ class _ItemScreenState extends State<ItemScreen> {
       isPasswordProtected: isPasswordProtected,
       assignedTo: assignedTo,
     );
-    itemFFI.addItemFull(
-      assetNo.toNativeUtf8(),
-      modelNo.toNativeUtf8(),
-      deviceType.toString().toNativeUtf8(),
-      serialNo.toNativeUtf8(),
-      receivedDate!.millisecondsSinceEpoch ~/ 1000,
-      warrantyDate.microsecondsSinceEpoch ~/ 1000,
-      assetStatus.toString().toNativeUtf8(),
-      hostName.toNativeUtf8(),
-      ipPort.toNativeUtf8(),
-      macAddress.toNativeUtf8(),
-      osVersion.toNativeUtf8(),
-      facePlateName.toNativeUtf8(),
-      switchPort.toNativeUtf8(),
-      switchIpAddress.toNativeUtf8(),
-      isPasswordProtected == false ? 0 : 1,
-      int.parse(assignedTo!.id),
-    );
-
-    // Free any allocated memory for inputs if needed.
-    malloc.free(assetNo.toNativeUtf8());
-    malloc.free(modelNo.toNativeUtf8());
-    malloc.free(deviceType.toString().toNativeUtf8());
-    malloc.free(serialNo.toNativeUtf8());
-    malloc.free(assetStatus.toString().toNativeUtf8());
-    malloc.free(hostName.toNativeUtf8());
-    malloc.free(ipPort.toNativeUtf8());
-    malloc.free(macAddress.toNativeUtf8());
-    malloc.free(osVersion.toNativeUtf8());
-    malloc.free(facePlateName.toNativeUtf8());
-    malloc.free(switchPort.toNativeUtf8());
-    malloc.free(switchIpAddress.toNativeUtf8());
-
-    log(item.toString());
     if (_editingItem != null) {
       _itemService.updateItem(item);
     } else {
@@ -209,6 +188,7 @@ class _ItemScreenState extends State<ItemScreen> {
     }
     _clearFields();
     _togglePanel();
+    _refreshData();
   }
 
   void _clearFields() {
@@ -307,9 +287,7 @@ class _ItemScreenState extends State<ItemScreen> {
                       DataColumn(label: Text('Asset Status')),
                       DataColumn(label: Text('Actions'))
                     ],
-                    source: ItemData(
-                        context: context,
-                        onEdit: (item) => _togglePanel(item: item)),
+                    source: _itemDataSource, // Use the instance variable
                   ),
                 ),
               ],
@@ -341,7 +319,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           controller: _assetInputController,
                           validator: ItemInputValidator.validateAssetNo,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration: InputDecoration(labelText: 'Asset No'),
                         ),
                       ),
@@ -350,7 +328,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           controller: _modelInputController,
                           validator: ItemInputValidator.validateModelNo,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration: InputDecoration(labelText: 'Model No'),
                         ),
                       ),
@@ -363,7 +341,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           controller: _serialInputController,
                           validator: ItemInputValidator.validateSerialNo,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration: InputDecoration(labelText: 'Serial No'),
                         ),
                       ),
@@ -373,7 +351,7 @@ class _ItemScreenState extends State<ItemScreen> {
                           value: _selectedDeviceType,
                           decoration: InputDecoration(labelText: 'Device Type'),
                           validator: ItemInputValidator.validateDeviceType,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           items: DeviceType.values.map((type) {
                             return DropdownMenuItem(
                                 value: type, child: Text(type.name));
@@ -424,7 +402,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: TextFormField(
                           readOnly: true,
                           validator: ItemInputValidator.validateWarrantyDate,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration: InputDecoration(
                             labelText: 'Warranty Date',
                             suffixIcon: Icon(Icons.calendar_today),
@@ -456,7 +434,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: DropdownButtonFormField<AssetStatus>(
                           value: _selectedAssetStatus,
                           validator: ItemInputValidator.validateAssetStatus,
-                          autovalidateMode: AutovalidateMode.onUnfocus,
+                          autovalidateMode: AutovalidateMode.always,
                           decoration:
                               InputDecoration(labelText: 'Asset Status'),
                           items: AssetStatus.values.map((type) {
@@ -616,27 +594,32 @@ class _ItemScreenState extends State<ItemScreen> {
 
 class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
-  late final List<Item> _items;
+  List<Item> _items = [];
   late final BuildContext _context;
   final void Function(Item)? onEdit;
 
   final Set<int> _selectedRows = {};
 
   ItemData({required BuildContext context, this.onEdit}) {
-    _items = _itemService.getAllItems();
     _context = context;
+    refreshData();
+  }
+
+  void refreshData() {
+    _items = _itemService.getAllItems();
+    notifyListeners();
   }
 
   @override
   DataRow getRow(int index) {
     final item = _items[index];
-    final selectedRowId = int.parse(item.id);
+    final selectedRowId = item.id;
     return DataRow.byIndex(
       index: index,
       selected: _selectedRows.contains(selectedRowId),
       onSelectChanged: (selected) {
         if (selected == true) {
-          _selectedRows.add(selectedRowId);
+          _selectedRows.add(selectedRowId!);
         } else {
           _selectedRows.remove(selectedRowId);
         }
@@ -675,7 +658,7 @@ class ItemData extends DataTableSource {
                               itemText: '${item.deviceType.name}'),
                           if (item.receivedDate != null)
                             ItemDetailsText(
-                                label: 'Warranty Date',
+                                label: 'Received Date',
                                 itemText:
                                     '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
                           ItemDetailsText(
@@ -763,18 +746,18 @@ class ItemData extends DataTableSource {
                   );
                   if (confirmDelete == true) {
                     if (selectedRowCount == 0) {
-                      _itemService.deleteItem(item.id);
-                      notifyListeners();
-                    } else {}
-                    final selectedItems = _items
-                        .where((element) =>
-                            _selectedRows.contains(int.parse(element.id)))
-                        .toList();
-                    for (final currentlySelectedItem in selectedItems) {
-                      _itemService.deleteItem(currentlySelectedItem.id);
-                      _selectedRows.remove(int.parse(currentlySelectedItem.id));
-                      notifyListeners();
+                      _itemService.deleteItem(item.id!);
+                    } else {
+                      final selectedItems = _items
+                          .where(
+                              (element) => _selectedRows.contains(element.id))
+                          .toList();
+                      for (final currentlySelectedItem in selectedItems) {
+                        _itemService.deleteItem(currentlySelectedItem.id!);
+                        _selectedRows.remove(currentlySelectedItem.id);
+                      }
                     }
+                    refreshData();
                   }
                 })
           ],

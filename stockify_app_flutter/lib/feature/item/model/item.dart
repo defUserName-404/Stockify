@@ -1,10 +1,12 @@
+import 'dart:developer';
+
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 
 import '../../user/model/user.dart';
 import 'device_type.dart';
 
 class Item {
-  final String id;
+  final int? id;
   final String assetNo;
   final String modelNo;
   final DeviceType deviceType;
@@ -22,8 +24,7 @@ class Item {
   final bool? isPasswordProtected;
   final User? assignedTo;
 
-  Item(
-      {required this.id,
+  Item({this.id,
       required this.assetNo,
       required this.modelNo,
       required this.deviceType,
@@ -62,5 +63,33 @@ class Item {
         'isPasswordProtected: $isPasswordProtected, '
         'assignedTo: $assignedTo'
         '}';
+  }
+
+  factory Item.fromJson(Map<String, dynamic> json) {
+    log(json.toString());
+    return Item(
+      id: json['ID'],
+      assetNo: json['AssetNo'],
+      modelNo: json['ModelNo'],
+      deviceType: DeviceType.values
+          .firstWhere((e) => e.toString() == json['DeviceType']),
+      serialNo: json['SerialNo'],
+      receivedDate: json['ReceivedDate'] != null
+          ? DateTime.parse(json['ReceivedDate']).toLocal()
+          : null,
+      warrantyDate: DateTime.parse(json['WarrantyDate']).toLocal(),
+      assetStatus: AssetStatus.values
+          .firstWhere((e) => e.toString() == json['AssetStatus']),
+      hostName: json['HostName'],
+      macAddress: json['MacAddress'],
+      ipPort: json['IpPort'],
+      osVersion: json['OsVersion'],
+      facePlateName: json['FacePlateName'],
+      switchPort: json['SwitchPort'],
+      switchIpAddress: json['SwitchIpAddress'],
+      isPasswordProtected: json['IsPasswordProtected'] == 1,
+      assignedTo:
+          json['AssignedTo'] != null ? User.fromJson(json['AssignedTo']) : null,
+    );
   }
 }

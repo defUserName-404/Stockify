@@ -5,9 +5,9 @@ abstract class ItemService {
 
   void updateItem(Item item);
 
-  void deleteItem(String id);
+  void deleteItem(int id);
 
   List<Item> getAllItems();
 
-  Item getItem(String id);
+  Item getItem(int id);
 }

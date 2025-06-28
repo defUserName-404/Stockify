@@ -19,7 +19,7 @@ class ItemServiceImplementation extends ItemService {
   }
 
   @override
-  void deleteItem(String id) {
+  void deleteItem(int id) {
     _itemRepository.deleteItem(id);
   }
 
@@ -29,8 +29,8 @@ class ItemServiceImplementation extends ItemService {
   }
 
   @override
-  Item getItem(String id) {
-    return _itemRepository.getItem(id);
+  Item getItem(int id) {
+    return _itemRepository.getItemById(id);
   }
 
   @override
