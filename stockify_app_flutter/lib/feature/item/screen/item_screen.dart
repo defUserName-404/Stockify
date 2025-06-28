@@ -8,13 +8,14 @@ import 'package:stockify_app_flutter/common/widget/app_button.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
-import 'package:stockify_app_flutter/feature/item/util/item_validator.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 
 import '../../user/model/user.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
+import '../util/item_validator.dart';
 import '../widget/item_details_text.dart';
+import '../widget/item_filter_dialog.dart';
 
 class ItemScreen extends StatefulWidget {
   ItemScreen({super.key});
@@ -29,6 +30,10 @@ class _ItemScreenState extends State<ItemScreen> {
   bool _isPanelOpen = false;
   Item? _editingItem;
   late ItemData _itemDataSource;
+
+  // Add search and filter variables
+  final TextEditingController _searchController = TextEditingController();
+  ItemFilterParams _filterParams = ItemFilterParams();
 
   late final TextEditingController _assetInputController,
       _modelInputController,
@@ -78,13 +83,41 @@ class _ItemScreenState extends State<ItemScreen> {
     _itemDataSource = ItemData(
       context: context,
       onEdit: (item) => _togglePanel(item: item),
+      filterParams: _filterParams,
+      rowsPerPage: _rowsPerPage,
     );
   }
 
   void _refreshData() {
     setState(() {
+      _itemDataSource.updateFilterParams(_filterParams);
+      _itemDataSource.updateRowsPerPage(_rowsPerPage);
       _itemDataSource.refreshData();
     });
+  }
+
+  // Add search functionality
+  void _onSearchChanged(String query) {
+    setState(() {
+      _filterParams = _filterParams.copyWith(search: query, page: 1);
+    });
+    _refreshData();
+  }
+
+  // Add filter dialog
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => FilterDialog(
+        currentParams: _filterParams,
+        onApplyFilter: (params) {
+          setState(() {
+            _filterParams = params.copyWith(page: 1);
+          });
+          _refreshData();
+        },
+      ),
+    );
   }
 
   @override
@@ -99,6 +132,7 @@ class _ItemScreenState extends State<ItemScreen> {
     _facePlateNameInputController.dispose();
     _switchPortInputController.dispose();
     _switchIpAddressInputController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -228,72 +262,115 @@ class _ItemScreenState extends State<ItemScreen> {
       ),
       body: Stack(
         children: <Widget>[
-          SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                const SizedBox(height: 16.0),
+          Column(
+            children: <Widget>[
+              const SizedBox(height: 16.0),
+              // Active Filters Display
+              if (_filterParams.deviceType != null ||
+                  _filterParams.assetStatus != null)
                 Container(
                   width: double.infinity,
-                  child: PaginatedDataTable(
-                    headingRowColor: WidgetStateProperty.all<Color>(
-                        AppColors.colorAccent.withValues(alpha: 0.25)),
-                    actions: [
-                      AppButton(
-                          onPressed: _togglePanel,
-                          icon: Icons.add,
-                          iconColor: AppColors.colorAccent,
-                          text: 'Add New Item'),
-                    ],
-                    header: Row(
-                      children: <Widget>[
-                        Expanded(
-                          flex: 9,
-                          child: SearchBar(
-                            padding:
-                                WidgetStateProperty.all<EdgeInsetsGeometry>(
-                              const EdgeInsets.symmetric(horizontal: 16.0),
-                            ),
-                            leading: Icon(Icons.search,
-                                color: AppColors.colorTextDark),
-                            hintText:
-                                'Search for items by their ID, Asset No, Model No or Serial No',
-                          ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Wrap(
+                    spacing: 8.0,
+                    children: [
+                      if (_filterParams.deviceType != null)
+                        Chip(
+                          label:
+                              Text('Device: ${_filterParams.deviceType!.name}'),
+                          onDeleted: () {
+                            setState(() {
+                              _filterParams =
+                                  _filterParams.copyWith(deviceType: null);
+                            });
+                            _refreshData();
+                          },
                         ),
-                        const SizedBox(width: 8.0),
-                        AppButton(
-                          onPressed: () {},
-                          icon: Icons.filter_list_rounded,
-                          iconColor: AppColors.colorTextDark,
-                          text: 'Sort & Filter',
-                          backgroundColor: AppColors.colorTextSemiLight,
-                          foregroundColor: AppColors.colorTextDark,
+                      if (_filterParams.assetStatus != null)
+                        Chip(
+                          label: Text(
+                              'Status: ${_filterParams.assetStatus!.name}'),
+                          onDeleted: () {
+                            setState(() {
+                              _filterParams =
+                                  _filterParams.copyWith(assetStatus: null);
+                            });
+                            _refreshData();
+                          },
                         ),
-                      ],
-                    ),
-                    availableRowsPerPage: const [10, 20, 50],
-                    onRowsPerPageChanged: (int? value) {
-                      setState(() {
-                        _rowsPerPage = value!;
-                      });
-                    },
-                    rowsPerPage: _rowsPerPage,
-                    columns: [
-                      DataColumn(label: Text('ID')),
-                      DataColumn(label: Text('Asset No')),
-                      DataColumn(label: Text('Model No')),
-                      DataColumn(label: Text('Serial No')),
-                      DataColumn(label: Text('Device Type')),
-                      DataColumn(label: Text('Warranty Date')),
-                      DataColumn(label: Text('Asset Status')),
-                      DataColumn(label: Text('Actions'))
                     ],
-                    source: _itemDataSource, // Use the instance variable
                   ),
                 ),
-              ],
-            ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    width: double.infinity,
+                    child: PaginatedDataTable(
+                      headingRowColor: WidgetStateProperty.all<Color>(
+                          AppColors.colorAccent.withValues(alpha: 0.25)),
+                      actions: [
+                        AppButton(
+                            onPressed: _togglePanel,
+                            icon: Icons.add,
+                            iconColor: AppColors.colorAccent,
+                            text: 'Add New Item'),
+                      ],
+                      header: Row(
+                        children: <Widget>[
+                          Expanded(
+                            flex: 9,
+                            child: SearchBar(
+                              controller: _searchController,
+                              padding:
+                                  WidgetStateProperty.all<EdgeInsetsGeometry>(
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                              ),
+                              leading: Icon(Icons.search,
+                                  color: AppColors.colorTextDark),
+                              hintText:
+                                  'Search for items by their Asset No, Model No or Serial No',
+                              onChanged:
+                                  _onSearchChanged, // Connect search functionality
+                            ),
+                          ),
+                          const SizedBox(width: 8.0),
+                          AppButton(
+                            onPressed: _showFilterDialog,
+                            // Connect filter dialog
+                            icon: Icons.filter_list_rounded,
+                            iconColor: AppColors.colorTextDark,
+                            text: 'Sort & Filter',
+                            backgroundColor: AppColors.colorTextSemiLight,
+                            foregroundColor: AppColors.colorTextDark,
+                          ),
+                        ],
+                      ),
+                      availableRowsPerPage: const [10, 20, 50],
+                      onRowsPerPageChanged: (int? value) {
+                        setState(() {
+                          _rowsPerPage = value!;
+                        });
+                      },
+                      rowsPerPage: _rowsPerPage,
+                      columns: [
+                        DataColumn(label: Text('ID')),
+                        DataColumn(label: Text('Asset No')),
+                        DataColumn(label: Text('Model No')),
+                        DataColumn(label: Text('Serial No')),
+                        DataColumn(label: Text('Device Type')),
+                        DataColumn(label: Text('Warranty Date')),
+                        DataColumn(label: Text('Asset Status')),
+                        DataColumn(label: Text('Actions'))
+                      ],
+                      source: _itemDataSource,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          // Side Panel (Sliding in/out)
+          // Side Panel (Sliding in/out) - Keep your existing panel code
           AnimatedPositioned(
             duration: Duration(milliseconds: 300),
             right: _isPanelOpen ? 0 : -screenWidthHalf,
@@ -595,36 +672,92 @@ class _ItemScreenState extends State<ItemScreen> {
 class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
   List<Item> _items = [];
+  List<Item> _filteredItems = [];
   late final BuildContext _context;
   final void Function(Item)? onEdit;
+  ItemFilterParams _filterParams;
 
-  final Set<int> _selectedRows = {};
-
-  ItemData({required BuildContext context, this.onEdit}) {
+  ItemData({
+    required BuildContext context,
+    this.onEdit,
+    required ItemFilterParams filterParams,
+    required int rowsPerPage,
+  }) : _filterParams = filterParams {
     _context = context;
     refreshData();
   }
 
+  void updateFilterParams(ItemFilterParams params) {
+    _filterParams = params;
+  }
+
+  void updateRowsPerPage(int rowsPerPage) {}
+
   void refreshData() {
     _items = _itemService.getAllItems();
+    _applyFilters();
     notifyListeners();
+  }
+
+  void _applyFilters() {
+    _filteredItems = _items.where((item) {
+      // Apply search filter
+      if (_filterParams.search.isNotEmpty) {
+        final searchLower = _filterParams.search.toLowerCase();
+        final matchesSearch =
+            item.assetNo.toLowerCase().contains(searchLower) ||
+                item.modelNo.toLowerCase().contains(searchLower) ||
+                item.serialNo.toLowerCase().contains(searchLower) ||
+                (item.hostName?.toLowerCase().contains(searchLower) ?? false) ||
+                (item.ipPort?.toLowerCase().contains(searchLower) ?? false) ||
+                (item.macAddress?.toLowerCase().contains(searchLower) ?? false);
+        if (!matchesSearch) return false;
+      }
+      // Apply device type filter
+      if (_filterParams.deviceType != null &&
+          item.deviceType != _filterParams.deviceType) {
+        return false;
+      }
+      // Apply asset status filter
+      if (_filterParams.assetStatus != null &&
+          item.assetStatus != _filterParams.assetStatus) {
+        return false;
+      }
+      return true;
+    }).toList();
+    // Apply sorting
+    _filteredItems.sort((a, b) {
+      int comparison = 0;
+      switch (_filterParams.sortBy) {
+        case 'assetNo':
+          comparison = a.assetNo.compareTo(b.assetNo);
+          break;
+        case 'modelNo':
+          comparison = a.modelNo.compareTo(b.modelNo);
+          break;
+        case 'serialNo':
+          comparison = a.serialNo.compareTo(b.serialNo);
+          break;
+        case 'receivedDate':
+          if (a.receivedDate != null && b.receivedDate != null) {
+            comparison = a.receivedDate!.compareTo(b.receivedDate!);
+          }
+          break;
+        case 'warrantyDate':
+          comparison = a.warrantyDate.compareTo(b.warrantyDate);
+          break;
+        default:
+          comparison = a.assetNo.compareTo(b.assetNo);
+      }
+      return _filterParams.sortOrder == 'DESC' ? -comparison : comparison;
+    });
   }
 
   @override
   DataRow getRow(int index) {
-    final item = _items[index];
-    final selectedRowId = item.id;
+    final item = _filteredItems[index];
     return DataRow.byIndex(
       index: index,
-      selected: _selectedRows.contains(selectedRowId),
-      onSelectChanged: (selected) {
-        if (selected == true) {
-          _selectedRows.add(selectedRowId!);
-        } else {
-          _selectedRows.remove(selectedRowId);
-        }
-        notifyListeners();
-      },
       cells: [
         DataCell(Text(item.id.toString())),
         DataCell(Text(item.assetNo)),
@@ -725,12 +858,8 @@ class ItemData extends DataTableSource {
                     context: _context,
                     builder: (context) => AlertDialog(
                       title: const Text('Confirm Deletion'),
-                      content: (_selectedRows.length == 0 ||
-                              _selectedRows.length == 1)
-                          ? const Text(
-                              'Are you sure you want to delete this item?')
-                          : Text(
-                              'Are you sure you want to delete these ${_selectedRows.length} items?'),
+                      content: const Text(
+                          'Are you sure you want to delete this item?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -745,18 +874,7 @@ class ItemData extends DataTableSource {
                     ),
                   );
                   if (confirmDelete == true) {
-                    if (selectedRowCount == 0) {
-                      _itemService.deleteItem(item.id!);
-                    } else {
-                      final selectedItems = _items
-                          .where(
-                              (element) => _selectedRows.contains(element.id))
-                          .toList();
-                      for (final currentlySelectedItem in selectedItems) {
-                        _itemService.deleteItem(currentlySelectedItem.id!);
-                        _selectedRows.remove(currentlySelectedItem.id);
-                      }
-                    }
+                    _itemService.deleteItem(item.id!);
                     refreshData();
                   }
                 })
@@ -767,11 +885,11 @@ class ItemData extends DataTableSource {
   }
 
   @override
-  int get rowCount => _items.length;
+  int get rowCount => _filteredItems.length;
 
   @override
   bool get isRowCountApproximate => false;
 
   @override
-  int get selectedRowCount => _selectedRows.length;
+  int get selectedRowCount => 0;
 }

@@ -24,7 +24,8 @@ class Item {
   final bool? isPasswordProtected;
   final User? assignedTo;
 
-  Item({this.id,
+  Item(
+      {this.id,
       required this.assetNo,
       required this.modelNo,
       required this.deviceType,
@@ -90,6 +91,50 @@ class Item {
       isPasswordProtected: json['IsPasswordProtected'] == 1,
       assignedTo:
           json['AssignedTo'] != null ? User.fromJson(json['AssignedTo']) : null,
+    );
+  }
+}
+
+class ItemFilterParams {
+  final String search;
+  final DeviceType? deviceType;
+  final AssetStatus? assetStatus;
+  final DateTime? warrantyDate;
+  final String sortBy;
+  final String sortOrder;
+  final int page;
+  final int pageSize;
+
+  ItemFilterParams({
+    this.search = '',
+    this.deviceType,
+    this.assetStatus,
+    this.warrantyDate,
+    this.sortBy = 'assetNo',
+    this.sortOrder = 'ASC',
+    this.page = 1,
+    this.pageSize = 10,
+  });
+
+  ItemFilterParams copyWith({
+    String? search,
+    DeviceType? deviceType,
+    AssetStatus? assetStatus,
+    DateTime? warrantyDate,
+    String? sortBy,
+    String? sortOrder,
+    int? page,
+    int? pageSize,
+  }) {
+    return ItemFilterParams(
+      search: search ?? this.search,
+      deviceType: deviceType ?? this.deviceType,
+      assetStatus: assetStatus ?? this.assetStatus,
+      warrantyDate: warrantyDate ?? this.warrantyDate,
+      sortBy: sortBy ?? this.sortBy,
+      sortOrder: sortOrder ?? this.sortOrder,
+      page: page ?? this.page,
+      pageSize: pageSize ?? this.pageSize,
     );
   }
 }

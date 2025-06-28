@@ -150,4 +150,41 @@ class ItemRepository {
   void deleteItem(int id) {
     _ffi.deleteItemById(id);
   }
+
+  // Retrieve filtered items
+  Future<List<Item>> getFilteredItems(ItemFilterParams params) async {
+    final searchPtr = params.search.toNativeUtf8();
+    final deviceTypePtr =
+        params.deviceType?.toString().toNativeUtf8() ?? nullptr;
+    final assetStatusPtr =
+        params.assetStatus?.toString().toNativeUtf8() ?? nullptr;
+    final warrantyDateMs = params.warrantyDate?.millisecondsSinceEpoch ?? 0;
+    final sortByPtr = params.sortBy.toNativeUtf8();
+    final sortOrderPtr = params.sortOrder.toNativeUtf8();
+    try {
+      final resultPtr = _ffi.getFilteredItems(
+        searchPtr,
+        deviceTypePtr,
+        assetStatusPtr,
+        warrantyDateMs,
+        sortByPtr,
+        sortOrderPtr,
+        params.page,
+        params.pageSize,
+      );
+      if (resultPtr == nullptr) {
+        return [];
+      }
+      final jsonString = resultPtr.toDartString();
+      _ffi.freeCString(resultPtr);
+      final List<dynamic> jsonList = json.decode(jsonString);
+      return jsonList.map((json) => Item.fromJson(json)).toList();
+    } finally {
+      malloc.free(searchPtr);
+      if (deviceTypePtr != nullptr) malloc.free(deviceTypePtr);
+      if (assetStatusPtr != nullptr) malloc.free(assetStatusPtr);
+      malloc.free(sortByPtr);
+      malloc.free(sortOrderPtr);
+    }
+  }
 }
