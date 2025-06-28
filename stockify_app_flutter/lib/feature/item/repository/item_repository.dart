@@ -94,15 +94,6 @@ class ItemRepository {
 
   // Debug version of your Flutter updateItem function
   void updateItem(Item item) {
-    print('=== UPDATE ITEM DEBUG ===');
-    print('Item ID: ${item.id}');
-    print('Asset No: ${item.assetNo}');
-    print('Model No: ${item.modelNo}');
-    print('Device Type: ${item.deviceType}');
-    print('Serial No: ${item.serialNo}');
-    print('Asset Status: ${item.assetStatus}');
-    print('Is Password Protected: ${item.isPasswordProtected}');
-    print('Assigned User: ${item.assignedTo?.id}');
     final id = item.id;
     final assetNoPtr = _toUtf8(item.assetNo);
     final modelNoPtr = _toUtf8(item.modelNo);
