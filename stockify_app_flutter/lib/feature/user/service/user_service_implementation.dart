@@ -18,7 +18,7 @@ class UserServiceImplementation extends UserService {
   }
 
   @override
-  void deleteUser(String id) {
+  void deleteUser(int id) {
     _userRepository.deleteUser(id);
   }
 
@@ -33,7 +33,7 @@ class UserServiceImplementation extends UserService {
   }
 
   @override
-  User getUser(String id) {
+  User getUser(int id) {
     return _userRepository.getUser(id);
   }
 }

@@ -80,9 +80,7 @@ class _UserScreenState extends State<UserScreen> {
     final roomNo = _roomNoController.text;
     final floor = _floorController.text;
     final user = User(
-      id: _editingUser == null
-          ? (int.parse(_userService.getAllUsers().last.id) + 1).toString()
-          : _editingUser!.id,
+      id: _editingUser != null ? _editingUser!.id : null,
       userName: userName,
       designation: designation,
       sapId: sapId,
@@ -285,8 +283,6 @@ class UserData extends DataTableSource {
   late final BuildContext _context;
   final void Function(User)? onEdit;
 
-  final Set<int> _selectedRows = {};
-
   UserData({required BuildContext context, this.onEdit}) {
     _context = context;
     _users = _userService.getAllUsers();
@@ -295,18 +291,8 @@ class UserData extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final user = _users[index];
-    final selectedRowId = int.parse(user.id);
     return DataRow.byIndex(
       index: index,
-      selected: _selectedRows.contains(selectedRowId),
-      onSelectChanged: (selected) {
-        if (selected == true) {
-          _selectedRows.add(selectedRowId);
-        } else {
-          _selectedRows.remove(selectedRowId);
-        }
-        notifyListeners();
-      },
       cells: [
         DataCell(Text(user.id.toString())),
         DataCell(Text(user.userName)),
@@ -336,15 +322,14 @@ class UserData extends DataTableSource {
                                 label: 'SAP ID', itemText: '${user.sapId}'),
                           if (user.ipPhone != null)
                             ItemDetailsText(
-                                label: 'Device Type',
+                                label: 'IP Phone',
                                 itemText: '${user.ipPhone!}'),
                           if (user.roomNo != null)
                             ItemDetailsText(
-                                label: 'Warranty Date',
-                                itemText: '${user.roomNo!}'),
+                                label: 'Room No', itemText: '${user.roomNo!}'),
                           if (user.floor != null)
                             ItemDetailsText(
-                                label: 'Host Name', itemText: '${user.floor}'),
+                                label: 'Floor No', itemText: '${user.floor}'),
                         ],
                       ),
                       actions: [
@@ -370,12 +355,8 @@ class UserData extends DataTableSource {
                     context: _context,
                     builder: (context) => AlertDialog(
                       title: const Text('Confirm Deletion'),
-                      content: (_selectedRows.length == 0 ||
-                              _selectedRows.length == 1)
-                          ? const Text(
-                              'Are you sure you want to delete this user?')
-                          : Text(
-                              'Are you sure you want to delete these ${_selectedRows.length} user?'),
+                      content: const Text(
+                          'Are you sure you want to delete this user?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -390,19 +371,8 @@ class UserData extends DataTableSource {
                     ),
                   );
                   if (confirmDelete == true) {
-                    if (selectedRowCount == 0) {
-                      _userService.deleteUser(user.id);
-                      notifyListeners();
-                    } else {}
-                    final selectedItems = _users
-                        .where((element) =>
-                            _selectedRows.contains(int.parse(element.id)))
-                        .toList();
-                    for (final currentlySelectedItem in selectedItems) {
-                      _userService.deleteUser(currentlySelectedItem.id);
-                      _selectedRows.remove(int.parse(currentlySelectedItem.id));
-                      notifyListeners();
-                    }
+                    _userService.deleteUser(user.id!);
+                    notifyListeners();
                   }
                 })
           ],
@@ -418,5 +388,5 @@ class UserData extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get selectedRowCount => _selectedRows.length;
+  int get selectedRowCount => 0;
 }

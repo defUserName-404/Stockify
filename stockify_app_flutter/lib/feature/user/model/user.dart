@@ -1,5 +1,5 @@
 class User {
-  final String id;
+  final int? id;
   final String userName;
   final String? designation;
   final String? sapId;
@@ -25,7 +25,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
+      id: json['ID'],
       userName: json['userName'],
       designation: json['designation'],
       sapId: json['sapId'],

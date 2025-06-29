@@ -9,6 +9,8 @@ import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
+import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
+import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 
 import '../../user/model/user.dart';
 import '../item_filter_param.dart';
@@ -27,6 +29,7 @@ class ItemScreen extends StatefulWidget {
 
 class _ItemScreenState extends State<ItemScreen> {
   late final ItemService _itemService;
+  late final UserService _userService;
   int _rowsPerPage = 10;
   bool _isPanelOpen = false;
   Item? _editingItem;
@@ -50,13 +53,22 @@ class _ItemScreenState extends State<ItemScreen> {
   DateTime? _selectedReceivedDate;
   bool? _isPasswordProtected;
   User? _assignedUser;
+  List<User> _usersList = [];
 
   @override
   void initState() {
     _itemService = ItemServiceImplementation.instance;
+    _userService = UserServiceImplementation.instance;
     _initializeControllers();
     _initializeItemDataSource();
+    _fetchUsers();
     super.initState();
+  }
+
+  void _fetchUsers() {
+    setState(() {
+      _usersList = _userService.getAllUsers();
+    });
   }
 
   void _initializeControllers() {
@@ -91,7 +103,6 @@ class _ItemScreenState extends State<ItemScreen> {
   void _refreshData() {
     setState(() {
       _itemDataSource.updateFilterParams(_filterParams);
-      _itemDataSource.updateRowsPerPage(_rowsPerPage);
       _itemDataSource.refreshData();
     });
   }
@@ -247,12 +258,6 @@ class _ItemScreenState extends State<ItemScreen> {
     final screenWidthHalf = MediaQuery.of(context).size.width / 2;
     final currentTheme =
         Provider.of<ThemeController>(context).themeData.brightness;
-    List<User> usersList = List.generate(
-        10,
-        (index) => User(
-              id: index.toString(),
-              userName: "User ${index + 1}",
-            ));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Items'),
@@ -615,7 +620,7 @@ class _ItemScreenState extends State<ItemScreen> {
                                 value: _assignedUser,
                                 decoration:
                                     InputDecoration(labelText: 'Assigned User'),
-                                items: usersList.map((user) {
+                                items: _usersList.map((user) {
                                   return DropdownMenuItem(
                                       value: user, child: Text(user.userName));
                                 }).toList(),

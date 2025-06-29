@@ -5,9 +5,9 @@ abstract class UserService {
 
   void editUser(User user);
 
-  User getUser(String id);
+  User getUser(int id);
 
   List<User> getAllUsers();
 
-  void deleteUser(String id);
+  void deleteUser(int id);
 }
