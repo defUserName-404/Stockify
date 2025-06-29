@@ -27,32 +27,79 @@ func main() {
 
 // ========== User functions ==========
 
-func AddUser(user usermodel.User) {
+//export AddUser
+func AddUser(userName, designation, sapId, ipPhone, roomNo, floor *C.char) {
+	user := usermodel.User{
+		UserName:    C.GoString(userName),
+		Designation: cStringOrNil(designation),
+		SapId:       cStringOrNil(sapId),
+		IpPhone:     cStringOrNil(ipPhone),
+		RoomNo:      cStringOrNil(roomNo),
+		Floor:       cStringOrNil(floor),
+	}
 	userService.AddUser(user)
 }
 
-func GetAllUsers() []usermodel.User {
-	return userService.GetAllUsers()
+//export GetAllUsers
+func GetAllUsers() *C.char {
+	users := userService.GetAllUsers()
+	jsonData, err := json.Marshal(users)
+	if err != nil {
+		return jsonError("Failed to marshal users")
+	}
+	return C.CString(string(jsonData))
 }
 
-func GetUserById(id uint64) usermodel.User {
-	return userService.GetUserById(id)
+//export GetUserById
+func GetUserById(id C.ulonglong) *C.char {
+	user := userService.GetUserById(uint64(id))
+	if user.ID == 0 {
+		return jsonError("User not found")
+	}
+	jsonData, err := json.Marshal(user)
+	if err != nil {
+		return jsonError("Failed to marshal user")
+	}
+	return C.CString(string(jsonData))
 }
 
-func UpdateUser(updatedUser usermodel.User) {
-	userService.UpdateUser(updatedUser)
+//export UpdateUser
+func UpdateUser(id C.ulonglong, userName, designation, sapId, ipPhone, roomNo, floor *C.char) {
+	user := usermodel.User{
+		ID:          uint64(id),
+		UserName:    C.GoString(userName),
+		Designation: cStringOrNil(designation),
+		SapId:       cStringOrNil(sapId),
+		IpPhone:     cStringOrNil(ipPhone),
+		RoomNo:      cStringOrNil(roomNo),
+		Floor:       cStringOrNil(floor),
+	}
+	userService.UpdateUser(user)
 }
 
-func DeleteUserById(id uint64) {
-	userService.DeleteUserById(id)
+//export DeleteUserById
+func DeleteUserById(id C.ulonglong) {
+	userService.DeleteUserById(uint64(id))
 }
 
-func GetFilteredUsers(params usermodel.UserQueryParams) []usermodel.User {
+//export GetFilteredUsers
+func GetFilteredUsers(search, sortBy, sortOrder *C.char, page, pageSize C.int) *C.char {
+	params := usermodel.UserQueryParams{
+		Search:    C.GoString(search),
+		SortBy:    C.GoString(sortBy),
+		SortOrder: C.GoString(sortOrder),
+		Page:      int(page),
+		PageSize:  int(pageSize),
+	}
 	users, err := userService.GetFilteredUsers(params)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return users
+	jsonData, err := json.Marshal(users)
+	if err != nil {
+		return jsonError("Failed to marshal users")
+	}
+	return C.CString(string(jsonData))
 }
 
 // ========== Helper Functions ==========
