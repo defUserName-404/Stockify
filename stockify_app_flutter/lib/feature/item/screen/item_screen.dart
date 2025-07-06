@@ -9,17 +9,21 @@ import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
+import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
+import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 
 import '../../user/model/user.dart';
-import '../item_filter_param.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
+import '../model/item_filter_param.dart';
 import '../util/item_validator.dart';
 import '../widget/item_details_text.dart';
 import '../widget/item_filter_dialog.dart';
 
 class ItemScreen extends StatefulWidget {
-  ItemScreen({super.key});
+  final ItemFilterParams? filterParams;
+
+  ItemScreen({super.key, this.filterParams});
 
   @override
   State<ItemScreen> createState() => _ItemScreenState();
@@ -27,6 +31,7 @@ class ItemScreen extends StatefulWidget {
 
 class _ItemScreenState extends State<ItemScreen> {
   late final ItemService _itemService;
+  late final UserService _userService;
   int _rowsPerPage = 10;
   bool _isPanelOpen = false;
   Item? _editingItem;
@@ -50,13 +55,23 @@ class _ItemScreenState extends State<ItemScreen> {
   DateTime? _selectedReceivedDate;
   bool? _isPasswordProtected;
   User? _assignedUser;
+  List<User> _usersList = [];
 
   @override
   void initState() {
     _itemService = ItemServiceImplementation.instance;
+    _userService = UserServiceImplementation.instance;
+    _filterParams = widget.filterParams ?? ItemFilterParams();
     _initializeControllers();
     _initializeItemDataSource();
+    _fetchUsers();
     super.initState();
+  }
+
+  void _fetchUsers() {
+    setState(() {
+      _usersList = _userService.getAllUsers();
+    });
   }
 
   void _initializeControllers() {
@@ -91,7 +106,6 @@ class _ItemScreenState extends State<ItemScreen> {
   void _refreshData() {
     setState(() {
       _itemDataSource.updateFilterParams(_filterParams);
-      _itemDataSource.updateRowsPerPage(_rowsPerPage);
       _itemDataSource.refreshData();
     });
   }
@@ -247,12 +261,6 @@ class _ItemScreenState extends State<ItemScreen> {
     final screenWidthHalf = MediaQuery.of(context).size.width / 2;
     final currentTheme =
         Provider.of<ThemeController>(context).themeData.brightness;
-    List<User> usersList = List.generate(
-        10,
-        (index) => User(
-              id: index.toString(),
-              userName: "User ${index + 1}",
-            ));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Items'),
@@ -615,7 +623,7 @@ class _ItemScreenState extends State<ItemScreen> {
                                 value: _assignedUser,
                                 decoration:
                                     InputDecoration(labelText: 'Assigned User'),
-                                items: usersList.map((user) {
+                                items: _usersList.map((user) {
                                   return DropdownMenuItem(
                                       value: user, child: Text(user.userName));
                                 }).toList(),
@@ -713,6 +721,12 @@ class ItemData extends DataTableSource {
       if (_filterParams.assetStatus != null &&
           item.assetStatus != _filterParams.assetStatus) {
         return false;
+      }
+      if (_filterParams.isExpiring) {
+        final now = DateTime.now();
+        final isExpiring = item.warrantyDate.isAfter(now) &&
+            item.warrantyDate.difference(now).inDays <= 30;
+        if (!isExpiring) return false;
       }
       return true;
     }).toList();

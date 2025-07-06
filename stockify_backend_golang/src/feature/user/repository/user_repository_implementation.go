@@ -36,7 +36,7 @@ func (r *userRepository) GetUserById(id uint64) model.User {
 }
 
 func (r *userRepository) UpdateUser(user model.User) {
-	db.DB.Select("IsPasswordProtected").Updates(&user)
+	db.DB.Save(&user)
 }
 
 func (r *userRepository) DeleteUserById(id uint64) {
@@ -54,8 +54,9 @@ func (r *userRepository) GetFilteredUsers(params model.UserQueryParams) ([]model
 	if params.Search != "" {
 		searchTerm := "%" + params.Search + "%"
 		database = database.Where("user_name LIKE ?", searchTerm).Or("sap_id LIKE ?", searchTerm).Or(
-			"room_no LIKE ?", searchTerm,
-		).Or("floor_no LIKE ?", searchTerm)
+			"room_no LIKE ?",
+			searchTerm,
+		).Or("floor LIKE ?", searchTerm)
 	}
 	// Sorting
 	sortColumn := map[string]string{

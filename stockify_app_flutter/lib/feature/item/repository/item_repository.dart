@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
+import 'package:stockify_app_flutter/common/ffi/ffi_bridge.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
-
-import '../../../common/ffi/ffi_item.dart';
 
 class ItemRepository {
   ItemRepository._privateConstructor();
@@ -13,7 +12,7 @@ class ItemRepository {
 
   static ItemRepository get instance => _instance;
 
-  final ItemFFI _ffi = ItemFFI();
+  final FFIBridge _ffi = FFIBridge();
 
   // Helper method to convert Dart String to Pointer<Utf8>
   Pointer<Utf8> _toUtf8(String? str) =>
@@ -40,7 +39,7 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID = (item.assignedTo?.id ?? 0) as int;
+    final assignedToID = item.assignedTo?.id ?? 0;
     _ffi.addItemFull(
       assetNoPtr,
       modelNoPtr,
@@ -110,8 +109,7 @@ class ItemRepository {
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
     final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
-    final assignedToID =
-        item.assignedTo?.id != null ? int.parse(item.assignedTo!.id) : 0;
+    final assignedToID = item.assignedTo?.id != null ? item.assignedTo!.id : 0;
     _ffi.updateItemFull(
       id!,
       assetNoPtr,
@@ -129,7 +127,7 @@ class ItemRepository {
       switchPortPtr,
       switchIpAddressPtr,
       isPasswordProtected,
-      assignedToID,
+      assignedToID!,
     );
     // Free allocated memory
     calloc.free(assetNoPtr);

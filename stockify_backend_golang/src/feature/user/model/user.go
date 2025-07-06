@@ -8,13 +8,13 @@ import (
 
 type User struct {
 	gorm.Model
-	ID          uint64 `gorm:"primaryKey;autoIncrement"`
-	UserName    string
-	Designation *string
-	SapId       *string
-	IpPhone     *string
-	RoomNo      *string
-	Floor       *string
+	ID          uint64  `gorm:"primaryKey;autoIncrement" json:"ID"`
+	UserName    string  `json:"userName"`
+	Designation *string `json:"designation,omitempty"`
+	SapId       *string `json:"sapId,omitempty"`
+	IpPhone     *string `json:"ipPhone,omitempty"`
+	RoomNo      *string `json:"roomNo,omitempty"`
+	Floor       *string `json:"floor,omitempty"`
 }
 
 func (u *User) String() string {

@@ -9,6 +9,8 @@ enum DeviceType {
   Scanner,
   Projector,
   Router,
+  Switch,
+  Modem,
   Camera,
   Keyboard,
   Mouse,

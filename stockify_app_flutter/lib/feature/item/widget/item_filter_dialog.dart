@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../item_filter_param.dart';
 import '../model/asset_status.dart';
 import '../model/device_type.dart';
+import '../model/item_filter_param.dart';
 
 class FilterDialog extends StatefulWidget {
   final ItemFilterParams currentParams;

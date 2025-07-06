@@ -5,6 +5,7 @@ import 'package:stockify_app_flutter/feature/notification/screen/notification_sc
 import 'package:stockify_app_flutter/feature/user/screen/user_screen.dart';
 
 import '../../../feature/dashboard/screen/dashboard_screen.dart';
+import '../../../feature/item/model/item_filter_param.dart';
 import '../../../feature/settings/screen/settings_screen.dart';
 import '../../shared-preference/shared_preference_service.dart';
 import '../../theme/colors.dart';
@@ -12,12 +13,16 @@ import '../../theme/colors.dart';
 class AppPlaceholder extends StatefulWidget {
   const AppPlaceholder({super.key});
 
+  static final GlobalKey<_AppPlaceholderState> navigatorKey =
+      GlobalKey<_AppPlaceholderState>();
+
   @override
   State<AppPlaceholder> createState() => _AppPlaceholderState();
 }
 
 class _AppPlaceholderState extends State<AppPlaceholder> {
   int _selectedIndex = 0;
+  ItemFilterParams? _currentFilterParams = null;
   late double _railWidth;
   bool _isExtended = false;
   bool _showLabels = false;
@@ -122,11 +127,14 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
   }
 
   Widget _getSelectedScreen(int index) {
+    if (index != 1) {
+      _currentFilterParams = null;
+    }
     switch (index) {
       case 0:
         return const DashboardScreen();
       case 1:
-        return ItemScreen();
+        return ItemScreen(filterParams: _currentFilterParams);
       case 2:
         return UserScreen();
       case 3:
@@ -136,5 +144,12 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
       default:
         return const Center(child: Text("Page not found"));
     }
+  }
+
+  void updateSelectedScreen(int index, {ItemFilterParams? itemFilterParams}) {
+    setState(() {
+      _selectedIndex = index;
+      _currentFilterParams = itemFilterParams;
+    });
   }
 }
