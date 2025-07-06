@@ -1,5 +1,5 @@
-import 'model/asset_status.dart';
-import 'model/device_type.dart';
+import 'asset_status.dart';
+import 'device_type.dart';
 
 class ItemFilterParams {
   final String search;

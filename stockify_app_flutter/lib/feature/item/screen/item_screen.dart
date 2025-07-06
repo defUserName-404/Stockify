@@ -13,9 +13,9 @@ import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 
 import '../../user/model/user.dart';
-import '../item_filter_param.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
+import '../model/item_filter_param.dart';
 import '../util/item_validator.dart';
 import '../widget/item_details_text.dart';
 import '../widget/item_filter_dialog.dart';

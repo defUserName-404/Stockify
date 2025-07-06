@@ -6,8 +6,10 @@ import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/theme/controller/theme_controller.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
 import 'package:stockify_app_flutter/common/widget/app_button.dart';
+import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/user/util/user_validator.dart';
+import 'package:stockify_app_flutter/feature/user/widget/user_filter_dialog.dart';
 
 import '../../item/widget/item_details_text.dart';
 import '../../user/model/user.dart';
@@ -25,21 +27,69 @@ class _UserScreenState extends State<UserScreen> {
   int _rowsPerPage = 10;
   bool _isPanelOpen = false;
   User? _editingUser;
+  late UserData _userDataSource;
+  UserFilterParams _filterParams = UserFilterParams();
+
   late final TextEditingController _userNameController,
       _designationController,
       _sapIdController,
       _roomNoController,
-      _floorController;
+      _floorController,
+      _searchInputController;
 
   @override
   void initState() {
     _userService = UserServiceImplementation.instance;
+    _initializeControllers();
+    _initializeUserDataSource();
+    super.initState();
+  }
+
+  void _initializeControllers() {
     _userNameController = TextEditingController();
     _designationController = TextEditingController();
     _sapIdController = TextEditingController();
     _roomNoController = TextEditingController();
     _floorController = TextEditingController();
-    super.initState();
+    _searchInputController = TextEditingController();
+  }
+
+  void _initializeUserDataSource() {
+    _userDataSource = UserData(
+      context: context,
+      onEdit: (user) => _togglePanel(user: user),
+      filterParams: _filterParams,
+      rowsPerPage: _rowsPerPage,
+    );
+  }
+
+  void _refreshData() {
+    setState(() {
+      _userDataSource.updateFilterParams(_filterParams);
+      _userDataSource.refreshData();
+    });
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _filterParams = _filterParams.copyWith(search: query, page: 1);
+    });
+    _refreshData();
+  }
+
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => UserFilterDialog(
+        currentParams: _filterParams,
+        onApplyFilter: (params) {
+          setState(() {
+            _filterParams = params.copyWith(page: 1);
+          });
+          _refreshData();
+        },
+      ),
+    );
   }
 
   @override
@@ -49,6 +99,7 @@ class _UserScreenState extends State<UserScreen> {
     _sapIdController.dispose();
     _roomNoController.dispose();
     _floorController.dispose();
+    _searchInputController.dispose();
     super.dispose();
   }
 
@@ -95,6 +146,7 @@ class _UserScreenState extends State<UserScreen> {
     }
     _clearFields();
     _togglePanel();
+    _refreshData();
   }
 
   void _clearFields() {
@@ -138,6 +190,7 @@ class _UserScreenState extends State<UserScreen> {
                         Expanded(
                           flex: 9,
                           child: SearchBar(
+                            controller: _searchInputController,
                             padding:
                                 WidgetStateProperty.all<EdgeInsetsGeometry>(
                               const EdgeInsets.symmetric(horizontal: 16.0),
@@ -145,12 +198,13 @@ class _UserScreenState extends State<UserScreen> {
                             leading: Icon(Icons.search,
                                 color: AppColors.colorTextDark),
                             hintText:
-                                'Search for items by their ID, User Name or SAP ID',
+                                'Search for users by their User Name or SAP ID',
+                            onChanged: _onSearchChanged,
                           ),
                         ),
                         const SizedBox(width: 8.0),
                         AppButton(
-                          onPressed: () {},
+                          onPressed: _showFilterDialog,
                           icon: Icons.filter_list_rounded,
                           iconColor: AppColors.colorTextDark,
                           text: 'Sort & Filter',
@@ -173,9 +227,7 @@ class _UserScreenState extends State<UserScreen> {
                       DataColumn(label: Text('SAP ID')),
                       DataColumn(label: Text('Actions'))
                     ],
-                    source: UserData(
-                        context: context,
-                        onEdit: (user) => _togglePanel(user: user)),
+                    source: _userDataSource,
                   ),
                 ),
               ],
@@ -279,18 +331,67 @@ class _UserScreenState extends State<UserScreen> {
 
 class UserData extends DataTableSource {
   final UserService _userService = UserServiceImplementation.instance;
-  late final List<User> _users;
+  List<User> _users = [];
+  List<User> _filteredUsers = [];
   late final BuildContext _context;
   final void Function(User)? onEdit;
+  UserFilterParams _filterParams;
 
-  UserData({required BuildContext context, this.onEdit}) {
+  UserData({
+    required BuildContext context,
+    this.onEdit,
+    required UserFilterParams filterParams,
+    required int rowsPerPage,
+  }) : _filterParams = filterParams {
     _context = context;
+    refreshData();
+  }
+
+  void updateFilterParams(UserFilterParams params) {
+    _filterParams = params;
+  }
+
+  void refreshData() {
     _users = _userService.getAllUsers();
+    _applyFilters();
+    notifyListeners();
+  }
+
+  void _applyFilters() {
+    _filteredUsers = _users.where((user) {
+      if (_filterParams.search.isNotEmpty) {
+        final searchLower = _filterParams.search.toLowerCase();
+        final matchesSearch = user.userName
+                .toLowerCase()
+                .contains(searchLower) ||
+            (user.sapId?.toLowerCase().contains(searchLower) ?? false) ||
+            (user.designation?.toLowerCase().contains(searchLower) ?? false);
+        if (!matchesSearch) return false;
+      }
+      return true;
+    }).toList();
+    _filteredUsers.sort((a, b) {
+      int comparison = 0;
+      switch (_filterParams.sortBy) {
+        case 'userName':
+          comparison = a.userName.compareTo(b.userName);
+          break;
+        case 'designation':
+          comparison = (a.designation ?? '').compareTo(b.designation ?? '');
+          break;
+        case 'sapId':
+          comparison = (a.sapId ?? '').compareTo(b.sapId ?? '');
+          break;
+        default:
+          comparison = a.userName.compareTo(b.userName);
+      }
+      return _filterParams.sortOrder == 'DESC' ? -comparison : comparison;
+    });
   }
 
   @override
   DataRow getRow(int index) {
-    final user = _users[index];
+    final user = _filteredUsers[index];
     return DataRow.byIndex(
       index: index,
       cells: [
@@ -372,7 +473,7 @@ class UserData extends DataTableSource {
                   );
                   if (confirmDelete == true) {
                     _userService.deleteUser(user.id!);
-                    notifyListeners();
+                    refreshData();
                   }
                 })
           ],
@@ -382,7 +483,7 @@ class UserData extends DataTableSource {
   }
 
   @override
-  int get rowCount => _users.length;
+  int get rowCount => _filteredUsers.length;
 
   @override
   bool get isRowCountApproximate => false;
