@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/widget/placeholder/placeholder_widget.dart';
+import 'package:stockify_app_flutter/feature/notification/service/notification_service.dart';
+import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
 
 import 'common/shared-preference/shared_preference_service.dart';
 import 'common/theme/controller/theme_controller.dart';
@@ -8,10 +10,13 @@ import 'common/theme/controller/theme_controller.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final sharedPrefsService = SharedPrefsService();
+  final notificationStorageService = NotificationStorageService();
   await sharedPrefsService.init();
+  await NotificationService().init();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => ThemeController()),
-    ChangeNotifierProvider(create: (_) => sharedPrefsService)
+    ChangeNotifierProvider(create: (_) => sharedPrefsService),
+    ChangeNotifierProvider(create: (_) => notificationStorageService)
   ], child: const MyApp()));
 }
 
