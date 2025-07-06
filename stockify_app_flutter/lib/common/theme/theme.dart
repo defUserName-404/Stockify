@@ -45,6 +45,19 @@ class AppTheme {
         fontFamily: 'Brand-Bold',
         color: AppColors.colorTextDark,
         fontWeight: FontWeight.bold,
+        fontSize: 22,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: 'Brand-Bold',
+        color: AppColors.colorTextDark,
+        fontWeight: FontWeight.bold,
+        fontSize: 24,
+      ),
+      headlineLarge: TextStyle(
+        fontFamily: 'Brand-Bold',
+        color: AppColors.colorTextDark,
+        fontWeight: FontWeight.bold,
+        fontSize: 28,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -72,10 +85,19 @@ class AppTheme {
         borderRadius: BorderRadius.all(Radius.circular(4.0)),
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.colorAccent,
+        backgroundColor: AppColors.colorPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4.0),
+        ),
+      ),
+    ),
     listTileTheme: ListTileThemeData(
       iconColor: AppColors.colorTextDark,
+      titleTextStyle: TextStyle(color: AppColors.colorTextDark, fontSize: 20),
       textColor: AppColors.colorTextDark,
-      titleAlignment: ListTileTitleAlignment.top,
     ),
     switchTheme: const SwitchThemeData(
       thumbColor: WidgetStatePropertyAll<Color>(AppColors.colorAccent),
@@ -131,8 +153,21 @@ class AppTheme {
       titleMedium: TextStyle(color: AppColors.colorTextLight),
       headlineMedium: TextStyle(
         fontFamily: 'Brand-Bold',
-        color: AppColors.colorTextSemiLight,
+        color: AppColors.colorTextLight,
         fontWeight: FontWeight.bold,
+        fontSize: 22,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: 'Brand-Bold',
+        color: AppColors.colorTextLight,
+        fontWeight: FontWeight.bold,
+        fontSize: 24,
+      ),
+      headlineLarge: TextStyle(
+        fontFamily: 'Brand-Bold',
+        color: AppColors.colorTextLight,
+        fontWeight: FontWeight.bold,
+        fontSize: 28,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -163,9 +198,19 @@ class AppTheme {
         borderRadius: BorderRadius.all(Radius.circular(4.0)),
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.colorAccent,
+        backgroundColor: AppColors.colorPrimaryDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4.0),
+        ),
+      ),
+    ),
     listTileTheme: const ListTileThemeData(
       iconColor: AppColors.colorTextLight,
       textColor: AppColors.colorTextLight,
+      titleTextStyle: TextStyle(color: AppColors.colorTextDark, fontSize: 20),
     ),
     switchTheme: const SwitchThemeData(
       thumbColor: WidgetStatePropertyAll(AppColors.colorAccent),
