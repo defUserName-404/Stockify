@@ -11,6 +11,9 @@ import 'package:stockify_app_flutter/feature/item/model/item.dart';
 import 'package:stockify_app_flutter/feature/item/model/item_filter_param.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
+import 'package:stockify_app_flutter/feature/notification/model/app_notification.dart';
+import 'package:stockify_app_flutter/feature/notification/service/notification_service.dart';
+import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
 import 'package:stockify_app_flutter/feature/user/model/user.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
@@ -34,7 +37,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _userService = UserServiceImplementation.instance;
     _items = _itemService.getAllItems();
     _users = _userService.getAllUsers();
+    _scheduleWarrantyNotifications();
     super.initState();
+  }
+
+  void _scheduleWarrantyNotifications() async {
+    final expiringItems = _getExpiringItems();
+    final existingNotifications =
+        await NotificationStorageService().getNotifications();
+    for (var item in expiringItems) {
+      if (!existingNotifications.any((n) => n.id == item.id)) {
+        final notificationTitle = 'Warranty Expiring Soon!';
+        final notificationBody =
+            'The warranty for ${item.assetNo} (${item.modelNo}) is expiring on ${item.warrantyDate.toLocal().toString().split(' ')[0]}.';
+        final notificationPayload = 'item_id_${item.id}';
+        NotificationService().showNotification(
+          id: item.id!,
+          title: notificationTitle,
+          body: notificationBody,
+          payload: notificationPayload,
+        );
+        NotificationStorageService().addNotification(
+          AppNotification(
+            id: item.id!,
+            title: notificationTitle,
+            body: notificationBody,
+            timestamp: DateTime.now(),
+            payload: notificationPayload,
+          ),
+        );
+      }
+    }
   }
 
   @override
