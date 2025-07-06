@@ -20,10 +20,12 @@ class SettingsScreen extends StatelessWidget {
         titleSpacing: 0,
       ),
       body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 20.0),
         children: [
           ListTile(
             leading: const Icon(Icons.dark_mode),
             title: const Text('Dark Mode'),
+            subtitle: const Text('Toggle dark mode'),
             trailing: Switch(
               value: sharedPrefs.isDarkMode,
               onChanged: (isDarkMode) {
@@ -35,23 +37,91 @@ class SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.upload_file),
-            title: const Text('Import Data (CSV)'),
-            onTap: () => dataService.importItemsFromCsv(context),
+            title: const Text('Import Data'),
+            subtitle: Text(
+                'This will not overwrite existing data. Select the file format you want to import.'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  child: const Text('CSV'),
+                  onPressed: () async {
+                    await dataService.importItemsFromCsv();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Items imported successfully!')),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: const Text('Excel'),
+                  onPressed: () async {
+                    await dataService.importItemsFromExcel();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                              Text('Items imported successfully from Excel!')),
+                    );
+                  },
+                ),
+              ],
+            ),
+            onTap: () async {
+              try {
+                await dataService.importItemsFromCsv();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Items imported successfully!')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error importing CSV: $e')),
+                );
+              }
+            },
           ),
           ListTile(
             leading: const Icon(Icons.download_for_offline),
-            title: const Text('Export Data (CSV)'),
-            onTap: () => dataService.exportItemsToCsv(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.upload_file),
-            title: const Text('Import Data (Excel)'),
-            onTap: () => dataService.importItemsFromExcel(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.download_for_offline),
-            title: const Text('Export Data (Excel)'),
-            onTap: () => dataService.exportItemsToExcel(context),
+            title: const Text('Export Data'),
+            subtitle: Text('Select the file format you want to export.'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  child: const Text('CSV'),
+                  onPressed: () async {
+                    await dataService.exportItemsToCsv();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Items exported successfully to CSV!')),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: const Text('Excel'),
+                  onPressed: () async {
+                    await dataService.exportItemsToExcel();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                              Text('Items exported successfully to Excel!')),
+                    );
+                  },
+                ),
+              ],
+            ),
+            onTap: () async {
+              try {
+                await dataService.exportItemsToCsv();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Items exported successfully to CSV!')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error exporting CSV: $e')),
+                );
+              }
+            },
           ),
         ],
       ),

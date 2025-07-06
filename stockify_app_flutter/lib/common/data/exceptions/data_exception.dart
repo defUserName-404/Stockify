@@ -1,29 +1,20 @@
-sealed class DataException implements Exception {
+class DataExportException implements Exception {
   final String message;
-
-  DataException(this.message);
+  DataExportException(this.message);
+  @override
+  String toString() => 'DataExportException: $message';
 }
 
-final class DataNotFoundException extends DataException {
-  DataNotFoundException(String message) : super(message);
+class DataImportException implements Exception {
+  final String message;
+  DataImportException(this.message);
+  @override
+  String toString() => 'DataImportException: $message';
 }
 
-final class DataConflictException extends DataException {
-  DataConflictException(String message) : super(message);
-}
-
-final class DataExportException extends DataException {
-  DataExportException(String message) : super(message);
-}
-
-final class DataImportException extends DataException {
-  DataImportException(String message) : super(message);
-}
-
-final class DataParseException extends DataException {
-  DataParseException(String message) : super(message);
-}
-
-final class DataValidationException extends DataException {
-  DataValidationException(String message) : super(message);
+class DataCancelledException implements Exception {
+  final String message;
+  DataCancelledException(this.message);
+  @override
+  String toString() => 'DataCancelledException: $message';
 }

@@ -45,6 +45,19 @@ class AppTheme {
         fontFamily: 'Brand-Bold',
         color: AppColors.colorTextDark,
         fontWeight: FontWeight.bold,
+        fontSize: 22,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: 'Brand-Bold',
+        color: AppColors.colorTextDark,
+        fontWeight: FontWeight.bold,
+        fontSize: 24,
+      ),
+      headlineLarge: TextStyle(
+        fontFamily: 'Brand-Bold',
+        color: AppColors.colorTextDark,
+        fontWeight: FontWeight.bold,
+        fontSize: 28,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -74,8 +87,8 @@ class AppTheme {
     ),
     listTileTheme: ListTileThemeData(
       iconColor: AppColors.colorTextDark,
+      titleTextStyle: TextStyle(color: AppColors.colorTextDark, fontSize: 20),
       textColor: AppColors.colorTextDark,
-      titleAlignment: ListTileTitleAlignment.top,
     ),
     switchTheme: const SwitchThemeData(
       thumbColor: WidgetStatePropertyAll<Color>(AppColors.colorAccent),
@@ -131,8 +144,21 @@ class AppTheme {
       titleMedium: TextStyle(color: AppColors.colorTextLight),
       headlineMedium: TextStyle(
         fontFamily: 'Brand-Bold',
-        color: AppColors.colorTextSemiLight,
+        color: AppColors.colorTextLight,
         fontWeight: FontWeight.bold,
+        fontSize: 22,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: 'Brand-Bold',
+        color: AppColors.colorTextLight,
+        fontWeight: FontWeight.bold,
+        fontSize: 24,
+      ),
+      headlineLarge: TextStyle(
+        fontFamily: 'Brand-Bold',
+        color: AppColors.colorTextLight,
+        fontWeight: FontWeight.bold,
+        fontSize: 28,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -166,6 +192,7 @@ class AppTheme {
     listTileTheme: const ListTileThemeData(
       iconColor: AppColors.colorTextLight,
       textColor: AppColors.colorTextLight,
+      titleTextStyle: TextStyle(color: AppColors.colorTextDark, fontSize: 20),
     ),
     switchTheme: const SwitchThemeData(
       thumbColor: WidgetStatePropertyAll(AppColors.colorAccent),

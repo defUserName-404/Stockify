@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
@@ -21,11 +20,11 @@ class DataService {
 
   DataService._();
 
-  static final _instance = DataService._();
+  static final DataService _instance = DataService._();
 
   static DataService get instance => _instance;
 
-  Future<void> exportItemsToCsv(BuildContext context) async {
+  Future<void> exportItemsToCsv() async {
     try {
       List<Item> items = _itemService.getAllItems();
       List<List<dynamic>> csvData = [];
@@ -83,22 +82,15 @@ class DataService {
       if (outputFile != null) {
         final file = File(outputFile);
         await file.writeAsString(csv);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Items exported successfully to $outputFile')),
-        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export cancelled')),
-        );
+        throw DataCancelledException('Export cancelled');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error exporting items: $e')),
-      );
+      throw DataExportException('Error exporting items: $e');
     }
   }
 
-  Future<void> importItemsFromCsv(BuildContext context) async {
+  Future<void> importItemsFromCsv() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -110,14 +102,10 @@ class DataService {
         List<List<dynamic>> csvList =
             const CsvToListConverter().convert(csvString);
         if (csvList.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('CSV file is empty')),
-          );
-          return;
+          throw DataImportException('CSV file is empty');
         }
         List<dynamic> header = csvList[0];
         List<List<dynamic>> data = csvList.sublist(1);
-        int importedCount = 0;
         for (var row in data) {
           try {
             Map<String, dynamic> itemMap = {};
@@ -165,27 +153,20 @@ class DataService {
               assignedTo: assignedTo,
             );
             _itemService.addItem(item);
-            importedCount++;
           } catch (e) {
             throw DataImportException('Error processing row: $row, Error: $e');
           }
         }
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text('Successfully imported $importedCount items')),
-        // );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import cancelled')),
-        );
+        throw DataCancelledException('Import cancelled');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error importing items: $e')),
-      );
+      if (e is DataCancelledException) rethrow;
+      throw DataImportException('Error importing items: $e');
     }
   }
 
-  Future<void> exportItemsToExcel(BuildContext context) async {
+  Future<void> exportItemsToExcel() async {
     try {
       List<Item> items = _itemService.getAllItems();
       var excel = Excel.createExcel();
@@ -248,28 +229,19 @@ class DataService {
         List<int>? excelBytes = excel.encode();
         if (excelBytes != null) {
           await file.writeAsBytes(excelBytes);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Items exported successfully to $outputFile')),
-          );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to encode Excel file')),
-          );
+          throw DataExportException('Failed to encode Excel file');
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export cancelled')),
-        );
+        throw DataCancelledException('Export cancelled');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error exporting items: $e')),
-      );
+      if (e is DataCancelledException) rethrow;
+      throw DataExportException('Error exporting items: $e');
     }
   }
 
-  Future<void> importItemsFromExcel(BuildContext context) async {
+  Future<void> importItemsFromExcel() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -279,7 +251,6 @@ class DataService {
         File file = File(result.files.single.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
-        int importedCount = 0;
         for (var table in excel.tables.keys) {
           var sheet = excel.tables[table];
           if (sheet == null || sheet.rows.isEmpty) continue;
@@ -333,27 +304,18 @@ class DataService {
                 assignedTo: assignedTo,
               );
               _itemService.addItem(item);
-              importedCount++;
             } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Error processing row: $row, Error: $e')),
-              );
+              throw DataImportException(
+                  'Error processing row: $row, Error: $e');
             }
           }
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Successfully imported $importedCount items')),
-        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import cancelled')),
-        );
+        throw DataCancelledException('Import cancelled');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error importing items: $e')),
-      );
+      if (e is DataCancelledException) rethrow;
+      throw DataImportException('Error importing items: $e');
     }
   }
 }
