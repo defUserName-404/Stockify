@@ -38,90 +38,94 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.upload_file),
             title: const Text('Import Data'),
-            subtitle: Text(
-                'This will not overwrite existing data. Select the file format you want to import.'),
+            subtitle: const Text(
+                'Select the file format of your imported data. Please note that this will not overwrite any existing data.'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextButton(
                   child: const Text('CSV'),
                   onPressed: () async {
-                    await dataService.importItemsFromCsv();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Items imported successfully!')),
-                    );
+                    try {
+                      await dataService.importItemsFromCsv();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text('Items imported successfully from CSV!')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error importing CSV: $e')),
+                      );
+                    }
                   },
                 ),
+                const SizedBox(width: 16),
                 TextButton(
                   child: const Text('Excel'),
                   onPressed: () async {
-                    await dataService.importItemsFromExcel();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content:
-                              Text('Items imported successfully from Excel!')),
-                    );
+                    try {
+                      await dataService.importItemsFromExcel();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'Items imported successfully from Excel!')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error importing Excel: $e')),
+                      );
+                    }
                   },
                 ),
               ],
             ),
-            onTap: () async {
-              try {
-                await dataService.importItemsFromCsv();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Items imported successfully!')),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error importing CSV: $e')),
-                );
-              }
-            },
           ),
           ListTile(
             leading: const Icon(Icons.download_for_offline),
             title: const Text('Export Data'),
-            subtitle: Text('Select the file format you want to export.'),
+            subtitle:
+                const Text('Select the file format of your exported data.'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextButton(
                   child: const Text('CSV'),
                   onPressed: () async {
-                    await dataService.exportItemsToCsv();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Items exported successfully to CSV!')),
-                    );
+                    try {
+                      await dataService.exportItemsToCsv();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text('Items exported successfully to CSV!')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error exporting CSV: $e')),
+                      );
+                    }
                   },
                 ),
+                const SizedBox(width: 16),
                 TextButton(
                   child: const Text('Excel'),
                   onPressed: () async {
-                    await dataService.exportItemsToExcel();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content:
-                              Text('Items exported successfully to Excel!')),
-                    );
+                    try {
+                      await dataService.exportItemsToExcel();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text('Items exported successfully to Excel!')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error exporting Excel: $e')),
+                      );
+                    }
                   },
                 ),
               ],
             ),
-            onTap: () async {
-              try {
-                await dataService.exportItemsToCsv();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Items exported successfully to CSV!')),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error exporting CSV: $e')),
-                );
-              }
-            },
           ),
         ],
       ),

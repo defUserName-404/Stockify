@@ -85,6 +85,15 @@ class AppTheme {
         borderRadius: BorderRadius.all(Radius.circular(4.0)),
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.colorAccent,
+        backgroundColor: AppColors.colorPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4.0),
+        ),
+      ),
+    ),
     listTileTheme: ListTileThemeData(
       iconColor: AppColors.colorTextDark,
       titleTextStyle: TextStyle(color: AppColors.colorTextDark, fontSize: 20),
@@ -187,6 +196,15 @@ class AppTheme {
       textTheme: ButtonTextTheme.primary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(4.0)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.colorAccent,
+        backgroundColor: AppColors.colorPrimaryDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4.0),
+        ),
       ),
     ),
     listTileTheme: const ListTileThemeData(
