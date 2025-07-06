@@ -21,7 +21,9 @@ import '../widget/item_details_text.dart';
 import '../widget/item_filter_dialog.dart';
 
 class ItemScreen extends StatefulWidget {
-  ItemScreen({super.key});
+  final ItemFilterParams? filterParams;
+
+  ItemScreen({super.key, this.filterParams});
 
   @override
   State<ItemScreen> createState() => _ItemScreenState();
@@ -59,6 +61,7 @@ class _ItemScreenState extends State<ItemScreen> {
   void initState() {
     _itemService = ItemServiceImplementation.instance;
     _userService = UserServiceImplementation.instance;
+    _filterParams = widget.filterParams ?? ItemFilterParams();
     _initializeControllers();
     _initializeItemDataSource();
     _fetchUsers();
@@ -718,6 +721,12 @@ class ItemData extends DataTableSource {
       if (_filterParams.assetStatus != null &&
           item.assetStatus != _filterParams.assetStatus) {
         return false;
+      }
+      if (_filterParams.isExpiring) {
+        final now = DateTime.now();
+        final isExpiring = item.warrantyDate.isAfter(now) &&
+            item.warrantyDate.difference(now).inDays <= 30;
+        if (!isExpiring) return false;
       }
       return true;
     }).toList();

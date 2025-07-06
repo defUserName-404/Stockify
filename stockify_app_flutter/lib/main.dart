@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Stockify',
       theme: themeProvider.themeData,
-      home: const AppPlaceholder(),
+      home: AppPlaceholder(key: AppPlaceholder.navigatorKey),
       debugShowCheckedModeBanner: false,
     );
   }

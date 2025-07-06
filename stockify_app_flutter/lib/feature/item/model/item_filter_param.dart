@@ -7,6 +7,7 @@ class ItemFilterParams {
   final String sortOrder;
   final DeviceType? deviceType;
   final AssetStatus? assetStatus;
+  final bool isExpiring;
   final int page;
 
   ItemFilterParams({
@@ -15,6 +16,7 @@ class ItemFilterParams {
     this.sortOrder = 'ASC',
     this.deviceType,
     this.assetStatus,
+    this.isExpiring = false,
     this.page = 1,
   });
 
@@ -54,6 +56,7 @@ class ItemFilterParams {
           sortOrder == other.sortOrder &&
           deviceType == other.deviceType &&
           assetStatus == other.assetStatus &&
+          isExpiring == other.isExpiring &&
           page == other.page;
 
   @override
@@ -63,6 +66,7 @@ class ItemFilterParams {
       sortOrder.hashCode ^
       deviceType.hashCode ^
       assetStatus.hashCode ^
+      isExpiring.hashCode ^
       page.hashCode;
 }
 
