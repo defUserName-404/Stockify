@@ -127,20 +127,19 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
   }
 
   Widget _getSelectedScreen(int index) {
+    if (index != 1) {
+      _currentFilterParams = null;
+    }
     switch (index) {
       case 0:
-        _currentFilterParams = null;
         return const DashboardScreen();
       case 1:
         return ItemScreen(filterParams: _currentFilterParams);
       case 2:
-        _currentFilterParams = null;
         return UserScreen();
       case 3:
-        _currentFilterParams = null;
         return const NotificationScreen();
       case 4:
-        _currentFilterParams = null;
         return const SettingsScreen();
       default:
         return const Center(child: Text("Page not found"));

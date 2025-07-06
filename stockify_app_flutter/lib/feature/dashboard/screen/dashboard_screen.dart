@@ -133,27 +133,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           const Text(
             'Items by Device Type',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 16),
           Expanded(
             child: PieChart(
               PieChartData(
-                pieTouchData: PieTouchData(
-                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                    if (!event.isInterestedForInteractions ||
-                        pieTouchResponse == null ||
-                        pieTouchResponse.touchedSection == null) {
-                      return;
-                    }
-                    final deviceType = deviceTypeCounts.keys.elementAt(
-                        pieTouchResponse.touchedSection!.touchedSectionIndex);
-                    AppPlaceholder.navigatorKey.currentState
-                        ?.updateSelectedScreen(1,
-                            itemFilterParams:
-                                ItemFilterParams(deviceType: deviceType));
-                  },
-                ),
                 sections: deviceTypeCounts.entries.map((entry) {
                   return PieChartSectionData(
                     color: _getDeviceTypeColor(entry.key),
@@ -177,9 +164,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             spacing: 16,
             runSpacing: 8,
             children: deviceTypeCounts.keys.map((type) {
-              return ChartLegend(
-                title: type.name,
-                color: _getDeviceTypeColor(type),
+              return InkWell(
+                onTap: () {
+                  _navigateToItems(ItemFilterParams(deviceType: type));
+                },
+                child: ChartLegend(
+                  title: type.name,
+                  color: _getDeviceTypeColor(type),
+                ),
               );
             }).toList(),
           ),
@@ -195,27 +187,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           const Text(
             'Items by Asset Status',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 16),
           Expanded(
             child: BarChart(
               BarChartData(
-                barTouchData: BarTouchData(
-                  touchCallback: (FlTouchEvent event, barTouchResponse) {
-                    if (!event.isInterestedForInteractions ||
-                        barTouchResponse == null ||
-                        barTouchResponse.spot == null) {
-                      return;
-                    }
-                    final assetStatus = assetStatusCounts.keys
-                        .elementAt(barTouchResponse.spot!.touchedBarGroupIndex);
-                    AppPlaceholder.navigatorKey.currentState
-                        ?.updateSelectedScreen(1,
-                            itemFilterParams:
-                                ItemFilterParams(assetStatus: assetStatus));
-                  },
-                ),
                 barGroups: assetStatusCounts.entries.map((entry) {
                   return BarChartGroupData(
                     x: entry.key.index,
@@ -234,9 +213,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
-                        return Text(
-                          AssetStatus.values[value.toInt()].name,
-                          style: const TextStyle(fontSize: 12),
+                        return InkWell(
+                          onTap: () {
+                            _navigateToItems(ItemFilterParams().copyWith(
+                                assetStatus:
+                                    AssetStatus.values[value.toInt()]));
+                          },
+                          child: Text(
+                            AssetStatus.values[value.toInt()].name,
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         );
                       },
                     ),
@@ -251,6 +237,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     );
+  }
+
+  void _navigateToItems(ItemFilterParams filterParams) {
+    AppPlaceholder.navigatorKey.currentState
+        ?.updateSelectedScreen(1, itemFilterParams: filterParams);
   }
 
   List<Item> _getExpiringItems() {

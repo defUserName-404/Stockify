@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/feature/dashboard/widget/dashboard_card.dart';
 
-class InfoCard extends StatefulWidget {
+class InfoCard extends StatelessWidget {
   final String title;
   final String value;
   final IconData icon;
@@ -16,38 +16,52 @@ class InfoCard extends StatefulWidget {
   });
 
   @override
-  State<InfoCard> createState() => _InfoCardState();
-}
-
-class _InfoCardState extends State<InfoCard> {
-  bool _isHovered = false;
-
-  @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: DashboardCard(
-        elevation: _isHovered ? 8 : 2,
-        child: Row(
-          children: [
-            Icon(widget.icon, size: 40, color: widget.color),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  widget.value,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ],
+    return DashboardCard(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color.withAlpha(90), color],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(80),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 50, color: Colors.white),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
