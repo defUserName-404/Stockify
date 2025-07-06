@@ -1,0 +1,6 @@
+ID,AssetNo,ModelNo,DeviceType,SerialNo,ReceivedDate,WarrantyDate,AssetStatus,HostName,IpPort,MacAddress,OsVersion,FacePlateName,SwitchPort,SwitchIpAddress,IsPasswordProtected,AssignedToID,AssignedToUserName
+6,abcd,agbwe,UPS,ag3ew,null,2025-06-19T00:00:00.000,Disposed,null,null,null,null,null,null,null,0,null,null
+7,bac,agw,CPU,agh4er,null,2025-06-27T00:00:00.000,Active,null,null,null,null,null,null,null,0,null,null
+8,this is a new item,new item model,Camera,new item serial no,null,2025-07-15T00:00:00.000,Active,null,null,null,null,null,null,null,0,null,null
+9,another item,JHFG,Monitor,1fa,null,2025-11-28T00:00:00.000,Inactive,null,null,null,null,null,null,null,0,null,null
+10,mmz2312,ag232,CPU,a23,null,2028-07-07T00:00:00.000,Active,null,null,null,null,null,null,null,0,null,null
