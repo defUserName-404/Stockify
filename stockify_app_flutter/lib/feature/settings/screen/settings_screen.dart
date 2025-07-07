@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/feature/settings/screen/shortcut_list_screen.dart';
 
 import '../../../common/data/service/data_service.dart';
 import '../../../common/shared-preference/shared_preference_service.dart';
@@ -34,6 +35,19 @@ class SettingsScreen extends StatelessWidget {
                     .setThemeData(isDarkMode ? AppTheme.dark : AppTheme.light);
               },
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.keyboard_sharp),
+            title: const Text('Keyboard Shortcuts'),
+            subtitle: const Text('View all available keyboard shortcuts'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ShortcutListScreen(),
+                ),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.upload_file),
