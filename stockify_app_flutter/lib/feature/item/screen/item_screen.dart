@@ -333,6 +333,7 @@ class _ItemScreenState extends State<ItemScreen> {
                           child: PaginatedDataTable(
                             headingRowColor: WidgetStateProperty.all<Color>(
                                 AppColors.colorAccent.withValues(alpha: 0.25)),
+                            showEmptyRows: false,
                             actions: [
                               AppButton(
                                   onPressed: _togglePanel,
@@ -716,6 +717,7 @@ class ItemData extends DataTableSource {
   late final BuildContext _context;
   final void Function(Item)? onEdit;
   ItemFilterParams _filterParams;
+  int? _hoveredRowIndex;
 
   ItemData({
     required BuildContext context,
@@ -798,17 +800,139 @@ class ItemData extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final item = _filteredItems[index];
+    final isHovered = _hoveredRowIndex == index;
     return DataRow.byIndex(
       index: index,
+      color: WidgetStateProperty.all<Color?>(
+        isHovered ? AppColors.colorAccent.withValues(alpha: 0.04) : null,
+      ),
       cells: [
-        DataCell(Text(item.id.toString())),
-        DataCell(Text(item.assetNo)),
-        DataCell(Text(item.modelNo)),
-        DataCell(Text(item.serialNo)),
-        DataCell(Text(item.deviceType.name)),
         DataCell(
-            Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
-        DataCell(ItemStatus(assetStatus: item.assetStatus)),
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(item.id.toString()),
+            ),
+          ),
+        ),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(item.assetNo),
+            ),
+          ),
+        ),
+        // DataCell(Text(item.modelNo)),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(item.modelNo),
+            ),
+          ),
+        ),
+        // DataCell(Text(item.serialNo)),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(item.serialNo),
+            ),
+          ),
+        ),
+        // DataCell(Text(item.deviceType.name)),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(item.deviceType.name),
+            ),
+          ),
+        ),
+        // DataCell(
+        //     Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                  DateFormatter.extractDateFromDateTime(item.warrantyDate)),
+            ),
+          ),
+        ),
+        // DataCell(ItemStatus(assetStatus: item.assetStatus)),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: ItemStatus(assetStatus: item.assetStatus),
+            ),
+          ),
+        ),
         DataCell(Row(
           children: [
             ActionWidget(

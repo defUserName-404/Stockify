@@ -196,6 +196,8 @@ class _UserScreenState extends State<UserScreen> {
                         child: PaginatedDataTable(
                           headingRowColor: WidgetStateProperty.all<Color>(
                               AppColors.colorAccent.withValues(alpha: 0.25)),
+                          showEmptyRows: false,
+                          source: _userDataSource,
                           actions: [
                             AppButton(
                                 onPressed: _togglePanel,
@@ -362,6 +364,7 @@ class UserData extends DataTableSource {
   late final BuildContext _context;
   final void Function(User)? onEdit;
   UserFilterParams _filterParams;
+  int? _hoveredRowIndex;
 
   UserData({
     required BuildContext context,
@@ -418,92 +421,164 @@ class UserData extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final user = _filteredUsers[index];
+    final isHovered = _hoveredRowIndex == index;
     return DataRow.byIndex(
       index: index,
+      color: WidgetStateProperty.all<Color?>(
+        isHovered ? AppColors.colorAccent.withValues(alpha: 0.04) : null,
+      ),
       cells: [
-        DataCell(Text(user.id.toString())),
-        DataCell(Text(user.userName)),
-        DataCell(Text(user.designation ?? '')),
-        DataCell(Text(user.sapId ?? '')),
-        DataCell(Row(
-          children: [
-            ActionWidget(
-                icon: Icons.remove_red_eye_rounded,
-                onTap: () {
-                  showDialog(
-                    context: _context,
-                    builder: (_) => AlertDialog(
-                      title: Text('Item Details'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ItemDetailsText(
-                              label: 'User Name', itemText: '${user.userName}'),
-                          if (user.designation != null)
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(user.id.toString()),
+            ),
+          ),
+        ),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(user.userName),
+            ),
+          ),
+        ),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(user.designation ?? ''),
+            ),
+          ),
+        ),
+        DataCell(
+          MouseRegion(
+            onEnter: (_) {
+              _hoveredRowIndex = index;
+              notifyListeners();
+            },
+            onExit: (_) {
+              _hoveredRowIndex = null;
+              notifyListeners();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(user.sapId ?? ''),
+            ),
+          ),
+        ),
+        DataCell(
+          Row(
+            children: [
+              ActionWidget(
+                  icon: Icons.remove_red_eye_rounded,
+                  onTap: () {
+                    showDialog(
+                      context: _context,
+                      builder: (_) => AlertDialog(
+                        title: Text('Item Details'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             ItemDetailsText(
-                                label: 'Designation',
-                                itemText: '${user.designation}'),
-                          if (user.sapId != null)
-                            ItemDetailsText(
-                                label: 'SAP ID', itemText: '${user.sapId}'),
-                          if (user.ipPhone != null)
-                            ItemDetailsText(
-                                label: 'IP Phone',
-                                itemText: '${user.ipPhone!}'),
-                          if (user.roomNo != null)
-                            ItemDetailsText(
-                                label: 'Room No', itemText: '${user.roomNo!}'),
-                          if (user.floor != null)
-                            ItemDetailsText(
-                                label: 'Floor No', itemText: '${user.floor}'),
+                                label: 'User Name',
+                                itemText: '${user.userName}'),
+                            if (user.designation != null)
+                              ItemDetailsText(
+                                  label: 'Designation',
+                                  itemText: '${user.designation}'),
+                            if (user.sapId != null)
+                              ItemDetailsText(
+                                  label: 'SAP ID', itemText: '${user.sapId}'),
+                            if (user.ipPhone != null)
+                              ItemDetailsText(
+                                  label: 'IP Phone',
+                                  itemText: '${user.ipPhone!}'),
+                            if (user.roomNo != null)
+                              ItemDetailsText(
+                                  label: 'Room No',
+                                  itemText: '${user.roomNo!}'),
+                            if (user.floor != null)
+                              ItemDetailsText(
+                                  label: 'Floor No', itemText: '${user.floor}'),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            child: const Text('Close'),
+                            onPressed: () => Navigator.of(_context).pop(),
+                          ),
                         ],
                       ),
-                      actions: [
-                        TextButton(
-                          child: const Text('Close'),
-                          onPressed: () => Navigator.of(_context).pop(),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-            const SizedBox(width: 10.0),
-            ActionWidget(
-                icon: Icons.edit,
-                onTap: () {
-                  onEdit!(user);
-                }),
-            const SizedBox(width: 10.0),
-            ActionWidget(
-                icon: Icons.delete,
-                onTap: () async {
-                  final confirmDelete = await showDialog<bool>(
-                    context: _context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Confirm Deletion'),
-                      content: const Text(
-                          'Are you sure you want to delete this user?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Yes',
-                              style: TextStyle(color: AppColors.colorPink)),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmDelete == true) {
-                    _userService.deleteUser(user.id!);
-                    refreshData();
-                  }
-                })
-          ],
-        ))
+                    );
+                  }),
+              const SizedBox(width: 10.0),
+              ActionWidget(
+                  icon: Icons.edit,
+                  onTap: () {
+                    onEdit!(user);
+                  }),
+              const SizedBox(width: 10.0),
+              ActionWidget(
+                  icon: Icons.delete,
+                  onTap: () async {
+                    final confirmDelete = await showDialog<bool>(
+                      context: _context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Confirm Deletion'),
+                        content: const Text(
+                            'Are you sure you want to delete this user?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Yes',
+                                style: TextStyle(color: AppColors.colorPink)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmDelete == true) {
+                      _userService.deleteUser(user.id!);
+                      refreshData();
+                    }
+                  })
+            ],
+          ),
+        )
       ],
     );
   }

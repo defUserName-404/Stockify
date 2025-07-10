@@ -24,6 +24,7 @@ class ItemStatus extends StatelessWidget {
       ),
       child: Text(
         assetStatus.name,
+        textAlign: TextAlign.center,
         style: const TextStyle(color: Colors.white),
       ),
     );
