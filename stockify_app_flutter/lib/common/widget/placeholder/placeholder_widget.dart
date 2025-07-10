@@ -73,7 +73,8 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
             onInvoke: (intent) => intent.callback(),
           ),
         },
-        child: Focus(
+        child: FocusScope(
+          autofocus: true,
           child: Scaffold(
             body: Row(
               children: <Widget>[
