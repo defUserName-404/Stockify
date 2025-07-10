@@ -74,7 +74,6 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
           ),
         },
         child: Focus(
-          autofocus: true,
           child: Scaffold(
             body: Row(
               children: <Widget>[

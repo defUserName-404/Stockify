@@ -77,13 +77,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Dashboard'),
         titleSpacing: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildInfoCards(),
-            const SizedBox(height: 16),
-            _buildCharts(),
-          ],
+      body: Focus(
+        autofocus: true,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildInfoCards(),
+              const SizedBox(height: 16),
+              _buildCharts(),
+            ],
+          ),
         ),
       ),
     );
