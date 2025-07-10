@@ -249,7 +249,6 @@ class _UserScreenState extends State<UserScreen> {
                             DataColumn(label: Text('SAP ID')),
                             DataColumn(label: Text('Actions'))
                           ],
-                          source: _userDataSource,
                         ),
                       ),
                     ],
