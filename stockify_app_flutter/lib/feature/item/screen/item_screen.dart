@@ -39,6 +39,7 @@ class _ItemScreenState extends State<ItemScreen> {
   late ItemData _itemDataSource;
   ItemFilterParams _filterParams = ItemFilterParams();
   final FocusNode _searchFocusNode = FocusNode();
+  int _hoveredRowIndex = -1;
 
   late final TextEditingController _assetInputController,
       _modelInputController,
@@ -98,11 +99,18 @@ class _ItemScreenState extends State<ItemScreen> {
 
   void _initializeItemDataSource() {
     _itemDataSource = ItemData(
-      context: context,
-      onEdit: (item) => _togglePanel(item: item),
-      filterParams: _filterParams,
-      rowsPerPage: _rowsPerPage,
-    );
+        context: context,
+        onEdit: (item) => _togglePanel(item: item),
+        filterParams: _filterParams,
+        rowsPerPage: _rowsPerPage,
+        onView: (item) => _showViewDetailsDialog(item),
+        onDelete: (item) => _showDeleteConfirmationDialog(item),
+        getHoveredRowIndex: () => _hoveredRowIndex,
+        setHoveredRowIndex: (index) {
+          setState(() {
+            _hoveredRowIndex = index;
+          });
+        });
   }
 
   void _refreshData() {
@@ -259,6 +267,92 @@ class _ItemScreenState extends State<ItemScreen> {
     _assignedUser = null;
   }
 
+  void _showViewDetailsDialog(Item item) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Item Details'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ItemDetailsText(label: 'Asset No', itemText: '${item.assetNo}'),
+            ItemDetailsText(label: 'Model No', itemText: '${item.modelNo}'),
+            ItemDetailsText(label: 'Serial No', itemText: '${item.serialNo}'),
+            ItemDetailsText(
+                label: 'Device Type', itemText: '${item.deviceType.name}'),
+            if (item.receivedDate != null)
+              ItemDetailsText(
+                  label: 'Received Date',
+                  itemText:
+                      '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
+            ItemDetailsText(
+                label: 'Warranty Date',
+                itemText:
+                    '${DateFormatter.extractDateFromDateTime(item.warrantyDate)}'),
+            ItemDetailsText(
+                label: 'Status', itemText: '${item.assetStatus.name}'),
+            if (item.hostName != null)
+              ItemDetailsText(label: 'Host Name', itemText: '${item.hostName}'),
+            if (item.ipPort != null)
+              ItemDetailsText(label: 'IP Address', itemText: '${item.ipPort}'),
+            if (item.macAddress != null)
+              ItemDetailsText(
+                  label: 'MAC Address', itemText: '${item.macAddress}'),
+            if (item.osVersion != null)
+              ItemDetailsText(
+                  label: 'OS Version', itemText: '${item.osVersion}'),
+            if (item.facePlateName != null)
+              ItemDetailsText(
+                  label: 'Face Plate Name', itemText: '${item.facePlateName}'),
+            if (item.switchPort != null)
+              ItemDetailsText(
+                  label: 'Switch Port', itemText: '${item.switchPort}'),
+            if (item.switchIpAddress != null)
+              ItemDetailsText(
+                  label: 'Switch IP Address',
+                  itemText: '${item.switchIpAddress}'),
+            if (item.assignedTo != null)
+              ItemDetailsText(
+                  label: 'Assigned User',
+                  itemText: '${item.assignedTo!.userName}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Close'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(Item item) async {
+    final confirmDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Deletion'),
+        content: const Text('Are you sure you want to delete this item?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child:
+                const Text('Yes', style: TextStyle(color: AppColors.colorPink)),
+          ),
+        ],
+      ),
+    );
+    if (confirmDelete == true) {
+      _itemService.deleteItem(item.id!);
+      _refreshData();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidthHalf = MediaQuery.of(context).size.width / 2;
@@ -276,6 +370,37 @@ class _ItemScreenState extends State<ItemScreen> {
           AppShortcuts.openFilter:
               VoidCallbackIntent(() => _showFilterDialog()),
           AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
+          AppShortcuts.arrowDown: VoidCallbackIntent(() {
+            setState(() {
+              if (_hoveredRowIndex < _itemDataSource.rowCount - 1) {
+                _hoveredRowIndex++;
+              }
+            });
+          }),
+          AppShortcuts.arrowUp: VoidCallbackIntent(() {
+            setState(() {
+              if (_hoveredRowIndex > 0) {
+                _hoveredRowIndex--;
+              }
+            });
+          }),
+          AppShortcuts.viewDetails: VoidCallbackIntent(() {
+            if (_hoveredRowIndex != -1) {
+              _showViewDetailsDialog(
+                  _itemDataSource.getRowData(_hoveredRowIndex));
+            }
+          }),
+          AppShortcuts.editItem: VoidCallbackIntent(() {
+            if (_hoveredRowIndex != -1) {
+              _togglePanel(item: _itemDataSource.getRowData(_hoveredRowIndex));
+            }
+          }),
+          AppShortcuts.deleteItem: VoidCallbackIntent(() {
+            if (_hoveredRowIndex != -1) {
+              _showDeleteConfirmationDialog(
+                  _itemDataSource.getRowData(_hoveredRowIndex));
+            }
+          }),
         },
         child: Actions(
           actions: {
@@ -714,18 +839,23 @@ class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
   List<Item> _items = [];
   List<Item> _filteredItems = [];
-  late final BuildContext _context;
   final void Function(Item)? onEdit;
+  final void Function(Item)? onView;
+  final void Function(Item)? onDelete;
   ItemFilterParams _filterParams;
-  int? _hoveredRowIndex;
+  final int Function() getHoveredRowIndex;
+  final Function(int) setHoveredRowIndex;
 
   ItemData({
     required BuildContext context,
     this.onEdit,
+    this.onView,
+    this.onDelete,
+    required this.getHoveredRowIndex,
+    required this.setHoveredRowIndex,
     required ItemFilterParams filterParams,
     required int rowsPerPage,
   }) : _filterParams = filterParams {
-    _context = context;
     refreshData();
   }
 
@@ -739,6 +869,10 @@ class ItemData extends DataTableSource {
     _items = _itemService.getAllItems();
     _applyFilters();
     notifyListeners();
+  }
+
+  Item getRowData(int index) {
+    return _filteredItems[index];
   }
 
   void _applyFilters() {
@@ -800,7 +934,7 @@ class ItemData extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final item = _filteredItems[index];
-    final isHovered = _hoveredRowIndex == index;
+    final isHovered = getHoveredRowIndex() == index;
     return DataRow.byIndex(
       index: index,
       color: WidgetStateProperty.all<Color?>(
@@ -809,14 +943,8 @@ class ItemData extends DataTableSource {
       cells: [
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -826,14 +954,8 @@ class ItemData extends DataTableSource {
         ),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -841,17 +963,10 @@ class ItemData extends DataTableSource {
             ),
           ),
         ),
-        // DataCell(Text(item.modelNo)),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -859,17 +974,10 @@ class ItemData extends DataTableSource {
             ),
           ),
         ),
-        // DataCell(Text(item.serialNo)),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -877,17 +985,10 @@ class ItemData extends DataTableSource {
             ),
           ),
         ),
-        // DataCell(Text(item.deviceType.name)),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -895,18 +996,10 @@ class ItemData extends DataTableSource {
             ),
           ),
         ),
-        // DataCell(
-        //     Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -915,17 +1008,10 @@ class ItemData extends DataTableSource {
             ),
           ),
         ),
-        // DataCell(ItemStatus(assetStatus: item.assetStatus)),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -938,77 +1024,7 @@ class ItemData extends DataTableSource {
             ActionWidget(
                 icon: Icons.remove_red_eye_rounded,
                 onTap: () {
-                  showDialog(
-                    context: _context,
-                    builder: (_) => AlertDialog(
-                      title: Text('Item Details'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ItemDetailsText(
-                              label: 'Asset No', itemText: '${item.assetNo}'),
-                          ItemDetailsText(
-                              label: 'Model No', itemText: '${item.modelNo}'),
-                          ItemDetailsText(
-                              label: 'Serial No', itemText: '${item.serialNo}'),
-                          ItemDetailsText(
-                              label: 'Device Type',
-                              itemText: '${item.deviceType.name}'),
-                          if (item.receivedDate != null)
-                            ItemDetailsText(
-                                label: 'Received Date',
-                                itemText:
-                                    '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
-                          ItemDetailsText(
-                              label: 'Warranty Date',
-                              itemText:
-                                  '${DateFormatter.extractDateFromDateTime(item.warrantyDate)}'),
-                          ItemDetailsText(
-                              label: 'Status',
-                              itemText: '${item.assetStatus.name}'),
-                          if (item.hostName != null)
-                            ItemDetailsText(
-                                label: 'Host Name',
-                                itemText: '${item.hostName}'),
-                          if (item.ipPort != null)
-                            ItemDetailsText(
-                                label: 'IP Address',
-                                itemText: '${item.ipPort}'),
-                          if (item.macAddress != null)
-                            ItemDetailsText(
-                                label: 'MAC Address',
-                                itemText: '${item.macAddress}'),
-                          if (item.osVersion != null)
-                            ItemDetailsText(
-                                label: 'OS Version',
-                                itemText: '${item.osVersion}'),
-                          if (item.facePlateName != null)
-                            ItemDetailsText(
-                                label: 'Face Plate Name',
-                                itemText: '${item.facePlateName}'),
-                          if (item.switchPort != null)
-                            ItemDetailsText(
-                                label: 'Switch Port',
-                                itemText: '${item.switchPort}'),
-                          if (item.switchIpAddress != null)
-                            ItemDetailsText(
-                                label: 'Switch IP Address',
-                                itemText: '${item.switchIpAddress}'),
-                          if (item.assignedTo != null)
-                            ItemDetailsText(
-                                label: 'Assigned User',
-                                itemText: '${item.assignedTo!.userName}'),
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text('Close'),
-                          onPressed: () => Navigator.of(_context).pop(),
-                        ),
-                      ],
-                    ),
-                  );
+                  onView!(item);
                 }),
             const SizedBox(width: 10.0),
             ActionWidget(
@@ -1019,30 +1035,8 @@ class ItemData extends DataTableSource {
             const SizedBox(width: 10.0),
             ActionWidget(
                 icon: Icons.delete,
-                onTap: () async {
-                  final confirmDelete = await showDialog<bool>(
-                    context: _context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Confirm Deletion'),
-                      content: const Text(
-                          'Are you sure you want to delete this item?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Yes',
-                              style: TextStyle(color: AppColors.colorPink)),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmDelete == true) {
-                    _itemService.deleteItem(item.id!);
-                    refreshData();
-                  }
+                onTap: () {
+                  onDelete!(item);
                 })
           ],
         ))

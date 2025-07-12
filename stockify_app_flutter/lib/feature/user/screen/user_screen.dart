@@ -31,6 +31,7 @@ class _UserScreenState extends State<UserScreen> {
   late UserData _userDataSource;
   UserFilterParams _filterParams = UserFilterParams();
   final FocusNode _searchFocusNode = FocusNode();
+  int _hoveredRowIndex = -1;
 
   late final TextEditingController _userNameController,
       _designationController,
@@ -58,11 +59,18 @@ class _UserScreenState extends State<UserScreen> {
 
   void _initializeUserDataSource() {
     _userDataSource = UserData(
-      context: context,
-      onEdit: (user) => _togglePanel(user: user),
-      filterParams: _filterParams,
-      rowsPerPage: _rowsPerPage,
-    );
+        context: context,
+        onEdit: (user) => _togglePanel(user: user),
+        filterParams: _filterParams,
+        rowsPerPage: _rowsPerPage,
+        onView: (user) => _showViewDetailsDialog(user),
+        onDelete: (user) => _showDeleteConfirmationDialog(user),
+        getHoveredRowIndex: () => _hoveredRowIndex,
+        setHoveredRowIndex: (index) {
+          setState(() {
+            _hoveredRowIndex = index;
+          });
+        });
   }
 
   void _refreshData() {
@@ -160,6 +168,64 @@ class _UserScreenState extends State<UserScreen> {
     _floorController.clear();
   }
 
+  void _showViewDetailsDialog(User user) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('User Details'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ItemDetailsText(label: 'User Name', itemText: '${user.userName}'),
+            if (user.designation != null)
+              ItemDetailsText(
+                  label: 'Designation', itemText: '${user.designation}'),
+            if (user.sapId != null)
+              ItemDetailsText(label: 'SAP ID', itemText: '${user.sapId}'),
+            if (user.ipPhone != null)
+              ItemDetailsText(label: 'IP Phone', itemText: '${user.ipPhone!}'),
+            if (user.roomNo != null)
+              ItemDetailsText(label: 'Room No', itemText: '${user.roomNo!}'),
+            if (user.floor != null)
+              ItemDetailsText(label: 'Floor No', itemText: '${user.floor}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Close'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(User user) async {
+    final confirmDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Deletion'),
+        content: const Text('Are you sure you want to delete this user?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child:
+                const Text('Yes', style: TextStyle(color: AppColors.colorPink)),
+          ),
+        ],
+      ),
+    );
+    if (confirmDelete == true) {
+      _userService.deleteUser(user.id!);
+      _refreshData();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidthHalf = MediaQuery.of(context).size.width / 2;
@@ -176,6 +242,37 @@ class _UserScreenState extends State<UserScreen> {
               VoidCallbackIntent(() => _searchFocusNode.requestFocus()),
           AppShortcuts.openFilter: VoidCallbackIntent(() => _showFilterDialog()),
           AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
+          AppShortcuts.arrowDown: VoidCallbackIntent(() {
+            setState(() {
+              if (_hoveredRowIndex < _userDataSource.rowCount - 1) {
+                _hoveredRowIndex++;
+              }
+            });
+          }),
+          AppShortcuts.arrowUp: VoidCallbackIntent(() {
+            setState(() {
+              if (_hoveredRowIndex > 0) {
+                _hoveredRowIndex--;
+              }
+            });
+          }),
+          AppShortcuts.viewDetails: VoidCallbackIntent(() {
+            if (_hoveredRowIndex != -1) {
+              _showViewDetailsDialog(
+                  _userDataSource.getRowData(_hoveredRowIndex));
+            }
+          }),
+          AppShortcuts.editItem: VoidCallbackIntent(() {
+            if (_hoveredRowIndex != -1) {
+              _togglePanel(user: _userDataSource.getRowData(_hoveredRowIndex));
+            }
+          }),
+          AppShortcuts.deleteItem: VoidCallbackIntent(() {
+            if (_hoveredRowIndex != -1) {
+              _showDeleteConfirmationDialog(
+                  _userDataSource.getRowData(_hoveredRowIndex));
+            }
+          }),
         },
         child: Actions(
           actions: {
@@ -360,18 +457,23 @@ class UserData extends DataTableSource {
   final UserService _userService = UserServiceImplementation.instance;
   List<User> _users = [];
   List<User> _filteredUsers = [];
-  late final BuildContext _context;
   final void Function(User)? onEdit;
+  final void Function(User)? onView;
+  final void Function(User)? onDelete;
   UserFilterParams _filterParams;
-  int? _hoveredRowIndex;
+  final int Function() getHoveredRowIndex;
+  final Function(int) setHoveredRowIndex;
 
   UserData({
     required BuildContext context,
     this.onEdit,
+    this.onView,
+    this.onDelete,
+    required this.getHoveredRowIndex,
+    required this.setHoveredRowIndex,
     required UserFilterParams filterParams,
     required int rowsPerPage,
   }) : _filterParams = filterParams {
-    _context = context;
     refreshData();
   }
 
@@ -383,6 +485,10 @@ class UserData extends DataTableSource {
     _users = _userService.getAllUsers();
     _applyFilters();
     notifyListeners();
+  }
+
+  User getRowData(int index) {
+    return _filteredUsers[index];
   }
 
   void _applyFilters() {
@@ -420,7 +526,7 @@ class UserData extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final user = _filteredUsers[index];
-    final isHovered = _hoveredRowIndex == index;
+    final isHovered = getHoveredRowIndex() == index;
     return DataRow.byIndex(
       index: index,
       color: WidgetStateProperty.all<Color?>(
@@ -429,14 +535,8 @@ class UserData extends DataTableSource {
       cells: [
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -446,14 +546,8 @@ class UserData extends DataTableSource {
         ),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -463,14 +557,8 @@ class UserData extends DataTableSource {
         ),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -480,14 +568,8 @@ class UserData extends DataTableSource {
         ),
         DataCell(
           MouseRegion(
-            onEnter: (_) {
-              _hoveredRowIndex = index;
-              notifyListeners();
-            },
-            onExit: (_) {
-              _hoveredRowIndex = null;
-              notifyListeners();
-            },
+            onEnter: (_) => setHoveredRowIndex(index),
+            onExit: (_) => setHoveredRowIndex(-1),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -501,45 +583,7 @@ class UserData extends DataTableSource {
               ActionWidget(
                   icon: Icons.remove_red_eye_rounded,
                   onTap: () {
-                    showDialog(
-                      context: _context,
-                      builder: (_) => AlertDialog(
-                        title: Text('Item Details'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ItemDetailsText(
-                                label: 'User Name',
-                                itemText: '${user.userName}'),
-                            if (user.designation != null)
-                              ItemDetailsText(
-                                  label: 'Designation',
-                                  itemText: '${user.designation}'),
-                            if (user.sapId != null)
-                              ItemDetailsText(
-                                  label: 'SAP ID', itemText: '${user.sapId}'),
-                            if (user.ipPhone != null)
-                              ItemDetailsText(
-                                  label: 'IP Phone',
-                                  itemText: '${user.ipPhone!}'),
-                            if (user.roomNo != null)
-                              ItemDetailsText(
-                                  label: 'Room No',
-                                  itemText: '${user.roomNo!}'),
-                            if (user.floor != null)
-                              ItemDetailsText(
-                                  label: 'Floor No', itemText: '${user.floor}'),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            child: const Text('Close'),
-                            onPressed: () => Navigator.of(_context).pop(),
-                          ),
-                        ],
-                      ),
-                    );
+                    onView!(user);
                   }),
               const SizedBox(width: 10.0),
               ActionWidget(
@@ -550,30 +594,8 @@ class UserData extends DataTableSource {
               const SizedBox(width: 10.0),
               ActionWidget(
                   icon: Icons.delete,
-                  onTap: () async {
-                    final confirmDelete = await showDialog<bool>(
-                      context: _context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Confirm Deletion'),
-                        content: const Text(
-                            'Are you sure you want to delete this user?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Yes',
-                                style: TextStyle(color: AppColors.colorPink)),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirmDelete == true) {
-                      _userService.deleteUser(user.id!);
-                      refreshData();
-                    }
+                  onTap: () {
+                    onDelete!(user);
                   })
             ],
           ),

@@ -12,6 +12,13 @@ class AppShortcuts {
       SingleActivator(LogicalKeyboardKey.arrowRight, control: true);
   static const prevPage =
       SingleActivator(LogicalKeyboardKey.arrowLeft, control: true);
+  static const arrowUp = SingleActivator(LogicalKeyboardKey.arrowUp);
+  static const arrowDown = SingleActivator(LogicalKeyboardKey.arrowDown);
+  static const viewDetails =
+      SingleActivator(LogicalKeyboardKey.keyV, control: true);
+  static const editItem =
+      SingleActivator(LogicalKeyboardKey.keyE, control: true);
+  static const deleteItem = SingleActivator(LogicalKeyboardKey.delete);
 
   // Navigation
   static const goToDashboard =
@@ -49,8 +56,6 @@ final List<Shortcut> shortcutList = [
       description: 'Add New Item/User',
       combination: 'Ctrl + N',
       icon: Icons.add),
-  // Shortcut(description: 'Next Page', combination: 'Ctrl + Right Arrow'),
-  // Shortcut(description: 'Previous Page', combination: 'Ctrl + Left Arrow'),
   Shortcut(
       description: 'Go to Dashboard',
       combination: 'Ctrl + 1',
@@ -67,4 +72,22 @@ final List<Shortcut> shortcutList = [
       description: 'Go to Settings',
       combination: 'Ctrl + 5',
       icon: Icons.settings),
+  Shortcut(
+      description: 'View Item/User Details',
+      combination: 'Ctrl + V',
+      icon: Icons.remove_red_eye),
+  Shortcut(
+      description: 'Edit Item/User', combination: 'Ctrl + E', icon: Icons.edit),
+  Shortcut(
+      description: 'Delete Item/User',
+      combination: 'Delete',
+      icon: Icons.delete),
+  Shortcut(
+      description: 'Navigate Up',
+      combination: 'Up Arrow',
+      icon: Icons.arrow_upward),
+  Shortcut(
+      description: 'Navigate Down',
+      combination: 'Down Arrow',
+      icon: Icons.arrow_downward),
 ];
