@@ -31,7 +31,7 @@ class _UserScreenState extends State<UserScreen> {
   late UserData _userDataSource;
   UserFilterParams _filterParams = UserFilterParams();
   final FocusNode _searchFocusNode = FocusNode();
-  int _hoveredRowIndex = -1;
+  int _selectedRowIndex = -1;
 
   late final TextEditingController _userNameController,
       _designationController,
@@ -65,10 +65,10 @@ class _UserScreenState extends State<UserScreen> {
         rowsPerPage: _rowsPerPage,
         onView: (user) => _showViewDetailsDialog(user),
         onDelete: (user) => _showDeleteConfirmationDialog(user),
-        getHoveredRowIndex: () => _hoveredRowIndex,
-        setHoveredRowIndex: (index) {
+        getSelectedRowIndex: () => _selectedRowIndex,
+        setSelectedRowIndex: (index) {
           setState(() {
-            _hoveredRowIndex = index;
+            _selectedRowIndex = index;
           });
         });
   }
@@ -240,37 +240,43 @@ class _UserScreenState extends State<UserScreen> {
         shortcuts: {
           AppShortcuts.openSearch:
               VoidCallbackIntent(() => _searchFocusNode.requestFocus()),
-          AppShortcuts.openFilter: VoidCallbackIntent(() => _showFilterDialog()),
+          AppShortcuts.openFilter:
+              VoidCallbackIntent(() => _showFilterDialog()),
           AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
           AppShortcuts.arrowDown: VoidCallbackIntent(() {
+            _selectedRowIndex = _userDataSource.getSelectedRowIndex();
             setState(() {
-              if (_hoveredRowIndex < _userDataSource.rowCount - 1) {
-                _hoveredRowIndex++;
+              if (_selectedRowIndex <
+                  _userDataSource._filteredUsers.length - 1) {
+                _userDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
+                _refreshData();
               }
             });
           }),
           AppShortcuts.arrowUp: VoidCallbackIntent(() {
+            _selectedRowIndex = _userDataSource.getSelectedRowIndex();
             setState(() {
-              if (_hoveredRowIndex > 0) {
-                _hoveredRowIndex--;
+              if (_selectedRowIndex > 0) {
+                _userDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
+                _refreshData();
               }
             });
           }),
           AppShortcuts.viewDetails: VoidCallbackIntent(() {
-            if (_hoveredRowIndex != -1) {
+            if (_selectedRowIndex != -1) {
               _showViewDetailsDialog(
-                  _userDataSource.getRowData(_hoveredRowIndex));
+                  _userDataSource.getRowData(_selectedRowIndex));
             }
           }),
           AppShortcuts.editItem: VoidCallbackIntent(() {
-            if (_hoveredRowIndex != -1) {
-              _togglePanel(user: _userDataSource.getRowData(_hoveredRowIndex));
+            if (_selectedRowIndex != -1) {
+              _togglePanel(user: _userDataSource.getRowData(_selectedRowIndex));
             }
           }),
           AppShortcuts.deleteItem: VoidCallbackIntent(() {
-            if (_hoveredRowIndex != -1) {
+            if (_selectedRowIndex != -1) {
               _showDeleteConfirmationDialog(
-                  _userDataSource.getRowData(_hoveredRowIndex));
+                  _userDataSource.getRowData(_selectedRowIndex));
             }
           }),
         },
@@ -294,6 +300,7 @@ class _UserScreenState extends State<UserScreen> {
                           headingRowColor: WidgetStateProperty.all<Color>(
                               AppColors.colorAccent.withValues(alpha: 0.25)),
                           showEmptyRows: false,
+                          showCheckboxColumn: false,
                           source: _userDataSource,
                           actions: [
                             AppButton(
@@ -399,20 +406,23 @@ class _UserScreenState extends State<UserScreen> {
                             Expanded(
                               child: TextFormField(
                                 controller: _sapIdController,
-                                decoration: InputDecoration(labelText: 'SAP ID'),
+                                decoration:
+                                    InputDecoration(labelText: 'SAP ID'),
                               ),
                             ),
                             const SizedBox(width: 10.0),
                             Expanded(
                               child: TextFormField(
-                                decoration: InputDecoration(labelText: 'Room No'),
+                                decoration:
+                                    InputDecoration(labelText: 'Room No'),
                                 controller: _roomNoController,
                               ),
                             ),
                             const SizedBox(width: 10.0),
                             Expanded(
                               child: TextFormField(
-                                decoration: InputDecoration(labelText: 'Floor No'),
+                                decoration:
+                                    InputDecoration(labelText: 'Floor No'),
                                 controller: _floorController,
                               ),
                             ),
@@ -461,16 +471,16 @@ class UserData extends DataTableSource {
   final void Function(User)? onView;
   final void Function(User)? onDelete;
   UserFilterParams _filterParams;
-  final int Function() getHoveredRowIndex;
-  final Function(int) setHoveredRowIndex;
+  final int Function() getSelectedRowIndex;
+  final Function(int) setSelectedRowIndex;
 
   UserData({
     required BuildContext context,
     this.onEdit,
     this.onView,
     this.onDelete,
-    required this.getHoveredRowIndex,
-    required this.setHoveredRowIndex,
+    required this.getSelectedRowIndex,
+    required this.setSelectedRowIndex,
     required UserFilterParams filterParams,
     required int rowsPerPage,
   }) : _filterParams = filterParams {
@@ -526,57 +536,27 @@ class UserData extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final user = _filteredUsers[index];
-    final isHovered = getHoveredRowIndex() == index;
+    final isSelected = getSelectedRowIndex() == index;
     return DataRow.byIndex(
       index: index,
-      color: WidgetStateProperty.all<Color?>(
-        isHovered ? AppColors.colorAccent.withValues(alpha: 0.04) : null,
-      ),
+      selected: isSelected,
+      color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppColors.colorGreen.withAlpha(20);
+        }
+        return null;
+      }),
+      onSelectChanged: (_) {
+        if (index >= 0 && index < _filteredUsers.length) {
+          setSelectedRowIndex(index);
+        }
+        notifyListeners();
+      },
       cells: [
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(user.id.toString()),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(user.userName),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(user.designation ?? ''),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(user.sapId ?? ''),
-            ),
-          ),
-        ),
+        DataCell(Text(user.id.toString())),
+        DataCell(Text(user.userName)),
+        DataCell(Text(user.designation ?? '')),
+        DataCell(Text(user.sapId ?? '')),
         DataCell(
           Row(
             children: [

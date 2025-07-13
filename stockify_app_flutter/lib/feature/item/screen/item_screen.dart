@@ -39,7 +39,7 @@ class _ItemScreenState extends State<ItemScreen> {
   late ItemData _itemDataSource;
   ItemFilterParams _filterParams = ItemFilterParams();
   final FocusNode _searchFocusNode = FocusNode();
-  int _hoveredRowIndex = -1;
+  int _selectedRowIndex = -1;
 
   late final TextEditingController _assetInputController,
       _modelInputController,
@@ -105,10 +105,10 @@ class _ItemScreenState extends State<ItemScreen> {
         rowsPerPage: _rowsPerPage,
         onView: (item) => _showViewDetailsDialog(item),
         onDelete: (item) => _showDeleteConfirmationDialog(item),
-        getHoveredRowIndex: () => _hoveredRowIndex,
-        setHoveredRowIndex: (index) {
+        getSelectedRowIndex: () => _selectedRowIndex,
+        setSelectedRowIndex: (index) {
           setState(() {
-            _hoveredRowIndex = index;
+            _selectedRowIndex = index;
           });
         });
   }
@@ -371,34 +371,39 @@ class _ItemScreenState extends State<ItemScreen> {
               VoidCallbackIntent(() => _showFilterDialog()),
           AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
           AppShortcuts.arrowDown: VoidCallbackIntent(() {
+            _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
             setState(() {
-              if (_hoveredRowIndex < _itemDataSource.rowCount - 1) {
-                _hoveredRowIndex++;
+              if (_selectedRowIndex <
+                  _itemDataSource._filteredItems.length - 1) {
+                _itemDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
+                _refreshData();
               }
             });
           }),
           AppShortcuts.arrowUp: VoidCallbackIntent(() {
+            _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
             setState(() {
-              if (_hoveredRowIndex > 0) {
-                _hoveredRowIndex--;
+              if (_selectedRowIndex > 0) {
+                _itemDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
+                _refreshData();
               }
             });
           }),
           AppShortcuts.viewDetails: VoidCallbackIntent(() {
-            if (_hoveredRowIndex != -1) {
+            if (_selectedRowIndex != -1) {
               _showViewDetailsDialog(
-                  _itemDataSource.getRowData(_hoveredRowIndex));
+                  _itemDataSource.getRowData(_selectedRowIndex));
             }
           }),
           AppShortcuts.editItem: VoidCallbackIntent(() {
-            if (_hoveredRowIndex != -1) {
-              _togglePanel(item: _itemDataSource.getRowData(_hoveredRowIndex));
+            if (_selectedRowIndex != -1) {
+              _togglePanel(item: _itemDataSource.getRowData(_selectedRowIndex));
             }
           }),
           AppShortcuts.deleteItem: VoidCallbackIntent(() {
-            if (_hoveredRowIndex != -1) {
+            if (_selectedRowIndex != -1) {
               _showDeleteConfirmationDialog(
-                  _itemDataSource.getRowData(_hoveredRowIndex));
+                  _itemDataSource.getRowData(_selectedRowIndex));
             }
           }),
         },
@@ -458,6 +463,7 @@ class _ItemScreenState extends State<ItemScreen> {
                           child: PaginatedDataTable(
                             headingRowColor: WidgetStateProperty.all<Color>(
                                 AppColors.colorAccent.withValues(alpha: 0.25)),
+                            showCheckboxColumn: false,
                             showEmptyRows: false,
                             actions: [
                               AppButton(
@@ -843,16 +849,16 @@ class ItemData extends DataTableSource {
   final void Function(Item)? onView;
   final void Function(Item)? onDelete;
   ItemFilterParams _filterParams;
-  final int Function() getHoveredRowIndex;
-  final Function(int) setHoveredRowIndex;
+  final int Function() getSelectedRowIndex;
+  final Function(int) setSelectedRowIndex;
 
   ItemData({
     required BuildContext context,
     this.onEdit,
     this.onView,
     this.onDelete,
-    required this.getHoveredRowIndex,
-    required this.setHoveredRowIndex,
+    required this.getSelectedRowIndex,
+    required this.setSelectedRowIndex,
     required ItemFilterParams filterParams,
     required int rowsPerPage,
   }) : _filterParams = filterParams {
@@ -934,91 +940,31 @@ class ItemData extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final item = _filteredItems[index];
-    final isHovered = getHoveredRowIndex() == index;
+    final isSelected = getSelectedRowIndex() == index;
     return DataRow.byIndex(
       index: index,
-      color: WidgetStateProperty.all<Color?>(
-        isHovered ? AppColors.colorAccent.withValues(alpha: 0.04) : null,
-      ),
+      selected: isSelected,
+      color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppColors.colorGreen.withAlpha(20);
+        }
+        return null;
+      }),
+      onSelectChanged: (_) {
+        if (index >= 0 && index < _filteredItems.length) {
+          setSelectedRowIndex(index);
+        }
+        notifyListeners();
+      },
       cells: [
+        DataCell(Text(item.id.toString())),
+        DataCell(Text(item.assetNo)),
+        DataCell(Text(item.modelNo)),
+        DataCell(Text(item.serialNo)),
+        DataCell(Text(item.deviceType.name)),
         DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(item.id.toString()),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(item.assetNo),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(item.modelNo),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(item.serialNo),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(item.deviceType.name),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                  DateFormatter.extractDateFromDateTime(item.warrantyDate)),
-            ),
-          ),
-        ),
-        DataCell(
-          MouseRegion(
-            onEnter: (_) => setHoveredRowIndex(index),
-            onExit: (_) => setHoveredRowIndex(-1),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: ItemStatus(assetStatus: item.assetStatus),
-            ),
-          ),
-        ),
+            Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
+        DataCell(ItemStatus(assetStatus: item.assetStatus)),
         DataCell(Row(
           children: [
             ActionWidget(
