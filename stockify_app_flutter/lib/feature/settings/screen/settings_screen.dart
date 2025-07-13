@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/shortcuts/app_shortcuts.dart';
 
 import '../../../common/data/service/data_service.dart';
 import '../../../common/shared-preference/shared_preference_service.dart';
+import '../../../common/theme/colors.dart';
 import '../../../common/theme/controller/theme_controller.dart';
 import '../../../common/theme/theme.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _showShortcuts = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +44,43 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
           ),
+          ListTile(
+            leading: const Icon(Icons.keyboard_sharp),
+            title: const Text('Keyboard Shortcuts'),
+            subtitle: const Text('View all available keyboard shortcuts'),
+            trailing: Icon(
+              _showShortcuts ? Icons.expand_less : Icons.expand_more,
+            ),
+            onTap: () {
+              setState(() {
+                _showShortcuts = !_showShortcuts;
+              });
+            },
+          ),
+          if (_showShortcuts)
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: shortcutList.length,
+                itemBuilder: (context, index) {
+                  final shortcut = shortcutList[index];
+                  return ListTile(
+                    title: Text(shortcut.description),
+                    trailing: Text(
+                      shortcut.combination,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.colorAccent,
+                          ),
+                    ),
+                    leading: Icon(shortcut.icon),
+                  );
+                },
+              ),
+            ),
           ListTile(
             leading: const Icon(Icons.upload_file),
             title: const Text('Import Data'),

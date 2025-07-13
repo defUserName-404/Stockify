@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/shortcuts/app_shortcuts.dart';
 import 'package:stockify_app_flutter/feature/item/screen/item_screen.dart';
 import 'package:stockify_app_flutter/feature/notification/screen/notification_screen.dart';
 import 'package:stockify_app_flutter/feature/user/screen/user_screen.dart';
@@ -53,101 +54,129 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: <Widget>[
-          SizedBox(
-            width: _railWidth,
-            child: NavigationRail(
-              leading: IconButton(
-                onPressed: () {
-                  _updateRailWidth(_isExtended ? _minRailWidth : _maxRailWidth);
-                },
-                icon: const Icon(Icons.menu, color: AppColors.colorBackground),
-              ),
-              destinations: [
-                const NavigationRailDestination(
-                  icon: Icon(Icons.dashboard_outlined),
-                  selectedIcon: Icon(Icons.dashboard),
-                  label: Text('Dashboard'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.inventory_2_outlined),
-                  selectedIcon: Icon(Icons.inventory_2),
-                  label: Text('Items'),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.account_circle_outlined),
-                  selectedIcon: const Icon(Icons.account_circle),
-                  label: const Text('Users'),
-                ),
-                NavigationRailDestination(
-                  icon: Consumer<NotificationStorageService>(
-                    builder: (context, notificationService, child) {
-                      return FutureBuilder<List<AppNotification>>(
-                        future: notificationService.getNotifications(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                            return const Icon(Icons.notifications_active);
-                          } else {
-                            return const Icon(Icons.notifications_none);
-                          }
-                        },
-                      );
-                    },
+    return Shortcuts(
+      shortcuts: {
+        AppShortcuts.goToDashboard:
+            VoidCallbackIntent(() => updateSelectedScreen(0)),
+        AppShortcuts.goToItems:
+            VoidCallbackIntent(() => updateSelectedScreen(1)),
+        AppShortcuts.goToUsers:
+            VoidCallbackIntent(() => updateSelectedScreen(2)),
+        AppShortcuts.goToNotifications:
+            VoidCallbackIntent(() => updateSelectedScreen(3)),
+        AppShortcuts.goToSettings:
+            VoidCallbackIntent(() => updateSelectedScreen(4)),
+      },
+      child: Actions(
+        actions: {
+          VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
+            onInvoke: (intent) => intent.callback(),
+          ),
+        },
+        child: FocusScope(
+          autofocus: true,
+          child: Scaffold(
+            body: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: _railWidth,
+                  child: NavigationRail(
+                    leading: IconButton(
+                      onPressed: () {
+                        _updateRailWidth(
+                            _isExtended ? _minRailWidth : _maxRailWidth);
+                      },
+                      icon: const Icon(Icons.menu,
+                          color: AppColors.colorBackground),
+                    ),
+                    destinations: [
+                      const NavigationRailDestination(
+                        icon: Icon(Icons.dashboard_outlined),
+                        selectedIcon: Icon(Icons.dashboard),
+                        label: Text('Dashboard'),
+                      ),
+                      const NavigationRailDestination(
+                        icon: Icon(Icons.inventory_2_outlined),
+                        selectedIcon: Icon(Icons.inventory_2),
+                        label: Text('Items'),
+                      ),
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.account_circle_outlined),
+                        selectedIcon: const Icon(Icons.account_circle),
+                        label: const Text('Users'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Consumer<NotificationStorageService>(
+                          builder: (context, notificationService, child) {
+                            return FutureBuilder<List<AppNotification>>(
+                              future: notificationService.getNotifications(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData &&
+                                    snapshot.data!.isNotEmpty) {
+                                  return const Icon(Icons.notifications_active);
+                                } else {
+                                  return const Icon(Icons.notifications_none);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                        selectedIcon: Consumer<NotificationStorageService>(
+                          builder: (context, notificationService, child) {
+                            return FutureBuilder<List<AppNotification>>(
+                              future: notificationService.getNotifications(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData &&
+                                    snapshot.data!.isNotEmpty) {
+                                  return const Icon(Icons.notifications_active);
+                                } else {
+                                  return const Icon(Icons.notifications_none);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                        label: const Text('Notifications'),
+                      ),
+                      const NavigationRailDestination(
+                        icon: Icon(Icons.settings_outlined),
+                        selectedIcon: Icon(Icons.settings),
+                        label: Text('Settings'),
+                      ),
+                    ],
+                    selectedIndex: _selectedIndex,
+                    onDestinationSelected: (index) =>
+                        setState(() => _selectedIndex = index),
+                    labelType: _showLabels
+                        ? NavigationRailLabelType.all
+                        : NavigationRailLabelType.none,
                   ),
-                  selectedIcon: Consumer<NotificationStorageService>(
-                    builder: (context, notificationService, child) {
-                      return FutureBuilder<List<AppNotification>>(
-                        future: notificationService.getNotifications(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                            return const Icon(Icons.notifications_active);
-                          } else {
-                            return const Icon(Icons.notifications_none);
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  label: const Text('Notifications'),
                 ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings),
-                  label: Text('Settings'),
+                GestureDetector(
+                  onHorizontalDragUpdate: (details) {
+                    _updateRailWidth(_railWidth + details.primaryDelta!);
+                  },
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.resizeLeftRight,
+                    child: Container(
+                      width: 2,
+                      height: double.infinity,
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                ),
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 32.0),
+                    child: _getSelectedScreen(_selectedIndex),
+                  ),
                 ),
               ],
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (index) =>
-                  setState(() => _selectedIndex = index),
-              labelType: _showLabels
-                  ? NavigationRailLabelType.all
-                  : NavigationRailLabelType.none,
             ),
           ),
-          GestureDetector(
-            onHorizontalDragUpdate: (details) {
-              _updateRailWidth(_railWidth + details.primaryDelta!);
-            },
-            child: MouseRegion(
-              cursor: SystemMouseCursors.resizeLeftRight,
-              child: Container(
-                width: 2,
-                height: double.infinity,
-                color: Colors.grey[300],
-              ),
-            ),
-          ),
-          const VerticalDivider(thickness: 1, width: 1),
-          Expanded(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-              child: _getSelectedScreen(_selectedIndex),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
