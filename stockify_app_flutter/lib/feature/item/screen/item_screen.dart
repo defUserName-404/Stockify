@@ -961,7 +961,7 @@ class ItemData extends DataTableSource {
       selected: isSelected,
       color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
         if (states.contains(WidgetState.selected)) {
-          return AppColors.colorGreen.withAlpha(20);
+          return AppColors.colorSecondary.withAlpha(50);
         }
         return null;
       }),
