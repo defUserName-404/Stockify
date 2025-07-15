@@ -39,7 +39,7 @@ class _FilterDialogState extends State<FilterDialog> {
             const Text('Sort By',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
+            DropdownButtonFormField<String?>(
               value: _params.sortBy,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -47,18 +47,18 @@ class _FilterDialogState extends State<FilterDialog> {
                     EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               items: const [
-                DropdownMenuItem(value: 'assetNo', child: Text('Asset No')),
-                DropdownMenuItem(value: 'modelNo', child: Text('Model No')),
-                DropdownMenuItem(value: 'serialNo', child: Text('Serial No')),
+                DropdownMenuItem(value: null, child: Text('Default')),
+                DropdownMenuItem(value: 'asset_no', child: Text('Asset No')),
+                DropdownMenuItem(value: 'model_no', child: Text('Model No')),
+                DropdownMenuItem(value: 'serial_no', child: Text('Serial No')),
                 DropdownMenuItem(
-                    value: 'receivedDate', child: Text('Received Date')),
+                    value: 'received_date', child: Text('Received Date')),
                 DropdownMenuItem(
-                    value: 'warrantyDate', child: Text('Warranty Date')),
+                    value: 'warranty_date', child: Text('Warranty Date')),
               ],
               onChanged: (value) {
                 setState(() {
-                  final newParams = _params.copyWith(sortBy: value);
-                  widget.onApplyFilter(newParams);
+                  _params = _params.copyWith(sortBy: value);
                 });
               },
             ),
@@ -151,7 +151,7 @@ class _FilterDialogState extends State<FilterDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: () {
             widget.onApplyFilter(_params);
             Navigator.of(context).pop();

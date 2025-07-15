@@ -5,6 +5,8 @@ import 'package:ffi/ffi.dart';
 import 'package:stockify_app_flutter/common/ffi/ffi_bridge.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
 
+import '../model/item_filter_param.dart';
+
 class ItemRepository {
   ItemRepository._privateConstructor();
 
@@ -147,5 +149,30 @@ class ItemRepository {
   // Delete an item by ID
   void deleteItem(int id) {
     _ffi.deleteItemById(id);
+  }
+
+  List<Item> getFilteredItems(ItemFilterParams params) {
+    final searchPtr = _toUtf8(params.search);
+    final deviceTypePtr = _toUtf8(params.deviceType?.toString());
+    final assetStatusPtr = _toUtf8(params.assetStatus?.toString());
+    final sortByPtr = _toUtf8(params.sortBy);
+    final sortOrderPtr = _toUtf8(params.sortOrder);
+    final resultPtr = _ffi.getFilteredItems(
+      deviceTypePtr,
+      assetStatusPtr,
+      0,
+      searchPtr,
+      sortByPtr,
+      sortOrderPtr,
+    );
+    final jsonString = resultPtr.toDartString();
+    _ffi.freeCString(resultPtr);
+    calloc.free(searchPtr);
+    if (deviceTypePtr != nullptr) calloc.free(deviceTypePtr);
+    if (assetStatusPtr != nullptr) calloc.free(assetStatusPtr);
+    if (sortByPtr != nullptr) calloc.free(sortByPtr);
+    calloc.free(sortOrderPtr);
+    final List<dynamic> jsonList = jsonDecode(jsonString);
+    return jsonList.map((json) => Item.fromJson(json)).toList();
   }
 }

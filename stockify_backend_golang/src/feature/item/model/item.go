@@ -10,24 +10,24 @@ import (
 
 type Item struct {
 	gorm.Model
-	ID                  uint64 `gorm:"primaryKey;autoIncrement"`
-	AssetNo             string
-	ModelNo             string
-	DeviceType          DeviceType
-	SerialNo            string
-	ReceivedDate        *time.Time
-	WarrantyDate        time.Time
-	AssetStatus         AssetStatus
-	HostName            *string
-	IpPort              *string
-	MacAddress          *string
-	OsVersion           *string
-	FacePlateName       *string
-	SwitchPort          *string
-	SwitchIpAddress     *string
-	IsPasswordProtected *bool
-	AssignedToID        *uint64
-	AssignedTo          *model.User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;foreignKey:AssignedToID"`
+	ID                  uint64      `gorm:"primaryKey;autoIncrement" json:"ID"`
+	AssetNo             string      `json:"AssetNo"`
+	ModelNo             string      `json:"ModelNo"`
+	DeviceType          DeviceType  `json:"DeviceType"`
+	SerialNo            string      `json:"SerialNo"`
+	ReceivedDate        *time.Time  `json:"ReceivedDate,omitempty"`
+	WarrantyDate        time.Time   `json:"WarrantyDate"`
+	AssetStatus         AssetStatus `json:"AssetStatus"`
+	HostName            *string     `json:"HostName,omitempty"`
+	IpPort              *string     `json:"IpPort,omitempty"`
+	MacAddress          *string     `json:"MacAddress,omitempty"`
+	OsVersion           *string     `json:"OsVersion,omitempty"`
+	FacePlateName       *string     `json:"FacePlateName,omitempty"`
+	SwitchPort          *string     `json:"SwitchPort,omitempty"`
+	SwitchIpAddress     *string     `json:"SwitchIpAddress,omitempty"`
+	IsPasswordProtected *bool       `json:"IsPasswordProtected,omitempty"`
+	AssignedToID        *uint64     `json:"AssignedToID,omitempty"`
+	AssignedTo          *model.User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;foreignKey:AssignedToID" json:"AssignedTo,omitempty"`
 }
 
 func (i *Item) String() string {

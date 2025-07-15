@@ -36,7 +36,7 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
             const Text('Sort By',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
+            DropdownButtonFormField<String?>(
               value: _params.sortBy,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -44,10 +44,11 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
                     EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               items: const [
-                DropdownMenuItem(value: 'userName', child: Text('User Name')),
+                DropdownMenuItem(value: null, child: Text('Default')),
+                DropdownMenuItem(value: 'user_name', child: Text('User Name')),
                 DropdownMenuItem(
                     value: 'designation', child: Text('Designation')),
-                DropdownMenuItem(value: 'sapId', child: Text('SAP ID')),
+                DropdownMenuItem(value: 'sap_id', child: Text('SAP ID')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -101,7 +102,7 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: () {
             widget.onApplyFilter(_params);
             Navigator.of(context).pop();

@@ -321,8 +321,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return AppColors.colorPink;
       case DeviceType.SSD:
         return AppColors.colorPrimary;
-      case DeviceType.Printer:
-        return AppColors.colorSecondary;
       case DeviceType.Scanner:
         return AppColors.colorAccent;
       default:

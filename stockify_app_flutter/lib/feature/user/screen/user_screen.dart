@@ -323,6 +323,20 @@ class _UserScreenState extends State<UserScreen> {
                                   ),
                                   leading: Icon(Icons.search,
                                       color: AppColors.colorTextDark),
+                                  trailing: [
+                                    InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _searchInputController.clear();
+                                          _onSearchChanged('');
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.clear,
+                                        color: AppColors.colorTextDark,
+                                      ),
+                                    ),
+                                  ],
                                   hintText:
                                       'Search for users by their User Name or SAP ID',
                                   onChanged: _onSearchChanged,
@@ -343,7 +357,21 @@ class _UserScreenState extends State<UserScreen> {
                           onRowsPerPageChanged: (int? value) {
                             setState(() {
                               _rowsPerPage = value!;
+                              _refreshData();
                             });
+                          },
+                          onPageChanged: (int? firstRowIndex) {
+                            if (firstRowIndex != null) {
+                              final newPage =
+                                  (firstRowIndex / _rowsPerPage).floor() + 1;
+                              if (newPage != _filterParams.page) {
+                                setState(() {
+                                  _filterParams =
+                                      _filterParams.copyWith(page: newPage);
+                                  _refreshData();
+                                });
+                              }
+                            }
                           },
                           rowsPerPage: _rowsPerPage,
                           columns: [
@@ -505,29 +533,32 @@ class UserData extends DataTableSource {
     _filteredUsers = _users.where((user) {
       if (_filterParams.search.isNotEmpty) {
         final searchLower = _filterParams.search.toLowerCase();
-        final matchesSearch = user.userName
-                .toLowerCase()
-                .contains(searchLower) ||
-            (user.sapId?.toLowerCase().contains(searchLower) ?? false) ||
-            (user.designation?.toLowerCase().contains(searchLower) ?? false);
+        final matchesSearch =
+            user.userName.toLowerCase().contains(searchLower) ||
+                (user.sapId?.toLowerCase().contains(searchLower) ?? false);
+        ;
         if (!matchesSearch) return false;
       }
       return true;
     }).toList();
     _filteredUsers.sort((a, b) {
       int comparison = 0;
-      switch (_filterParams.sortBy) {
-        case 'userName':
-          comparison = a.userName.compareTo(b.userName);
-          break;
-        case 'designation':
-          comparison = (a.designation ?? '').compareTo(b.designation ?? '');
-          break;
-        case 'sapId':
-          comparison = (a.sapId ?? '').compareTo(b.sapId ?? '');
-          break;
-        default:
-          comparison = a.userName.compareTo(b.userName);
+      if (_filterParams.sortBy == null) {
+        comparison = a.id!.compareTo(b.id!);
+      } else {
+        switch (_filterParams.sortBy) {
+          case 'userName':
+            comparison = a.userName.compareTo(b.userName);
+            break;
+          case 'designation':
+            comparison = (a.designation ?? '').compareTo(b.designation ?? '');
+            break;
+          case 'sapId':
+            comparison = (a.sapId ?? '').compareTo(b.sapId ?? '');
+            break;
+          default:
+            comparison = a.id!.compareTo(b.id!);
+        }
       }
       return _filterParams.sortOrder == 'DESC' ? -comparison : comparison;
     });
@@ -561,22 +592,28 @@ class UserData extends DataTableSource {
           Row(
             children: [
               ActionWidget(
-                  icon: Icons.remove_red_eye_rounded,
-                  onTap: () {
-                    onView!(user);
-                  }),
+                icon: Icons.remove_red_eye_rounded,
+                onTap: () {
+                  onView!(user);
+                },
+                message: 'View User Details',
+              ),
               const SizedBox(width: 10.0),
               ActionWidget(
-                  icon: Icons.edit,
-                  onTap: () {
-                    onEdit!(user);
-                  }),
+                icon: Icons.edit,
+                onTap: () {
+                  onEdit!(user);
+                },
+                message: 'Edit User',
+              ),
               const SizedBox(width: 10.0),
               ActionWidget(
-                  icon: Icons.delete,
-                  onTap: () {
-                    onDelete!(user);
-                  })
+                icon: Icons.delete,
+                onTap: () {
+                  onDelete!(user);
+                },
+                message: 'Delete User',
+              )
             ],
           ),
         )
@@ -588,7 +625,7 @@ class UserData extends DataTableSource {
   int get rowCount => _filteredUsers.length;
 
   @override
-  bool get isRowCountApproximate => false;
+  bool get isRowCountApproximate => true;
 
   @override
   int get selectedRowCount => 0;

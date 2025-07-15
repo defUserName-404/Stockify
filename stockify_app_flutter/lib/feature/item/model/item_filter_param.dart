@@ -3,21 +3,19 @@ import 'device_type.dart';
 
 class ItemFilterParams {
   final String search;
-  final String sortBy;
+  final String? sortBy;
   final String sortOrder;
   final DeviceType? deviceType;
   final AssetStatus? assetStatus;
   final bool isExpiring;
-  final int page;
 
   ItemFilterParams({
     this.search = '',
-    this.sortBy = 'assetNo',
+    this.sortBy,
     this.sortOrder = 'ASC',
     this.deviceType,
     this.assetStatus,
     this.isExpiring = false,
-    this.page = 1,
   });
 
   ItemFilterParams copyWith({
@@ -27,12 +25,14 @@ class ItemFilterParams {
     Object? deviceType = const _Sentinel(),
     Object? assetStatus = const _Sentinel(),
     Object? page = const _Sentinel(),
+    Object? pageSize = const _Sentinel(),
   }) {
     return ItemFilterParams(
       search:
           identical(search, const _Sentinel()) ? this.search : search as String,
-      sortBy:
-          identical(sortBy, const _Sentinel()) ? this.sortBy : sortBy as String,
+      sortBy: identical(sortBy, const _Sentinel())
+          ? this.sortBy
+          : sortBy as String?,
       sortOrder: identical(sortOrder, const _Sentinel())
           ? this.sortOrder
           : sortOrder as String,
@@ -42,7 +42,6 @@ class ItemFilterParams {
       assetStatus: identical(assetStatus, const _Sentinel())
           ? this.assetStatus
           : assetStatus as AssetStatus?,
-      page: identical(page, const _Sentinel()) ? this.page : page as int,
     );
   }
 
@@ -56,8 +55,7 @@ class ItemFilterParams {
           sortOrder == other.sortOrder &&
           deviceType == other.deviceType &&
           assetStatus == other.assetStatus &&
-          isExpiring == other.isExpiring &&
-          page == other.page;
+          isExpiring == other.isExpiring;
 
   @override
   int get hashCode =>
@@ -66,8 +64,7 @@ class ItemFilterParams {
       sortOrder.hashCode ^
       deviceType.hashCode ^
       assetStatus.hashCode ^
-      isExpiring.hashCode ^
-      page.hashCode;
+      isExpiring.hashCode;
 }
 
 // Sentinel class to distinguish between null and not-provided

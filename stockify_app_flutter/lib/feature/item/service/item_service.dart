@@ -1,4 +1,5 @@
 import '../model/item.dart';
+import '../model/item_filter_param.dart';
 
 abstract class ItemService {
   void addItem(Item item);
@@ -8,6 +9,8 @@ abstract class ItemService {
   void deleteItem(int id);
 
   List<Item> getAllItems();
+
+  List<Item> getFilteredItems(ItemFilterParams params);
 
   Item getItem(int id);
 }

@@ -121,9 +121,7 @@ class _ItemScreenState extends State<ItemScreen> {
   }
 
   void _onSearchChanged(String query) {
-    setState(() {
-      _filterParams = _filterParams.copyWith(search: query, page: 1);
-    });
+    _filterParams = _filterParams.copyWith(search: query);
     _refreshData();
   }
 
@@ -134,7 +132,7 @@ class _ItemScreenState extends State<ItemScreen> {
         currentParams: _filterParams,
         onApplyFilter: (params) {
           setState(() {
-            _filterParams = params.copyWith(page: 1);
+            _filterParams = params;
           });
           _refreshData();
         },
@@ -376,18 +374,18 @@ class _ItemScreenState extends State<ItemScreen> {
               if (_selectedRowIndex <
                   _itemDataSource._filteredItems.length - 1) {
                 _itemDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
-                _refreshData();
               }
             });
+            _refreshData();
           }),
           AppShortcuts.arrowUp: VoidCallbackIntent(() {
             _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
             setState(() {
               if (_selectedRowIndex > 0) {
                 _itemDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
-                _refreshData();
               }
             });
+            _refreshData();
           }),
           AppShortcuts.viewDetails: VoidCallbackIntent(() {
             if (_selectedRowIndex != -1) {
@@ -486,6 +484,20 @@ class _ItemScreenState extends State<ItemScreen> {
                                     ),
                                     leading: Icon(Icons.search,
                                         color: AppColors.colorTextDark),
+                                    trailing: [
+                                      InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _searchInputController.clear();
+                                            _onSearchChanged('');
+                                          });
+                                        },
+                                        child: Icon(
+                                          Icons.clear,
+                                          color: AppColors.colorTextDark,
+                                        ),
+                                      ),
+                                    ],
                                     hintText:
                                         'Search for items by their Asset No, Model No or Serial No',
                                     onChanged: _onSearchChanged,
@@ -843,7 +855,6 @@ class _ItemScreenState extends State<ItemScreen> {
 
 class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
-  List<Item> _items = [];
   List<Item> _filteredItems = [];
   final void Function(Item)? onEdit;
   final void Function(Item)? onView;
@@ -867,74 +878,16 @@ class ItemData extends DataTableSource {
 
   void updateFilterParams(ItemFilterParams params) {
     _filterParams = params;
+    refreshData();
   }
 
-  void updateRowsPerPage(int rowsPerPage) {}
-
   void refreshData() {
-    _items = _itemService.getAllItems();
-    _applyFilters();
+    _filteredItems = _itemService.getFilteredItems(_filterParams);
     notifyListeners();
   }
 
   Item getRowData(int index) {
     return _filteredItems[index];
-  }
-
-  void _applyFilters() {
-    _filteredItems = _items.where((item) {
-      if (_filterParams.search.isNotEmpty) {
-        final searchLower = _filterParams.search.toLowerCase();
-        final matchesSearch =
-            item.assetNo.toLowerCase().contains(searchLower) ||
-                item.modelNo.toLowerCase().contains(searchLower) ||
-                item.serialNo.toLowerCase().contains(searchLower) ||
-                (item.hostName?.toLowerCase().contains(searchLower) ?? false) ||
-                (item.ipPort?.toLowerCase().contains(searchLower) ?? false) ||
-                (item.macAddress?.toLowerCase().contains(searchLower) ?? false);
-        if (!matchesSearch) return false;
-      }
-      if (_filterParams.deviceType != null &&
-          item.deviceType != _filterParams.deviceType) {
-        return false;
-      }
-      if (_filterParams.assetStatus != null &&
-          item.assetStatus != _filterParams.assetStatus) {
-        return false;
-      }
-      if (_filterParams.isExpiring) {
-        final now = DateTime.now();
-        final isExpiring = item.warrantyDate.isAfter(now) &&
-            item.warrantyDate.difference(now).inDays <= 30;
-        if (!isExpiring) return false;
-      }
-      return true;
-    }).toList();
-    _filteredItems.sort((a, b) {
-      int comparison = 0;
-      switch (_filterParams.sortBy) {
-        case 'assetNo':
-          comparison = a.assetNo.compareTo(b.assetNo);
-          break;
-        case 'modelNo':
-          comparison = a.modelNo.compareTo(b.modelNo);
-          break;
-        case 'serialNo':
-          comparison = a.serialNo.compareTo(b.serialNo);
-          break;
-        case 'receivedDate':
-          if (a.receivedDate != null && b.receivedDate != null) {
-            comparison = a.receivedDate!.compareTo(b.receivedDate!);
-          }
-          break;
-        case 'warrantyDate':
-          comparison = a.warrantyDate.compareTo(b.warrantyDate);
-          break;
-        default:
-          comparison = a.assetNo.compareTo(b.assetNo);
-      }
-      return _filterParams.sortOrder == 'DESC' ? -comparison : comparison;
-    });
   }
 
   @override
@@ -946,7 +899,7 @@ class ItemData extends DataTableSource {
       selected: isSelected,
       color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
         if (states.contains(WidgetState.selected)) {
-          return AppColors.colorGreen.withAlpha(20);
+          return AppColors.colorSecondary.withAlpha(50);
         }
         return null;
       }),
@@ -957,7 +910,7 @@ class ItemData extends DataTableSource {
         notifyListeners();
       },
       cells: [
-        DataCell(Text(item.id.toString())),
+        DataCell(Text(item.id?.toString() ?? '')),
         DataCell(Text(item.assetNo)),
         DataCell(Text(item.modelNo)),
         DataCell(Text(item.serialNo)),
@@ -968,22 +921,22 @@ class ItemData extends DataTableSource {
         DataCell(Row(
           children: [
             ActionWidget(
-                icon: Icons.remove_red_eye_rounded,
-                onTap: () {
-                  onView!(item);
-                }),
+              icon: Icons.remove_red_eye_rounded,
+              onTap: () => onView!(item),
+              message: 'View Item Details',
+            ),
             const SizedBox(width: 10.0),
             ActionWidget(
-                icon: Icons.edit,
-                onTap: () {
-                  onEdit!(item);
-                }),
+              icon: Icons.edit,
+              onTap: () => onEdit!(item),
+              message: 'Edit Item',
+            ),
             const SizedBox(width: 10.0),
             ActionWidget(
-                icon: Icons.delete,
-                onTap: () {
-                  onDelete!(item);
-                })
+              icon: Icons.delete,
+              onTap: () => onDelete!(item),
+              message: 'Delete Item',
+            )
           ],
         ))
       ],

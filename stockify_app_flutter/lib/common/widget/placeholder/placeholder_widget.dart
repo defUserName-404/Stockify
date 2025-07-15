@@ -29,7 +29,7 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
   late double _railWidth;
   bool _isExtended = false;
   bool _showLabels = false;
-  final double _minRailWidth = 72;
+  final double _minRailWidth = 80;
   final double _maxRailWidth = 250;
   final double _minRailLabelThreshold = 100;
 
@@ -78,94 +78,162 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
           child: Scaffold(
             body: Row(
               children: <Widget>[
-                SizedBox(
+                Container(
                   width: _railWidth,
-                  child: NavigationRail(
-                    leading: IconButton(
-                      onPressed: () {
-                        _updateRailWidth(
-                            _isExtended ? _minRailWidth : _maxRailWidth);
-                      },
-                      icon: const Icon(Icons.menu,
-                          color: AppColors.colorBackground),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border(
+                      right: BorderSide(
+                        color:
+                            Theme.of(context).colorScheme.outline.withAlpha(20),
+                        width: 1,
+                      ),
                     ),
-                    destinations: [
-                      const NavigationRailDestination(
-                        icon: Icon(Icons.dashboard_outlined),
-                        selectedIcon: Icon(Icons.dashboard),
-                        label: Text('Dashboard'),
-                      ),
-                      const NavigationRailDestination(
-                        icon: Icon(Icons.inventory_2_outlined),
-                        selectedIcon: Icon(Icons.inventory_2),
-                        label: Text('Items'),
-                      ),
-                      NavigationRailDestination(
-                        icon: const Icon(Icons.account_circle_outlined),
-                        selectedIcon: const Icon(Icons.account_circle),
-                        label: const Text('Users'),
-                      ),
-                      NavigationRailDestination(
-                        icon: Consumer<NotificationStorageService>(
-                          builder: (context, notificationService, child) {
-                            return FutureBuilder<List<AppNotification>>(
-                              future: notificationService.getNotifications(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData &&
-                                    snapshot.data!.isNotEmpty) {
-                                  return const Icon(Icons.notifications_active);
-                                } else {
-                                  return const Icon(Icons.notifications_none);
-                                }
-                              },
-                            );
-                          },
+                  ),
+                  child: Column(
+                    children: [
+                      // Header with toggle button
+                      Container(
+                        height: 64,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _CustomNavButton(
+                                icon: Icons.menu,
+                                onPressed: () {
+                                  _updateRailWidth(_isExtended
+                                      ? _minRailWidth
+                                      : _maxRailWidth);
+                                },
+                                isSelected: false,
+                                showLabel: false,
+                                tooltip: _isExtended ? 'Collapse' : 'Expand',
+                              ),
+                            ),
+                          ],
                         ),
-                        selectedIcon: Consumer<NotificationStorageService>(
-                          builder: (context, notificationService, child) {
-                            return FutureBuilder<List<AppNotification>>(
-                              future: notificationService.getNotifications(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData &&
-                                    snapshot.data!.isNotEmpty) {
-                                  return const Icon(Icons.notifications_active);
-                                } else {
-                                  return const Icon(Icons.notifications_none);
-                                }
-                              },
-                            );
-                          },
-                        ),
-                        label: const Text('Notifications'),
                       ),
-                      const NavigationRailDestination(
-                        icon: Icon(Icons.settings_outlined),
-                        selectedIcon: Icon(Icons.settings),
-                        label: Text('Settings'),
+                      const Divider(height: 1),
+                      // Main navigation items
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Column(
+                            children: [
+                              _CustomNavButton(
+                                icon: _selectedIndex == 0
+                                    ? Icons.dashboard
+                                    : Icons.dashboard_outlined,
+                                label: 'Dashboard',
+                                onPressed: () => updateSelectedScreen(0),
+                                isSelected: _selectedIndex == 0,
+                                showLabel: _showLabels,
+                                tooltip: 'Dashboard',
+                              ),
+                              const SizedBox(height: 4),
+                              _CustomNavButton(
+                                icon: _selectedIndex == 1
+                                    ? Icons.inventory_2
+                                    : Icons.inventory_2_outlined,
+                                label: 'Items',
+                                onPressed: () => updateSelectedScreen(1),
+                                isSelected: _selectedIndex == 1,
+                                showLabel: _showLabels,
+                                tooltip: 'Items',
+                              ),
+                              const SizedBox(height: 4),
+                              _CustomNavButton(
+                                icon: _selectedIndex == 2
+                                    ? Icons.account_circle
+                                    : Icons.account_circle_outlined,
+                                label: 'Users',
+                                onPressed: () => updateSelectedScreen(2),
+                                isSelected: _selectedIndex == 2,
+                                showLabel: _showLabels,
+                                tooltip: 'Users',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Bottom section with notifications and settings
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Column(
+                          children: [
+                            const Divider(height: 1),
+                            const SizedBox(height: 8),
+                            Consumer<NotificationStorageService>(
+                              builder: (context, notificationService, child) {
+                                return FutureBuilder<List<AppNotification>>(
+                                  future:
+                                      notificationService.getNotifications(),
+                                  builder: (context, snapshot) {
+                                    final hasNotifications = snapshot.hasData &&
+                                        snapshot.data!.isNotEmpty;
+                                    return _CustomNavButton(
+                                      icon: _selectedIndex == 3
+                                          ? (hasNotifications
+                                              ? Icons.notifications_active
+                                              : Icons.notifications_none)
+                                          : (hasNotifications
+                                              ? Icons
+                                                  .notifications_active_outlined
+                                              : Icons
+                                                  .notifications_none_outlined),
+                                      label: 'Notifications',
+                                      onPressed: () => updateSelectedScreen(3),
+                                      isSelected: _selectedIndex == 3,
+                                      showLabel: _showLabels,
+                                      tooltip: 'Notifications',
+                                      badge: hasNotifications
+                                          ? snapshot.data!.length
+                                          : null,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 4),
+                            _CustomNavButton(
+                              icon: _selectedIndex == 4
+                                  ? Icons.settings
+                                  : Icons.settings_outlined,
+                              label: 'Settings',
+                              onPressed: () => updateSelectedScreen(4),
+                              isSelected: _selectedIndex == 4,
+                              showLabel: _showLabels,
+                              tooltip: 'Settings',
+                            ),
+                          ],
+                        ),
                       ),
                     ],
-                    selectedIndex: _selectedIndex,
-                    onDestinationSelected: (index) =>
-                        setState(() => _selectedIndex = index),
-                    labelType: _showLabels
-                        ? NavigationRailLabelType.all
-                        : NavigationRailLabelType.none,
                   ),
                 ),
+                // Resize handle
                 GestureDetector(
                   onHorizontalDragUpdate: (details) {
                     _updateRailWidth(_railWidth + details.primaryDelta!);
                   },
                   child: MouseRegion(
                     cursor: SystemMouseCursors.resizeLeftRight,
-                    child: Container(
-                      width: 2,
-                      height: double.infinity,
-                      color: Colors.grey[300],
+                    child: Center(
+                      child: Container(
+                        width: 2,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withAlpha(20),
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                const VerticalDivider(thickness: 1, width: 1),
+                // Main content area
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -206,5 +274,116 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
       _selectedIndex = index;
       _currentFilterParams = itemFilterParams;
     });
+  }
+}
+
+class _CustomNavButton extends StatelessWidget {
+  final IconData icon;
+  final String? label;
+  final VoidCallback onPressed;
+  final bool isSelected;
+  final bool showLabel;
+  final String tooltip;
+  final int? badge;
+
+  const _CustomNavButton({
+    required this.icon,
+    this.label,
+    required this.onPressed,
+    required this.isSelected,
+    required this.showLabel,
+    required this.tooltip,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Tooltip(
+      message: tooltip,
+      waitDuration: const Duration(milliseconds: 500),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color:
+                isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: onPressed,
+              child: Container(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(
+                          icon,
+                          size: 24,
+                          color: isSelected
+                              ? AppColors.colorAccent
+                              : colorScheme.onSurface,
+                        ),
+                        if (badge != null)
+                          Positioned(
+                            right: -6,
+                            top: -6,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: colorScheme.error,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Text(
+                                badge! > 99 ? '99+' : badge.toString(),
+                                style: TextStyle(
+                                  color: colorScheme.onError,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    if (showLabel && label != null) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          label!,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w400,
+                            color: isSelected
+                                ? AppColors.colorAccent
+                                : colorScheme.onSurface,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
