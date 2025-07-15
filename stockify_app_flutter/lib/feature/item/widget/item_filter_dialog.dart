@@ -151,7 +151,7 @@ class _FilterDialogState extends State<FilterDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: () {
             widget.onApplyFilter(_params);
             Navigator.of(context).pop();

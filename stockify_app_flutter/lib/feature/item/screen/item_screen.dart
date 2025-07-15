@@ -486,6 +486,20 @@ class _ItemScreenState extends State<ItemScreen> {
                                     ),
                                     leading: Icon(Icons.search,
                                         color: AppColors.colorTextDark),
+                                    trailing: [
+                                      InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _searchInputController.clear();
+                                            _onSearchChanged('');
+                                          });
+                                        },
+                                        child: Icon(
+                                          Icons.clear,
+                                          color: AppColors.colorTextDark,
+                                        ),
+                                      ),
+                                    ],
                                     hintText:
                                         'Search for items by their Asset No, Model No or Serial No',
                                     onChanged: _onSearchChanged,

@@ -323,6 +323,20 @@ class _UserScreenState extends State<UserScreen> {
                                   ),
                                   leading: Icon(Icons.search,
                                       color: AppColors.colorTextDark),
+                                  trailing: [
+                                    InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _searchInputController.clear();
+                                          _onSearchChanged('');
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.clear,
+                                        color: AppColors.colorTextDark,
+                                      ),
+                                    ),
+                                  ],
                                   hintText:
                                       'Search for users by their User Name or SAP ID',
                                   onChanged: _onSearchChanged,
