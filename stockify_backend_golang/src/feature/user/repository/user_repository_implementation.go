@@ -68,7 +68,7 @@ func (r *userRepository) GetFilteredUsers(params model.UserQueryParams) ([]model
 		database = database.Order(sortColumn + " " + order)
 	}
 	// Pagination
-	database = database.Offset((params.Page - 1) * params.PageSize).Limit(params.PageSize)
+	database = database.Offset((params.Page - 1) * params.PageSize).Limit(params.PageSize + 1)
 	var users []model.User
 	err := database.Find(&users).Error
 	if err != nil {

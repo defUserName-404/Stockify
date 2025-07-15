@@ -9,6 +9,7 @@ class ItemFilterParams {
   final AssetStatus? assetStatus;
   final bool isExpiring;
   final int page;
+  final int pageSize;
 
   ItemFilterParams({
     this.search = '',
@@ -18,6 +19,7 @@ class ItemFilterParams {
     this.assetStatus,
     this.isExpiring = false,
     this.page = 1,
+    this.pageSize = 10,
   });
 
   ItemFilterParams copyWith({
@@ -27,6 +29,7 @@ class ItemFilterParams {
     Object? deviceType = const _Sentinel(),
     Object? assetStatus = const _Sentinel(),
     Object? page = const _Sentinel(),
+    Object? pageSize = const _Sentinel(),
   }) {
     return ItemFilterParams(
       search:
@@ -43,6 +46,9 @@ class ItemFilterParams {
           ? this.assetStatus
           : assetStatus as AssetStatus?,
       page: identical(page, const _Sentinel()) ? this.page : page as int,
+      pageSize: identical(pageSize, const _Sentinel())
+          ? this.pageSize
+          : pageSize as int,
     );
   }
 
@@ -57,7 +63,8 @@ class ItemFilterParams {
           deviceType == other.deviceType &&
           assetStatus == other.assetStatus &&
           isExpiring == other.isExpiring &&
-          page == other.page;
+          page == other.page &&
+          pageSize == other.pageSize;
 
   @override
   int get hashCode =>
@@ -67,7 +74,8 @@ class ItemFilterParams {
       deviceType.hashCode ^
       assetStatus.hashCode ^
       isExpiring.hashCode ^
-      page.hashCode;
+      page.hashCode ^
+      pageSize.hashCode;
 }
 
 // Sentinel class to distinguish between null and not-provided

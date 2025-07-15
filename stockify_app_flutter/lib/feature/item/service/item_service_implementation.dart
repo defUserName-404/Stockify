@@ -1,4 +1,5 @@
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
+import 'package:stockify_app_flutter/feature/item/model/item_filter_param.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 
 import '../repository/item_repository.dart';
@@ -36,5 +37,10 @@ class ItemServiceImplementation extends ItemService {
   @override
   void updateItem(Item item) {
     _itemRepository.updateItem(item);
+  }
+
+  @override
+  List<Item> getFilteredItems(ItemFilterParams params) {
+    return _itemRepository.getFilteredItems(params);
   }
 }

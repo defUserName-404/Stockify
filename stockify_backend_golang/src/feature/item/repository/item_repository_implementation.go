@@ -51,6 +51,7 @@ func (r *itemRepository) DeleteItemById(id uint64) {
 
 func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]model.Item, error) {
 	database := db.DB.Model(&model.Item{})
+
 	// Filtering
 	if params.DeviceType != nil {
 		database = database.Where("device_type = ?", *params.DeviceType)
@@ -61,20 +62,16 @@ func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]mode
 	if params.WarrantyDate != nil {
 		database = database.Where("warranty_date = ?", *params.WarrantyDate)
 	}
+
 	// Searching
 	if params.Search != "" {
 		searchTerm := "%" + params.Search + "%"
 		database = database.Where(
-			"asset_no LIKE ?",
-			searchTerm,
-		).Or(
-			"model_no LIKE ?",
-			searchTerm,
-		).Or(
-			"serial_no LIKE ?",
-			searchTerm,
+			"asset_no LIKE ? OR model_no LIKE ? OR serial_no LIKE ?",
+			searchTerm, searchTerm, searchTerm,
 		)
 	}
+
 	// Sorting
 	sortColumn := map[string]string{
 		"asset_no":      "asset_no",
@@ -90,9 +87,11 @@ func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]mode
 		}
 		database = database.Order(sortColumn + " " + order)
 	}
+
 	// Pagination
 	offset := (params.Page - 1) * params.PageSize
-	database = database.Offset(offset).Limit(params.PageSize)
+	database = database.Offset(offset).Limit(params.PageSize + 1)
+
 	// Execute
 	var items []model.Item
 	if err := database.Find(&items).Error; err != nil {

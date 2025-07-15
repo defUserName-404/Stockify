@@ -91,20 +91,20 @@ typedef DeleteItemByIdC = Void Function(Uint64 id);
 typedef DeleteItemByIdDart = void Function(int id);
 
 typedef GetFilteredItemsC = Pointer<Utf8> Function(
-  Pointer<Utf8> search,
   Pointer<Utf8> deviceType,
   Pointer<Utf8> assetStatus,
   Int64 warrantyDate,
+  Pointer<Utf8> search,
   Pointer<Utf8> sortBy,
   Pointer<Utf8> sortOrder,
   Int32 page,
   Int32 pageSize,
 );
 typedef GetFilteredItemsDart = Pointer<Utf8> Function(
-  Pointer<Utf8> search,
   Pointer<Utf8> deviceType,
   Pointer<Utf8> assetStatus,
   int warrantyDate,
+  Pointer<Utf8> search,
   Pointer<Utf8> sortBy,
   Pointer<Utf8> sortOrder,
   int page,

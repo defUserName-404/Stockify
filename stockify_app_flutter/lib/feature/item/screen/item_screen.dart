@@ -115,6 +115,7 @@ class _ItemScreenState extends State<ItemScreen> {
 
   void _refreshData() {
     setState(() {
+      _filterParams = _filterParams.copyWith(pageSize: _rowsPerPage);
       _itemDataSource.updateFilterParams(_filterParams);
       _itemDataSource.refreshData();
     });
@@ -371,23 +372,14 @@ class _ItemScreenState extends State<ItemScreen> {
               VoidCallbackIntent(() => _showFilterDialog()),
           AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
           AppShortcuts.arrowDown: VoidCallbackIntent(() {
-            _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
-            setState(() {
-              if (_selectedRowIndex <
-                  _itemDataSource._filteredItems.length - 1) {
-                _itemDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
-                _refreshData();
-              }
-            });
+            if (_selectedRowIndex < _itemDataSource.rowCount - 1) {
+              _itemDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
+            }
           }),
           AppShortcuts.arrowUp: VoidCallbackIntent(() {
-            _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
-            setState(() {
-              if (_selectedRowIndex > 0) {
-                _itemDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
-                _refreshData();
-              }
-            });
+            if (_selectedRowIndex > 0) {
+              _itemDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
+            }
           }),
           AppShortcuts.viewDetails: VoidCallbackIntent(() {
             if (_selectedRowIndex != -1) {
@@ -521,6 +513,19 @@ class _ItemScreenState extends State<ItemScreen> {
                               setState(() {
                                 _rowsPerPage = value!;
                               });
+                            },
+                            onPageChanged: (int? firstRowIndex) {
+                              if (firstRowIndex != null) {
+                                final newPage =
+                                    (firstRowIndex / _rowsPerPage).floor() + 1;
+                                if (newPage != _filterParams.page) {
+                                  setState(() {
+                                    _filterParams =
+                                        _filterParams.copyWith(page: newPage);
+                                    _refreshData();
+                                  });
+                                }
+                              }
                             },
                             rowsPerPage: _rowsPerPage,
                             columns: [
@@ -858,7 +863,7 @@ class _ItemScreenState extends State<ItemScreen> {
 class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
   List<Item> _items = [];
-  List<Item> _filteredItems = [];
+  bool _hasMore = false;
   final void Function(Item)? onEdit;
   final void Function(Item)? onView;
   final void Function(Item)? onDelete;
@@ -886,75 +891,19 @@ class ItemData extends DataTableSource {
   void updateRowsPerPage(int rowsPerPage) {}
 
   void refreshData() {
-    _items = _itemService.getAllItems();
-    _applyFilters();
+    final fetchedItems = _itemService.getFilteredItems(_filterParams);
+    _hasMore = fetchedItems.length > _filterParams.pageSize;
+    _items = fetchedItems.take(_filterParams.pageSize).toList();
     notifyListeners();
   }
 
   Item getRowData(int index) {
-    return _filteredItems[index];
-  }
-
-  void _applyFilters() {
-    _filteredItems = _items.where((item) {
-      if (_filterParams.search.isNotEmpty) {
-        final searchLower = _filterParams.search.toLowerCase();
-        final matchesSearch =
-            item.assetNo.toLowerCase().contains(searchLower) ||
-                item.modelNo.toLowerCase().contains(searchLower) ||
-                item.serialNo.toLowerCase().contains(searchLower);
-        if (!matchesSearch) return false;
-      }
-      if (_filterParams.deviceType != null &&
-          item.deviceType != _filterParams.deviceType) {
-        return false;
-      }
-      if (_filterParams.assetStatus != null &&
-          item.assetStatus != _filterParams.assetStatus) {
-        return false;
-      }
-      if (_filterParams.isExpiring) {
-        final now = DateTime.now();
-        final isExpiring = item.warrantyDate.isAfter(now) &&
-            item.warrantyDate.difference(now).inDays <= 30;
-        if (!isExpiring) return false;
-      }
-      return true;
-    }).toList();
-    _filteredItems.sort((a, b) {
-      int comparison = 0;
-      if (_filterParams.sortBy == null) {
-        comparison = a.id!.compareTo(b.id!);
-      } else {
-        switch (_filterParams.sortBy) {
-          case 'assetNo':
-            comparison = a.assetNo.compareTo(b.assetNo);
-            break;
-          case 'modelNo':
-            comparison = a.modelNo.compareTo(b.modelNo);
-            break;
-          case 'serialNo':
-            comparison = a.serialNo.compareTo(b.serialNo);
-            break;
-          case 'receivedDate':
-            if (a.receivedDate != null && b.receivedDate != null) {
-              comparison = a.receivedDate!.compareTo(b.receivedDate!);
-            }
-            break;
-          case 'warrantyDate':
-            comparison = a.warrantyDate.compareTo(b.warrantyDate);
-            break;
-          default:
-            comparison = a.id!.compareTo(b.id!);
-        }
-      }
-      return _filterParams.sortOrder == 'DESC' ? -comparison : comparison;
-    });
+    return _items[index];
   }
 
   @override
   DataRow getRow(int index) {
-    final item = _filteredItems[index];
+    final item = _items[index];
     final isSelected = getSelectedRowIndex() == index;
     return DataRow.byIndex(
       index: index,
@@ -966,7 +915,7 @@ class ItemData extends DataTableSource {
         return null;
       }),
       onSelectChanged: (_) {
-        if (index >= 0 && index < _filteredItems.length) {
+        if (index >= 0 && index < _items.length) {
           setSelectedRowIndex(index);
         }
         notifyListeners();
@@ -983,25 +932,25 @@ class ItemData extends DataTableSource {
         DataCell(Row(
           children: [
             ActionWidget(
-                icon: Icons.remove_red_eye_rounded,
-                onTap: () {
-                  onView!(item);
+              icon: Icons.remove_red_eye_rounded,
+              onTap: () {
+                onView!(item);
               },
               message: 'View Item Details',
             ),
             const SizedBox(width: 10.0),
             ActionWidget(
-                icon: Icons.edit,
-                onTap: () {
-                  onEdit!(item);
+              icon: Icons.edit,
+              onTap: () {
+                onEdit!(item);
               },
               message: 'Edit Item',
             ),
             const SizedBox(width: 10.0),
             ActionWidget(
-                icon: Icons.delete,
-                onTap: () {
-                  onDelete!(item);
+              icon: Icons.delete,
+              onTap: () {
+                onDelete!(item);
               },
               message: 'Delete Item',
             )
@@ -1012,10 +961,10 @@ class ItemData extends DataTableSource {
   }
 
   @override
-  int get rowCount => _filteredItems.length;
+  int get rowCount => _items.length;
 
   @override
-  bool get isRowCountApproximate => false;
+  bool get isRowCountApproximate => _hasMore;
 
   @override
   int get selectedRowCount => 0;
