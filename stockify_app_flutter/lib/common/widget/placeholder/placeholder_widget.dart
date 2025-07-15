@@ -218,21 +218,16 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
                   },
                   child: MouseRegion(
                     cursor: SystemMouseCursors.resizeLeftRight,
-                    child: Container(
-                      width: 4,
-                      height: double.infinity,
-                      color: Colors.transparent,
-                      child: Center(
-                        child: Container(
-                          width: 2,
-                          height: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(1),
-                          ),
+                    child: Center(
+                      child: Container(
+                        width: 2,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withAlpha(20),
+                          borderRadius: BorderRadius.circular(1),
                         ),
                       ),
                     ),
@@ -321,12 +316,10 @@ class _CustomNavButtonState extends State<_CustomNavButton> {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
             color: widget.isSelected
                 ? colorScheme.primaryContainer
-                : _isHovered
-                    ? colorScheme.surfaceContainerHighest
-                    : Colors.transparent,
+                : colorScheme.surface,
           ),
           child: Material(
             color: Colors.transparent,
@@ -346,9 +339,7 @@ class _CustomNavButtonState extends State<_CustomNavButton> {
                           size: 24,
                           color: widget.isSelected
                               ? AppColors.colorAccent
-                              : _isHovered
-                                  ? colorScheme.onSurface
-                                  : colorScheme.onSurfaceVariant,
+                              : colorScheme.onSurface,
                         ),
                         if (widget.badge != null)
                           Positioned(
@@ -391,9 +382,7 @@ class _CustomNavButtonState extends State<_CustomNavButton> {
                                 : FontWeight.w400,
                             color: widget.isSelected
                                 ? AppColors.colorAccent
-                                : _isHovered
-                                    ? colorScheme.onSurface
-                                    : colorScheme.onSurfaceVariant,
+                                : colorScheme.onSurface,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
