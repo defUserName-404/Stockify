@@ -164,6 +164,8 @@ class ItemRepository {
       searchPtr,
       sortByPtr,
       sortOrderPtr,
+      params.page,
+      params.pageSize,
     );
     final jsonString = resultPtr.toDartString();
     _ffi.freeCString(resultPtr);

@@ -48,18 +48,17 @@ class _FilterDialogState extends State<FilterDialog> {
               ),
               items: const [
                 DropdownMenuItem(value: null, child: Text('Default')),
-                DropdownMenuItem(value: 'assetNo', child: Text('Asset No')),
-                DropdownMenuItem(value: 'modelNo', child: Text('Model No')),
-                DropdownMenuItem(value: 'serialNo', child: Text('Serial No')),
+                DropdownMenuItem(value: 'asset_no', child: Text('Asset No')),
+                DropdownMenuItem(value: 'model_no', child: Text('Model No')),
+                DropdownMenuItem(value: 'serial_no', child: Text('Serial No')),
                 DropdownMenuItem(
-                    value: 'receivedDate', child: Text('Received Date')),
+                    value: 'received_date', child: Text('Received Date')),
                 DropdownMenuItem(
-                    value: 'warrantyDate', child: Text('Warranty Date')),
+                    value: 'warranty_date', child: Text('Warranty Date')),
               ],
               onChanged: (value) {
                 setState(() {
-                  final newParams = _params.copyWith(sortBy: value);
-                  widget.onApplyFilter(newParams);
+                  _params = _params.copyWith(sortBy: value);
                 });
               },
             ),

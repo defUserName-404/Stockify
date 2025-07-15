@@ -277,7 +277,7 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
   }
 }
 
-class _CustomNavButton extends StatefulWidget {
+class _CustomNavButton extends StatelessWidget {
   final IconData icon;
   final String? label;
   final VoidCallback onPressed;
@@ -297,18 +297,11 @@ class _CustomNavButton extends StatefulWidget {
   });
 
   @override
-  State<_CustomNavButton> createState() => _CustomNavButtonState();
-}
-
-class _CustomNavButtonState extends State<_CustomNavButton> {
-  bool _isHovered = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Tooltip(
-      message: widget.tooltip,
+      message: tooltip,
       waitDuration: const Duration(milliseconds: 500),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -317,15 +310,14 @@ class _CustomNavButtonState extends State<_CustomNavButton> {
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: widget.isSelected
-                ? colorScheme.primaryContainer
-                : colorScheme.surface,
+            color:
+                isSelected ? colorScheme.primaryContainer : colorScheme.surface,
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
-              onTap: widget.onPressed,
+              onTap: onPressed,
               child: Container(
                 height: 48,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -335,13 +327,13 @@ class _CustomNavButtonState extends State<_CustomNavButton> {
                       clipBehavior: Clip.none,
                       children: [
                         Icon(
-                          widget.icon,
+                          icon,
                           size: 24,
-                          color: widget.isSelected
+                          color: isSelected
                               ? AppColors.colorAccent
                               : colorScheme.onSurface,
                         ),
-                        if (widget.badge != null)
+                        if (badge != null)
                           Positioned(
                             right: -6,
                             top: -6,
@@ -356,9 +348,7 @@ class _CustomNavButtonState extends State<_CustomNavButton> {
                                 minHeight: 16,
                               ),
                               child: Text(
-                                widget.badge! > 99
-                                    ? '99+'
-                                    : widget.badge.toString(),
+                                badge! > 99 ? '99+' : badge.toString(),
                                 style: TextStyle(
                                   color: colorScheme.onError,
                                   fontSize: 10,
@@ -370,17 +360,16 @@ class _CustomNavButtonState extends State<_CustomNavButton> {
                           ),
                       ],
                     ),
-                    if (widget.showLabel && widget.label != null) ...[
+                    if (showLabel && label != null) ...[
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          widget.label!,
+                          label!,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: widget.isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                            color: widget.isSelected
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w400,
+                            color: isSelected
                                 ? AppColors.colorAccent
                                 : colorScheme.onSurface,
                           ),

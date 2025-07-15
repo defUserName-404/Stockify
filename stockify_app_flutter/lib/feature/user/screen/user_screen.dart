@@ -357,7 +357,21 @@ class _UserScreenState extends State<UserScreen> {
                           onRowsPerPageChanged: (int? value) {
                             setState(() {
                               _rowsPerPage = value!;
+                              _refreshData();
                             });
+                          },
+                          onPageChanged: (int? firstRowIndex) {
+                            if (firstRowIndex != null) {
+                              final newPage =
+                                  (firstRowIndex / _rowsPerPage).floor() + 1;
+                              if (newPage != _filterParams.page) {
+                                setState(() {
+                                  _filterParams =
+                                      _filterParams.copyWith(page: newPage);
+                                  _refreshData();
+                                });
+                              }
+                            }
                           },
                           rowsPerPage: _rowsPerPage,
                           columns: [
@@ -519,9 +533,8 @@ class UserData extends DataTableSource {
     _filteredUsers = _users.where((user) {
       if (_filterParams.search.isNotEmpty) {
         final searchLower = _filterParams.search.toLowerCase();
-        final matchesSearch = user.userName
-                .toLowerCase()
-                .contains(searchLower) ||
+        final matchesSearch =
+            user.userName.toLowerCase().contains(searchLower) ||
                 (user.sapId?.toLowerCase().contains(searchLower) ?? false);
         ;
         if (!matchesSearch) return false;
@@ -579,25 +592,25 @@ class UserData extends DataTableSource {
           Row(
             children: [
               ActionWidget(
-                  icon: Icons.remove_red_eye_rounded,
-                  onTap: () {
-                    onView!(user);
+                icon: Icons.remove_red_eye_rounded,
+                onTap: () {
+                  onView!(user);
                 },
                 message: 'View User Details',
               ),
               const SizedBox(width: 10.0),
               ActionWidget(
-                  icon: Icons.edit,
-                  onTap: () {
-                    onEdit!(user);
+                icon: Icons.edit,
+                onTap: () {
+                  onEdit!(user);
                 },
                 message: 'Edit User',
               ),
               const SizedBox(width: 10.0),
               ActionWidget(
-                  icon: Icons.delete,
-                  onTap: () {
-                    onDelete!(user);
+                icon: Icons.delete,
+                onTap: () {
+                  onDelete!(user);
                 },
                 message: 'Delete User',
               )
@@ -612,7 +625,7 @@ class UserData extends DataTableSource {
   int get rowCount => _filteredUsers.length;
 
   @override
-  bool get isRowCountApproximate => false;
+  bool get isRowCountApproximate => true;
 
   @override
   int get selectedRowCount => 0;
