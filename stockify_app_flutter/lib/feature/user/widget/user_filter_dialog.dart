@@ -45,10 +45,10 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
               ),
               items: const [
                 DropdownMenuItem(value: null, child: Text('Default')),
-                DropdownMenuItem(value: 'user_name', child: Text('User Name')),
+                DropdownMenuItem(value: 'userName', child: Text('User Name')),
                 DropdownMenuItem(
                     value: 'designation', child: Text('Designation')),
-                DropdownMenuItem(value: 'sap_id', child: Text('SAP ID')),
+                DropdownMenuItem(value: 'sapId', child: Text('SAP ID')),
               ],
               onChanged: (value) {
                 setState(() {
