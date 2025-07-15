@@ -9,6 +9,4 @@ type ItemFilterParams struct {
 	WarrantyDate *time.Time
 	SortBy       string
 	SortOrder    string
-	Page         int
-	PageSize     int
 }

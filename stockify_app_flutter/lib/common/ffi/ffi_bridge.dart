@@ -97,8 +97,6 @@ typedef GetFilteredItemsC = Pointer<Utf8> Function(
   Pointer<Utf8> search,
   Pointer<Utf8> sortBy,
   Pointer<Utf8> sortOrder,
-  Int32 page,
-  Int32 pageSize,
 );
 typedef GetFilteredItemsDart = Pointer<Utf8> Function(
   Pointer<Utf8> deviceType,
@@ -107,8 +105,6 @@ typedef GetFilteredItemsDart = Pointer<Utf8> Function(
   Pointer<Utf8> search,
   Pointer<Utf8> sortBy,
   Pointer<Utf8> sortOrder,
-  int page,
-  int pageSize,
 );
 
 typedef FreeCStringC = Void Function(Pointer<Utf8> str);
@@ -152,7 +148,7 @@ class FFIBridge {
         .lookupFunction<UpdateItemFullC, UpdateItemFullDart>('UpdateItemFull');
     deleteItemById = _lib
         .lookupFunction<DeleteItemByIdC, DeleteItemByIdDart>('DeleteItemById');
-    getFilteredItems = 
+    getFilteredItems =
         _lib.lookupFunction<GetFilteredItemsC, GetFilteredItemsDart>(
             'GetFilteredItems');
     freeCString =
@@ -165,9 +161,10 @@ class FFIBridge {
     getUserById =
         _lib.lookupFunction<GetUserByIdC, GetUserByIdDart>('GetUserById');
     updateUser = _lib.lookupFunction<UpdateUserC, UpdateUserDart>('UpdateUser');
-    deleteUserById =
-        _lib.lookupFunction<DeleteUserByIdC, DeleteUserByIdDart>('DeleteUserById');
-    getFilteredUsers = _lib.lookupFunction<GetFilteredUsersC, GetFilteredUsersDart>(
-        'GetFilteredUsers');
+    deleteUserById = _lib
+        .lookupFunction<DeleteUserByIdC, DeleteUserByIdDart>('DeleteUserById');
+    getFilteredUsers =
+        _lib.lookupFunction<GetFilteredUsersC, GetFilteredUsersDart>(
+            'GetFilteredUsers');
   }
 }

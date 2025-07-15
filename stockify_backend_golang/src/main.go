@@ -267,8 +267,6 @@ func GetFilteredItems(
 	search *C.char,
 	sortBy *C.char,
 	sortOrder *C.char,
-	page C.int,
-	pageSize C.int,
 ) *C.char {
 	searchStr := C.GoString(search)
 	sortByStr := C.GoString(sortBy)
@@ -277,8 +275,6 @@ func GetFilteredItems(
 		Search:    searchStr,
 		SortBy:    sortByStr,
 		SortOrder: sortOrderStr,
-		Page:      int(page),
-		PageSize:  int(pageSize),
 	}
 	if dt := C.GoString(deviceType); dt != "" {
 		tmp := model.DeviceType(dt)
