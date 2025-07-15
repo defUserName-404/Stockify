@@ -36,7 +36,7 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
             const Text('Sort By',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
+            DropdownButtonFormField<String?>(
               value: _params.sortBy,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -44,6 +44,7 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
                     EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               items: const [
+                DropdownMenuItem(value: null, child: Text('Default')),
                 DropdownMenuItem(value: 'userName', child: Text('User Name')),
                 DropdownMenuItem(
                     value: 'designation', child: Text('Designation')),

@@ -530,18 +530,22 @@ class UserData extends DataTableSource {
     }).toList();
     _filteredUsers.sort((a, b) {
       int comparison = 0;
-      switch (_filterParams.sortBy) {
-        case 'userName':
-          comparison = a.userName.compareTo(b.userName);
-          break;
-        case 'designation':
-          comparison = (a.designation ?? '').compareTo(b.designation ?? '');
-          break;
-        case 'sapId':
-          comparison = (a.sapId ?? '').compareTo(b.sapId ?? '');
-          break;
-        default:
-          comparison = a.userName.compareTo(b.userName);
+      if (_filterParams.sortBy == null) {
+        comparison = a.id!.compareTo(b.id!);
+      } else {
+        switch (_filterParams.sortBy) {
+          case 'userName':
+            comparison = a.userName.compareTo(b.userName);
+            break;
+          case 'designation':
+            comparison = (a.designation ?? '').compareTo(b.designation ?? '');
+            break;
+          case 'sapId':
+            comparison = (a.sapId ?? '').compareTo(b.sapId ?? '');
+            break;
+          default:
+            comparison = a.id!.compareTo(b.id!);
+        }
       }
       return _filterParams.sortOrder == 'DESC' ? -comparison : comparison;
     });

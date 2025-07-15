@@ -39,7 +39,7 @@ class _FilterDialogState extends State<FilterDialog> {
             const Text('Sort By',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
+            DropdownButtonFormField<String?>(
               value: _params.sortBy,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -47,6 +47,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               items: const [
+                DropdownMenuItem(value: null, child: Text('Default')),
                 DropdownMenuItem(value: 'assetNo', child: Text('Asset No')),
                 DropdownMenuItem(value: 'modelNo', child: Text('Model No')),
                 DropdownMenuItem(value: 'serialNo', child: Text('Serial No')),

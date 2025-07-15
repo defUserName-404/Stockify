@@ -3,7 +3,7 @@ import 'device_type.dart';
 
 class ItemFilterParams {
   final String search;
-  final String sortBy;
+  final String? sortBy;
   final String sortOrder;
   final DeviceType? deviceType;
   final AssetStatus? assetStatus;
@@ -12,7 +12,7 @@ class ItemFilterParams {
 
   ItemFilterParams({
     this.search = '',
-    this.sortBy = 'assetNo',
+    this.sortBy,
     this.sortOrder = 'ASC',
     this.deviceType,
     this.assetStatus,
@@ -32,7 +32,7 @@ class ItemFilterParams {
       search:
           identical(search, const _Sentinel()) ? this.search : search as String,
       sortBy:
-          identical(sortBy, const _Sentinel()) ? this.sortBy : sortBy as String,
+          identical(sortBy, const _Sentinel()) ? this.sortBy : sortBy as String?,
       sortOrder: identical(sortOrder, const _Sentinel())
           ? this.sortOrder
           : sortOrder as String,

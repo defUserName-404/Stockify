@@ -1,12 +1,12 @@
 class UserFilterParams {
   final String search;
-  final String sortBy;
+  final String? sortBy;
   final String sortOrder;
   final int page;
 
   UserFilterParams({
     this.search = '',
-    this.sortBy = 'userName',
+    this.sortBy,
     this.sortOrder = 'ASC',
     this.page = 1,
   });
@@ -21,7 +21,7 @@ class UserFilterParams {
       search:
           identical(search, const _Sentinel()) ? this.search : search as String,
       sortBy:
-          identical(sortBy, const _Sentinel()) ? this.sortBy : sortBy as String,
+          identical(sortBy, const _Sentinel()) ? this.sortBy : sortBy as String?,
       sortOrder: identical(sortOrder, const _Sentinel())
           ? this.sortOrder
           : sortOrder as String,

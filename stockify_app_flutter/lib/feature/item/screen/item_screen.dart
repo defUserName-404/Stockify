@@ -923,26 +923,30 @@ class ItemData extends DataTableSource {
     }).toList();
     _filteredItems.sort((a, b) {
       int comparison = 0;
-      switch (_filterParams.sortBy) {
-        case 'assetNo':
-          comparison = a.assetNo.compareTo(b.assetNo);
-          break;
-        case 'modelNo':
-          comparison = a.modelNo.compareTo(b.modelNo);
-          break;
-        case 'serialNo':
-          comparison = a.serialNo.compareTo(b.serialNo);
-          break;
-        case 'receivedDate':
-          if (a.receivedDate != null && b.receivedDate != null) {
-            comparison = a.receivedDate!.compareTo(b.receivedDate!);
-          }
-          break;
-        case 'warrantyDate':
-          comparison = a.warrantyDate.compareTo(b.warrantyDate);
-          break;
-        default:
-          comparison = a.assetNo.compareTo(b.assetNo);
+      if (_filterParams.sortBy == null) {
+        comparison = a.id!.compareTo(b.id!);
+      } else {
+        switch (_filterParams.sortBy) {
+          case 'assetNo':
+            comparison = a.assetNo.compareTo(b.assetNo);
+            break;
+          case 'modelNo':
+            comparison = a.modelNo.compareTo(b.modelNo);
+            break;
+          case 'serialNo':
+            comparison = a.serialNo.compareTo(b.serialNo);
+            break;
+          case 'receivedDate':
+            if (a.receivedDate != null && b.receivedDate != null) {
+              comparison = a.receivedDate!.compareTo(b.receivedDate!);
+            }
+            break;
+          case 'warrantyDate':
+            comparison = a.warrantyDate.compareTo(b.warrantyDate);
+            break;
+          default:
+            comparison = a.id!.compareTo(b.id!);
+        }
       }
       return _filterParams.sortOrder == 'DESC' ? -comparison : comparison;
     });
