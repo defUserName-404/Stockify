@@ -218,16 +218,21 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
                   },
                   child: MouseRegion(
                     cursor: SystemMouseCursors.resizeLeftRight,
-                    child: Center(
-                      child: Container(
-                        width: 2,
-                        height: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withAlpha(20),
-                          borderRadius: BorderRadius.circular(1),
+                    child: Container(
+                      width: 4,
+                      height: double.infinity,
+                      color: Colors.transparent,
+                      child: Center(
+                        child: Container(
+                          width: 2,
+                          height: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(1),
+                          ),
                         ),
                       ),
                     ),
@@ -277,7 +282,7 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
   }
 }
 
-class _CustomNavButton extends StatelessWidget {
+class _CustomNavButton extends StatefulWidget {
   final IconData icon;
   final String? label;
   final VoidCallback onPressed;
@@ -297,11 +302,18 @@ class _CustomNavButton extends StatelessWidget {
   });
 
   @override
+  State<_CustomNavButton> createState() => _CustomNavButtonState();
+}
+
+class _CustomNavButtonState extends State<_CustomNavButton> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Tooltip(
-      message: tooltip,
+      message: widget.tooltip,
       waitDuration: const Duration(milliseconds: 500),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -309,15 +321,18 @@ class _CustomNavButton extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color:
-                isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            color: widget.isSelected
+                ? colorScheme.primaryContainer
+                : _isHovered
+                    ? colorScheme.surfaceContainerHighest
+                    : Colors.transparent,
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
-              onTap: onPressed,
+              onTap: widget.onPressed,
               child: Container(
                 height: 48,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -327,13 +342,15 @@ class _CustomNavButton extends StatelessWidget {
                       clipBehavior: Clip.none,
                       children: [
                         Icon(
-                          icon,
+                          widget.icon,
                           size: 24,
-                          color: isSelected
+                          color: widget.isSelected
                               ? AppColors.colorAccent
-                              : colorScheme.onSurface,
+                              : _isHovered
+                                  ? colorScheme.onSurface
+                                  : colorScheme.onSurfaceVariant,
                         ),
-                        if (badge != null)
+                        if (widget.badge != null)
                           Positioned(
                             right: -6,
                             top: -6,
@@ -348,7 +365,9 @@ class _CustomNavButton extends StatelessWidget {
                                 minHeight: 16,
                               ),
                               child: Text(
-                                badge! > 99 ? '99+' : badge.toString(),
+                                widget.badge! > 99
+                                    ? '99+'
+                                    : widget.badge.toString(),
                                 style: TextStyle(
                                   color: colorScheme.onError,
                                   fontSize: 10,
@@ -360,18 +379,21 @@ class _CustomNavButton extends StatelessWidget {
                           ),
                       ],
                     ),
-                    if (showLabel && label != null) ...[
+                    if (widget.showLabel && widget.label != null) ...[
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          label!,
+                          widget.label!,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.w400,
-                            color: isSelected
+                            fontWeight: widget.isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: widget.isSelected
                                 ? AppColors.colorAccent
-                                : colorScheme.onSurface,
+                                : _isHovered
+                                    ? colorScheme.onSurface
+                                    : colorScheme.onSurfaceVariant,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
