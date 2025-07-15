@@ -88,10 +88,6 @@ func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]mode
 		database = database.Order(sortColumn + " " + order)
 	}
 
-	// Pagination
-	offset := (params.Page - 1) * params.PageSize
-	database = database.Offset(offset).Limit(params.PageSize + 1)
-
 	// Execute
 	var items []model.Item
 	if err := database.Find(&items).Error; err != nil {

@@ -115,16 +115,13 @@ class _ItemScreenState extends State<ItemScreen> {
 
   void _refreshData() {
     setState(() {
-      _filterParams = _filterParams.copyWith(pageSize: _rowsPerPage);
       _itemDataSource.updateFilterParams(_filterParams);
       _itemDataSource.refreshData();
     });
   }
 
   void _onSearchChanged(String query) {
-    setState(() {
-      _filterParams = _filterParams.copyWith(search: query, page: 1);
-    });
+    _filterParams = _filterParams.copyWith(search: query);
     _refreshData();
   }
 
@@ -135,7 +132,7 @@ class _ItemScreenState extends State<ItemScreen> {
         currentParams: _filterParams,
         onApplyFilter: (params) {
           setState(() {
-            _filterParams = params.copyWith(page: 1);
+            _filterParams = params;
           });
           _refreshData();
         },
@@ -372,14 +369,23 @@ class _ItemScreenState extends State<ItemScreen> {
               VoidCallbackIntent(() => _showFilterDialog()),
           AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
           AppShortcuts.arrowDown: VoidCallbackIntent(() {
-            if (_selectedRowIndex < _itemDataSource.rowCount - 1) {
-              _itemDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
-            }
+            _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
+            setState(() {
+              if (_selectedRowIndex <
+                  _itemDataSource._filteredItems.length - 1) {
+                _itemDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
+              }
+            });
+            _refreshData();
           }),
           AppShortcuts.arrowUp: VoidCallbackIntent(() {
-            if (_selectedRowIndex > 0) {
-              _itemDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
-            }
+            _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
+            setState(() {
+              if (_selectedRowIndex > 0) {
+                _itemDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
+              }
+            });
+            _refreshData();
           }),
           AppShortcuts.viewDetails: VoidCallbackIntent(() {
             if (_selectedRowIndex != -1) {
@@ -513,19 +519,6 @@ class _ItemScreenState extends State<ItemScreen> {
                               setState(() {
                                 _rowsPerPage = value!;
                               });
-                            },
-                            onPageChanged: (int? firstRowIndex) {
-                              if (firstRowIndex != null) {
-                                final newPage =
-                                    (firstRowIndex / _rowsPerPage).floor() + 1;
-                                if (newPage != _filterParams.page) {
-                                  setState(() {
-                                    _filterParams =
-                                        _filterParams.copyWith(page: newPage);
-                                    _refreshData();
-                                  });
-                                }
-                              }
                             },
                             rowsPerPage: _rowsPerPage,
                             columns: [
@@ -862,8 +855,7 @@ class _ItemScreenState extends State<ItemScreen> {
 
 class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
-  List<Item> _items = [];
-  bool _hasMore = false;
+  List<Item> _filteredItems = [];
   final void Function(Item)? onEdit;
   final void Function(Item)? onView;
   final void Function(Item)? onDelete;
@@ -886,24 +878,21 @@ class ItemData extends DataTableSource {
 
   void updateFilterParams(ItemFilterParams params) {
     _filterParams = params;
+    refreshData();
   }
 
-  void updateRowsPerPage(int rowsPerPage) {}
-
   void refreshData() {
-    final fetchedItems = _itemService.getFilteredItems(_filterParams);
-    _hasMore = fetchedItems.length > _filterParams.pageSize;
-    _items = fetchedItems.take(_filterParams.pageSize).toList();
+    _filteredItems = _itemService.getFilteredItems(_filterParams);
     notifyListeners();
   }
 
   Item getRowData(int index) {
-    return _items[index];
+    return _filteredItems[index];
   }
 
   @override
   DataRow getRow(int index) {
-    final item = _items[index];
+    final item = _filteredItems[index];
     final isSelected = getSelectedRowIndex() == index;
     return DataRow.byIndex(
       index: index,
@@ -915,13 +904,13 @@ class ItemData extends DataTableSource {
         return null;
       }),
       onSelectChanged: (_) {
-        if (index >= 0 && index < _items.length) {
+        if (index >= 0 && index < _filteredItems.length) {
           setSelectedRowIndex(index);
         }
         notifyListeners();
       },
       cells: [
-        DataCell(Text(item.id.toString())),
+        DataCell(Text(item.id?.toString() ?? '')),
         DataCell(Text(item.assetNo)),
         DataCell(Text(item.modelNo)),
         DataCell(Text(item.serialNo)),
@@ -933,25 +922,19 @@ class ItemData extends DataTableSource {
           children: [
             ActionWidget(
               icon: Icons.remove_red_eye_rounded,
-              onTap: () {
-                onView!(item);
-              },
+              onTap: () => onView!(item),
               message: 'View Item Details',
             ),
             const SizedBox(width: 10.0),
             ActionWidget(
               icon: Icons.edit,
-              onTap: () {
-                onEdit!(item);
-              },
+              onTap: () => onEdit!(item),
               message: 'Edit Item',
             ),
             const SizedBox(width: 10.0),
             ActionWidget(
               icon: Icons.delete,
-              onTap: () {
-                onDelete!(item);
-              },
+              onTap: () => onDelete!(item),
               message: 'Delete Item',
             )
           ],
@@ -961,10 +944,10 @@ class ItemData extends DataTableSource {
   }
 
   @override
-  int get rowCount => _items.length;
+  int get rowCount => _filteredItems.length;
 
   @override
-  bool get isRowCountApproximate => _hasMore;
+  bool get isRowCountApproximate => false;
 
   @override
   int get selectedRowCount => 0;
