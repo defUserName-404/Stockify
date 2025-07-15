@@ -522,8 +522,8 @@ class UserData extends DataTableSource {
         final matchesSearch = user.userName
                 .toLowerCase()
                 .contains(searchLower) ||
-            (user.sapId?.toLowerCase().contains(searchLower) ?? false) ||
-            (user.designation?.toLowerCase().contains(searchLower) ?? false);
+                (user.sapId?.toLowerCase().contains(searchLower) ?? false);
+        ;
         if (!matchesSearch) return false;
       }
       return true;
@@ -578,19 +578,25 @@ class UserData extends DataTableSource {
                   icon: Icons.remove_red_eye_rounded,
                   onTap: () {
                     onView!(user);
-                  }),
+                },
+                message: 'View User Details',
+              ),
               const SizedBox(width: 10.0),
               ActionWidget(
                   icon: Icons.edit,
                   onTap: () {
                     onEdit!(user);
-                  }),
+                },
+                message: 'Edit User',
+              ),
               const SizedBox(width: 10.0),
               ActionWidget(
                   icon: Icons.delete,
                   onTap: () {
                     onDelete!(user);
-                  })
+                },
+                message: 'Delete User',
+              )
             ],
           ),
         )

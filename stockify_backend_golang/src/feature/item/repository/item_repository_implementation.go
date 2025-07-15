@@ -73,7 +73,7 @@ func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]mode
 		).Or(
 			"serial_no LIKE ?",
 			searchTerm,
-		).Or("host_name LIKE ?", searchTerm).Or("ip_port LIKE ?", searchTerm).Or("mac_address LIKE ?", searchTerm)
+		)
 	}
 	// Sorting
 	sortColumn := map[string]string{

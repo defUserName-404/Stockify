@@ -902,10 +902,7 @@ class ItemData extends DataTableSource {
         final matchesSearch =
             item.assetNo.toLowerCase().contains(searchLower) ||
                 item.modelNo.toLowerCase().contains(searchLower) ||
-                item.serialNo.toLowerCase().contains(searchLower) ||
-                (item.hostName?.toLowerCase().contains(searchLower) ?? false) ||
-                (item.ipPort?.toLowerCase().contains(searchLower) ?? false) ||
-                (item.macAddress?.toLowerCase().contains(searchLower) ?? false);
+                item.serialNo.toLowerCase().contains(searchLower);
         if (!matchesSearch) return false;
       }
       if (_filterParams.deviceType != null &&
@@ -985,19 +982,25 @@ class ItemData extends DataTableSource {
                 icon: Icons.remove_red_eye_rounded,
                 onTap: () {
                   onView!(item);
-                }),
+              },
+              message: 'View Item Details',
+            ),
             const SizedBox(width: 10.0),
             ActionWidget(
                 icon: Icons.edit,
                 onTap: () {
                   onEdit!(item);
-                }),
+              },
+              message: 'Edit Item',
+            ),
             const SizedBox(width: 10.0),
             ActionWidget(
                 icon: Icons.delete,
                 onTap: () {
                   onDelete!(item);
-                })
+              },
+              message: 'Delete Item',
+            )
           ],
         ))
       ],

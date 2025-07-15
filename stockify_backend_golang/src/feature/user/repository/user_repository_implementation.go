@@ -53,10 +53,7 @@ func (r *userRepository) GetFilteredUsers(params model.UserQueryParams) ([]model
 	// Searching
 	if params.Search != "" {
 		searchTerm := "%" + params.Search + "%"
-		database = database.Where("user_name LIKE ?", searchTerm).Or("sap_id LIKE ?", searchTerm).Or(
-			"room_no LIKE ?",
-			searchTerm,
-		).Or("floor LIKE ?", searchTerm)
+		database = database.Where("user_name LIKE ?", searchTerm).Or("sap_id LIKE ?", searchTerm)
 	}
 	// Sorting
 	sortColumn := map[string]string{
