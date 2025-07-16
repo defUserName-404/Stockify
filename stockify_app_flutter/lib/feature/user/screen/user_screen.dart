@@ -23,7 +23,7 @@ class UserScreen extends StatefulWidget {
   State<UserScreen> createState() => _UserScreenState();
 }
 
-class _UserScreenState extends State<UserScreen> {
+class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
   late final UserService _userService;
   int _rowsPerPage = 10;
   bool _isPanelOpen = false;
@@ -32,6 +32,11 @@ class _UserScreenState extends State<UserScreen> {
   UserFilterParams _filterParams = UserFilterParams();
   final FocusNode _searchFocusNode = FocusNode();
   int _selectedRowIndex = -1;
+
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   late final TextEditingController _userNameController,
       _designationController,
@@ -46,6 +51,30 @@ class _UserScreenState extends State<UserScreen> {
     _initializeControllers();
     _initializeUserDataSource();
     super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+    _fadeController.forward();
+    _slideController.forward();
   }
 
   void _initializeControllers() {
@@ -111,6 +140,8 @@ class _UserScreenState extends State<UserScreen> {
     _floorController.dispose();
     _searchInputController.dispose();
     _searchFocusNode.dispose();
+    _fadeController.dispose();
+    _slideController.dispose();
     super.dispose();
   }
 
@@ -236,253 +267,265 @@ class _UserScreenState extends State<UserScreen> {
         title: const Text('Users'),
         surfaceTintColor: AppColors.colorTransparent,
       ),
-      body: Shortcuts(
-        shortcuts: {
-          AppShortcuts.openSearch:
-              VoidCallbackIntent(() => _searchFocusNode.requestFocus()),
-          AppShortcuts.openFilter:
-              VoidCallbackIntent(() => _showFilterDialog()),
-          AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
-          AppShortcuts.arrowDown: VoidCallbackIntent(() {
-            _selectedRowIndex = _userDataSource.getSelectedRowIndex();
-            setState(() {
-              if (_selectedRowIndex <
-                  _userDataSource._filteredUsers.length - 1) {
-                _userDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
-                _refreshData();
-              }
-            });
-          }),
-          AppShortcuts.arrowUp: VoidCallbackIntent(() {
-            _selectedRowIndex = _userDataSource.getSelectedRowIndex();
-            setState(() {
-              if (_selectedRowIndex > 0) {
-                _userDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
-                _refreshData();
-              }
-            });
-          }),
-          AppShortcuts.viewDetails: VoidCallbackIntent(() {
-            if (_selectedRowIndex != -1) {
-              _showViewDetailsDialog(
-                  _userDataSource.getRowData(_selectedRowIndex));
-            }
-          }),
-          AppShortcuts.editItem: VoidCallbackIntent(() {
-            if (_selectedRowIndex != -1) {
-              _togglePanel(user: _userDataSource.getRowData(_selectedRowIndex));
-            }
-          }),
-          AppShortcuts.deleteItem: VoidCallbackIntent(() {
-            if (_selectedRowIndex != -1) {
-              _showDeleteConfirmationDialog(
-                  _userDataSource.getRowData(_selectedRowIndex));
-            }
-          }),
-        },
-        child: Actions(
-          actions: {
-            VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
-              onInvoke: (intent) => intent.callback(),
-            ),
-          },
-          child: Focus(
-            autofocus: true,
-            child: Stack(
-              children: <Widget>[
-                SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      const SizedBox(height: 16.0),
-                      Container(
-                        width: double.infinity,
-                        child: PaginatedDataTable(
-                          headingRowColor: WidgetStateProperty.all<Color>(
-                              AppColors.colorAccent.withValues(alpha: 0.25)),
-                          showEmptyRows: false,
-                          showCheckboxColumn: false,
-                          source: _userDataSource,
-                          actions: [
-                            AppButton(
-                                onPressed: _togglePanel,
-                                icon: Icons.add,
-                                iconColor: AppColors.colorAccent,
-                                text: 'Add New User'),
-                          ],
-                          header: Row(
-                            children: <Widget>[
-                              Expanded(
-                                flex: 9,
-                                child: SearchBar(
-                                  controller: _searchInputController,
-                                  focusNode: _searchFocusNode,
-                                  padding: WidgetStateProperty.all<
-                                      EdgeInsetsGeometry>(
-                                    const EdgeInsets.symmetric(
-                                        horizontal: 16.0),
-                                  ),
-                                  leading: Icon(Icons.search,
-                                      color: AppColors.colorTextDark),
-                                  trailing: [
-                                    InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          _searchInputController.clear();
-                                          _onSearchChanged('');
-                                        });
-                                      },
-                                      child: Icon(
-                                        Icons.clear,
-                                        color: AppColors.colorTextDark,
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: Shortcuts(
+            shortcuts: {
+              AppShortcuts.openSearch:
+                  VoidCallbackIntent(() => _searchFocusNode.requestFocus()),
+              AppShortcuts.openFilter:
+                  VoidCallbackIntent(() => _showFilterDialog()),
+              AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
+              AppShortcuts.arrowDown: VoidCallbackIntent(() {
+                _selectedRowIndex = _userDataSource.getSelectedRowIndex();
+                setState(() {
+                  if (_selectedRowIndex <
+                      _userDataSource._filteredUsers.length - 1) {
+                    _userDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
+                    _refreshData();
+                  }
+                });
+              }),
+              AppShortcuts.arrowUp: VoidCallbackIntent(() {
+                _selectedRowIndex = _userDataSource.getSelectedRowIndex();
+                setState(() {
+                  if (_selectedRowIndex > 0) {
+                    _userDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
+                    _refreshData();
+                  }
+                });
+              }),
+              AppShortcuts.viewDetails: VoidCallbackIntent(() {
+                if (_selectedRowIndex != -1) {
+                  _showViewDetailsDialog(
+                      _userDataSource.getRowData(_selectedRowIndex));
+                }
+              }),
+              AppShortcuts.editItem: VoidCallbackIntent(() {
+                if (_selectedRowIndex != -1) {
+                  _togglePanel(
+                      user: _userDataSource.getRowData(_selectedRowIndex));
+                }
+              }),
+              AppShortcuts.deleteItem: VoidCallbackIntent(() {
+                if (_selectedRowIndex != -1) {
+                  _showDeleteConfirmationDialog(
+                      _userDataSource.getRowData(_selectedRowIndex));
+                }
+              }),
+            },
+            child: Actions(
+              actions: {
+                VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
+                  onInvoke: (intent) => intent.callback(),
+                ),
+              },
+              child: Focus(
+                autofocus: true,
+                child: Stack(
+                  children: <Widget>[
+                    SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          const SizedBox(height: 16.0),
+                          Container(
+                            width: double.infinity,
+                            child: PaginatedDataTable(
+                              headingRowColor: WidgetStateProperty.all<Color>(
+                                  AppColors.colorAccent
+                                      .withValues(alpha: 0.25)),
+                              showEmptyRows: false,
+                              showCheckboxColumn: false,
+                              source: _userDataSource,
+                              actions: [
+                                AppButton(
+                                    onPressed: _togglePanel,
+                                    icon: Icons.add,
+                                    iconColor: AppColors.colorAccent,
+                                    text: 'Add New User'),
+                              ],
+                              header: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 9,
+                                    child: SearchBar(
+                                      controller: _searchInputController,
+                                      focusNode: _searchFocusNode,
+                                      padding: WidgetStateProperty.all<
+                                          EdgeInsetsGeometry>(
+                                        const EdgeInsets.symmetric(
+                                            horizontal: 16.0),
                                       ),
+                                      leading: Icon(Icons.search,
+                                          color: AppColors.colorTextDark),
+                                      trailing: [
+                                        InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              _searchInputController.clear();
+                                              _onSearchChanged('');
+                                            });
+                                          },
+                                          child: Icon(
+                                            Icons.clear,
+                                            color: AppColors.colorTextDark,
+                                          ),
+                                        ),
+                                      ],
+                                      hintText:
+                                          'Search for users by their User Name or SAP ID',
+                                      onChanged: _onSearchChanged,
                                     ),
-                                  ],
-                                  hintText:
-                                      'Search for users by their User Name or SAP ID',
-                                  onChanged: _onSearchChanged,
-                                ),
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  AppButton(
+                                    onPressed: _showFilterDialog,
+                                    icon: Icons.filter_list_rounded,
+                                    iconColor: AppColors.colorTextDark,
+                                    text: 'Sort & Filter',
+                                    backgroundColor:
+                                        AppColors.colorTextSemiLight,
+                                    foregroundColor: AppColors.colorTextDark,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 8.0),
-                              AppButton(
-                                onPressed: _showFilterDialog,
-                                icon: Icons.filter_list_rounded,
-                                iconColor: AppColors.colorTextDark,
-                                text: 'Sort & Filter',
-                                backgroundColor: AppColors.colorTextSemiLight,
-                                foregroundColor: AppColors.colorTextDark,
-                              ),
-                            ],
-                          ),
-                          availableRowsPerPage: const [10, 20, 50],
-                          onRowsPerPageChanged: (int? value) {
-                            setState(() {
-                              _rowsPerPage = value!;
-                              _refreshData();
-                            });
-                          },
-                          onPageChanged: (int? firstRowIndex) {
-                            if (firstRowIndex != null) {
-                              final newPage =
-                                  (firstRowIndex / _rowsPerPage).floor() + 1;
-                              if (newPage != _filterParams.page) {
+                              availableRowsPerPage: const [10, 20, 50],
+                              onRowsPerPageChanged: (int? value) {
                                 setState(() {
-                                  _filterParams =
-                                      _filterParams.copyWith(page: newPage);
+                                  _rowsPerPage = value!;
                                   _refreshData();
                                 });
-                              }
-                            }
-                          },
-                          rowsPerPage: _rowsPerPage,
-                          columns: [
-                            DataColumn(label: Text('ID')),
-                            DataColumn(label: Text('User Name')),
-                            DataColumn(label: Text('Designation')),
-                            DataColumn(label: Text('SAP ID')),
-                            DataColumn(label: Text('Actions'))
+                              },
+                              onPageChanged: (int? firstRowIndex) {
+                                if (firstRowIndex != null) {
+                                  final newPage =
+                                      (firstRowIndex / _rowsPerPage).floor() +
+                                          1;
+                                  if (newPage != _filterParams.page) {
+                                    setState(() {
+                                      _filterParams =
+                                          _filterParams.copyWith(page: newPage);
+                                      _refreshData();
+                                    });
+                                  }
+                                }
+                              },
+                              rowsPerPage: _rowsPerPage,
+                              columns: [
+                                DataColumn(label: Text('ID')),
+                                DataColumn(label: Text('User Name')),
+                                DataColumn(label: Text('Designation')),
+                                DataColumn(label: Text('SAP ID')),
+                                DataColumn(label: Text('Actions'))
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Side Panel (Sliding in/out)
+                    AnimatedPositioned(
+                      duration: Duration(milliseconds: 300),
+                      right: _isPanelOpen ? 0 : -screenWidthHalf,
+                      top: 0,
+                      bottom: 0,
+                      width: screenWidthHalf,
+                      child: Container(
+                        color: currentTheme == Brightness.light
+                            ? AppColors.colorBackground
+                            : AppColors.colorBackgroundDark,
+                        padding: EdgeInsets.all(10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _editingUser == null ? 'Add User' : 'Edit User',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 10.0),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _userNameController,
+                                    validator:
+                                        UserInputValidator.validateUsername,
+                                    autovalidateMode:
+                                        AutovalidateMode.onUnfocus,
+                                    decoration:
+                                        InputDecoration(labelText: 'User Name'),
+                                  ),
+                                ),
+                                const SizedBox(width: 10.0),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _designationController,
+                                    decoration: InputDecoration(
+                                        labelText: 'Designation'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _sapIdController,
+                                    decoration:
+                                        InputDecoration(labelText: 'SAP ID'),
+                                  ),
+                                ),
+                                const SizedBox(width: 10.0),
+                                Expanded(
+                                  child: TextFormField(
+                                    decoration:
+                                        InputDecoration(labelText: 'Room No'),
+                                    controller: _roomNoController,
+                                  ),
+                                ),
+                                const SizedBox(width: 10.0),
+                                Expanded(
+                                  child: TextFormField(
+                                    decoration:
+                                        InputDecoration(labelText: 'Floor No'),
+                                    controller: _floorController,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AppButton(
+                                    onPressed: _saveUser,
+                                    icon: Icons.add,
+                                    iconColor: AppColors.colorAccent,
+                                    text: _editingUser == null
+                                        ? 'Add User'
+                                        : 'Save Changes'),
+                                const SizedBox(width: 10.0),
+                                AppButton(
+                                  onPressed: _togglePanel,
+                                  icon: Icons.cancel,
+                                  iconColor: AppColors.colorTextDark,
+                                  text: 'Cancel',
+                                  backgroundColor: AppColors.colorTextSemiLight,
+                                  foregroundColor: AppColors.colorTextDark,
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                // Side Panel (Sliding in/out)
-                AnimatedPositioned(
-                  duration: Duration(milliseconds: 300),
-                  right: _isPanelOpen ? 0 : -screenWidthHalf,
-                  top: 0,
-                  bottom: 0,
-                  width: screenWidthHalf,
-                  child: Container(
-                    color: currentTheme == Brightness.light
-                        ? AppColors.colorBackground
-                        : AppColors.colorBackgroundDark,
-                    padding: EdgeInsets.all(10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _editingUser == null ? 'Add User' : 'Edit User',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 10.0),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: _userNameController,
-                                validator: UserInputValidator.validateUsername,
-                                autovalidateMode: AutovalidateMode.onUnfocus,
-                                decoration:
-                                    InputDecoration(labelText: 'User Name'),
-                              ),
-                            ),
-                            const SizedBox(width: 10.0),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _designationController,
-                                decoration:
-                                    InputDecoration(labelText: 'Designation'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10.0),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: _sapIdController,
-                                decoration:
-                                    InputDecoration(labelText: 'SAP ID'),
-                              ),
-                            ),
-                            const SizedBox(width: 10.0),
-                            Expanded(
-                              child: TextFormField(
-                                decoration:
-                                    InputDecoration(labelText: 'Room No'),
-                                controller: _roomNoController,
-                              ),
-                            ),
-                            const SizedBox(width: 10.0),
-                            Expanded(
-                              child: TextFormField(
-                                decoration:
-                                    InputDecoration(labelText: 'Floor No'),
-                                controller: _floorController,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            AppButton(
-                                onPressed: _saveUser,
-                                icon: Icons.add,
-                                iconColor: AppColors.colorAccent,
-                                text: _editingUser == null
-                                    ? 'Add User'
-                                    : 'Save Changes'),
-                            const SizedBox(width: 10.0),
-                            AppButton(
-                              onPressed: _togglePanel,
-                              icon: Icons.cancel,
-                              iconColor: AppColors.colorTextDark,
-                              text: 'Cancel',
-                              backgroundColor: AppColors.colorTextSemiLight,
-                              foregroundColor: AppColors.colorTextDark,
-                            ),
-                          ],
-                        ),
-                      ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
