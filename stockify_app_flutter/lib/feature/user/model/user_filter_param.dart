@@ -2,20 +2,17 @@ class UserFilterParams {
   final String search;
   final String? sortBy;
   final String sortOrder;
-  final int page;
 
   UserFilterParams({
     this.search = '',
     this.sortBy,
     this.sortOrder = 'ASC',
-    this.page = 1,
   });
 
   UserFilterParams copyWith({
     Object? search = const _Sentinel(),
     Object? sortBy = const _Sentinel(),
     Object? sortOrder = const _Sentinel(),
-    Object? page = const _Sentinel(),
   }) {
     return UserFilterParams(
       search:
@@ -25,7 +22,6 @@ class UserFilterParams {
       sortOrder: identical(sortOrder, const _Sentinel())
           ? this.sortOrder
           : sortOrder as String,
-      page: identical(page, const _Sentinel()) ? this.page : page as int,
     );
   }
 
@@ -36,15 +32,12 @@ class UserFilterParams {
           runtimeType == other.runtimeType &&
           search == other.search &&
           sortBy == other.sortBy &&
-          sortOrder == other.sortOrder &&
-          page == other.page;
+          sortOrder == other.sortOrder;
 
   @override
   int get hashCode =>
       search.hashCode ^
-      sortBy.hashCode ^
-      sortOrder.hashCode ^
-      page.hashCode;
+      sortBy.hashCode ^ sortOrder.hashCode;
 }
 
 // Sentinel class to distinguish between null and not-provided

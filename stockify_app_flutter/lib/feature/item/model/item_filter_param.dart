@@ -24,8 +24,6 @@ class ItemFilterParams {
     Object? sortOrder = const _Sentinel(),
     Object? deviceType = const _Sentinel(),
     Object? assetStatus = const _Sentinel(),
-    Object? page = const _Sentinel(),
-    Object? pageSize = const _Sentinel(),
   }) {
     return ItemFilterParams(
       search:

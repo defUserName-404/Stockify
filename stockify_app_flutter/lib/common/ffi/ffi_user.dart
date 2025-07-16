@@ -53,13 +53,9 @@ typedef GetFilteredUsersC = Pointer<Utf8> Function(
   Pointer<Utf8> search,
   Pointer<Utf8> sortBy,
   Pointer<Utf8> sortOrder,
-  Int32 page,
-  Int32 pageSize,
 );
 typedef GetFilteredUsersDart = Pointer<Utf8> Function(
   Pointer<Utf8> search,
   Pointer<Utf8> sortBy,
   Pointer<Utf8> sortOrder,
-  int page,
-  int pageSize,
 );

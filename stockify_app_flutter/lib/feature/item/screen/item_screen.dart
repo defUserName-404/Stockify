@@ -906,11 +906,11 @@ class ItemData extends DataTableSource {
       selected: isSelected,
       color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
         if (states.contains(WidgetState.selected)) {
-          return theme.colorScheme.primary.withOpacity(0.2);
+          return theme.colorScheme.primary.withAlpha(40);
         }
         return isEven
             ? Colors.transparent
-            : theme.colorScheme.onSurface.withOpacity(0.02);
+            : theme.colorScheme.onSurface.withAlpha(2);
       }),
       onSelectChanged: (_) {
         if (index >= 0 && index < _filteredItems.length) {
