@@ -9,6 +9,7 @@ import 'package:stockify_app_flutter/common/widget/app_button.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
+import 'package:stockify_app_flutter/feature/item/widget/item_header.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
@@ -417,7 +418,13 @@ class _ItemScreenState extends State<ItemScreen> {
               children: <Widget>[
                 Column(
                   children: <Widget>[
-                    const SizedBox(height: 16.0),
+                    ItemHeader(
+                      onAddNew: _togglePanel,
+                      onFilter: _showFilterDialog,
+                      onSearch: _onSearchChanged,
+                      searchController: _searchInputController,
+                      searchFocusNode: _searchFocusNode,
+                    ),
                     if (_filterParams.deviceType != null ||
                         _filterParams.assetStatus != null)
                       Container(
@@ -463,60 +470,9 @@ class _ItemScreenState extends State<ItemScreen> {
                                 Theme.of(context)
                                     .colorScheme
                                     .primaryContainer
-                                    .withOpacity(0.1)),
+                                    .withAlpha(10)),
                             showCheckboxColumn: false,
                             showEmptyRows: false,
-                            actions: [
-                              AppButton(
-                                  onPressed: _togglePanel,
-                                  icon: Icons.add,
-                                  iconColor: AppColors.colorAccent,
-                                  text: 'Add New Item'),
-                            ],
-                            header: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  flex: 9,
-                                  child: SearchBar(
-                                    focusNode: _searchFocusNode,
-                                    controller: _searchInputController,
-                                    padding: WidgetStateProperty.all<
-                                        EdgeInsetsGeometry>(
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 16.0),
-                                    ),
-                                    leading: Icon(Icons.search,
-                                        color: AppColors.colorTextDark),
-                                    trailing: [
-                                      InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            _searchInputController.clear();
-                                            _onSearchChanged('');
-                                          });
-                                        },
-                                        child: Icon(
-                                          Icons.clear,
-                                          color: AppColors.colorTextDark,
-                                        ),
-                                      ),
-                                    ],
-                                    hintText:
-                                        'Search for items by their Asset No, Model No or Serial No',
-                                    onChanged: _onSearchChanged,
-                                  ),
-                                ),
-                                const SizedBox(width: 8.0),
-                                AppButton(
-                                  onPressed: _showFilterDialog,
-                                  icon: Icons.filter_list_rounded,
-                                  iconColor: AppColors.colorTextDark,
-                                  text: 'Sort & Filter',
-                                  backgroundColor: AppColors.colorTextSemiLight,
-                                  foregroundColor: AppColors.colorTextDark,
-                                ),
-                              ],
-                            ),
                             availableRowsPerPage: const [10, 20, 50],
                             onRowsPerPageChanged: (int? value) {
                               setState(() {

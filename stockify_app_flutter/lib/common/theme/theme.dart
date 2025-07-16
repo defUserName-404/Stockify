@@ -7,11 +7,11 @@ class AppTheme {
 
   static final _buttonStyleLight = ButtonStyle(
     shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-      RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
     ),
     backgroundColor: WidgetStateProperty.all<Color>(AppColors.colorPrimary),
     foregroundColor: WidgetStateProperty.all<Color>(AppColors.colorAccent),
-    minimumSize: WidgetStateProperty.all<Size>(Size(64, 64)),
+    minimumSize: WidgetStateProperty.all<Size>(Size(56, 56)),
     overlayColor:
         WidgetStateProperty.all<Color>(AppColors.colorBackground.withAlpha(10)),
   );
@@ -62,19 +62,19 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
         borderSide: const BorderSide(color: AppColors.colorOnBackground),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
         borderSide: const BorderSide(color: AppColors.colorOnBackground),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
         borderSide: const BorderSide(color: AppColors.colorPrimary, width: 2.0),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
         borderSide: const BorderSide(color: AppColors.colorPink, width: 2.0),
       ),
     ),
@@ -82,7 +82,7 @@ class AppTheme {
       buttonColor: AppColors.colorAccent,
       textTheme: ButtonTextTheme.primary,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -90,7 +90,7 @@ class AppTheme {
         foregroundColor: AppColors.colorAccent,
         backgroundColor: AppColors.colorPrimary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4.0),
+          borderRadius: BorderRadius.circular(8.0),
         ),
       ),
     ),
@@ -106,7 +106,7 @@ class AppTheme {
       backgroundColor: AppColors.colorPrimary,
       selectedIconTheme: const IconThemeData(color: AppColors.colorAccent),
       indicatorShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
       ),
       unselectedIconTheme:
           const IconThemeData(color: AppColors.colorBackground),
@@ -122,7 +122,7 @@ class AppTheme {
     searchBarTheme: SearchBarThemeData(
       elevation: WidgetStateProperty.all<double>(2.0),
       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
       backgroundColor:
           WidgetStateProperty.all<Color>(AppColors.colorTextSemiLight),
@@ -172,22 +172,22 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
         borderSide: const BorderSide(color: AppColors.colorOnBackgroundDark),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
         borderSide: const BorderSide(color: AppColors.colorOnBackgroundDark),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
         borderSide: const BorderSide(
           color: AppColors.colorPrimaryDark,
           width: 2.0,
         ),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
         borderSide: const BorderSide(color: AppColors.colorPink, width: 2.0),
       ),
     ),
@@ -195,7 +195,7 @@ class AppTheme {
       buttonColor: AppColors.colorAccent,
       textTheme: ButtonTextTheme.primary,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -203,7 +203,7 @@ class AppTheme {
         foregroundColor: AppColors.colorAccent,
         backgroundColor: AppColors.colorPrimaryDark,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4.0),
+          borderRadius: BorderRadius.circular(8.0),
         ),
       ),
     ),
@@ -219,7 +219,7 @@ class AppTheme {
       backgroundColor: AppColors.colorPrimaryDark,
       selectedIconTheme: const IconThemeData(color: AppColors.colorAccent),
       indicatorShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(8.0),
       ),
       unselectedIconTheme:
           const IconThemeData(color: AppColors.colorBackground),
@@ -237,7 +237,7 @@ class AppTheme {
     searchBarTheme: SearchBarThemeData(
       elevation: WidgetStateProperty.all<double>(2.0),
       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
       backgroundColor:
           WidgetStateProperty.all<Color>(AppColors.colorTextSemiLight),
