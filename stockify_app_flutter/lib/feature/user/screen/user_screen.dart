@@ -335,29 +335,53 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
                           child: SingleChildScrollView(
                             child: Container(
                               width: double.infinity,
-                              child: PaginatedDataTable(
-                                headingRowColor: WidgetStateProperty.all<Color>(
-                                    Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer
-                                        .withAlpha(10)),
-                                showCheckboxColumn: false,
-                                showEmptyRows: false,
-                                availableRowsPerPage: const [10, 20, 50],
-                                onRowsPerPageChanged: (int? value) {
-                                  setState(() {
-                                    _rowsPerPage = value!;
-                                  });
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  List<DataColumn> getColumns(double maxWidth) {
+                                    if (maxWidth < 600) {
+                                      return [
+                                        DataColumn(label: Text('ID')),
+                                        DataColumn(label: Text('User Name')),
+                                        DataColumn(label: Text('Actions')),
+                                      ];
+                                    } else if (maxWidth < 900) {
+                                      return [
+                                        DataColumn(label: Text('ID')),
+                                        DataColumn(label: Text('User Name')),
+                                        DataColumn(label: Text('Designation')),
+                                        DataColumn(label: Text('Actions')),
+                                      ];
+                                    } else {
+                                      return [
+                                        DataColumn(label: Text('ID')),
+                                        DataColumn(label: Text('User Name')),
+                                        DataColumn(label: Text('Designation')),
+                                        DataColumn(label: Text('SAP ID')),
+                                        DataColumn(label: Text('Actions')),
+                                      ];
+                                    }
+                                  }
+
+                                  return PaginatedDataTable(
+                                    headingRowColor:
+                                        WidgetStateProperty.all<Color>(
+                                            Theme.of(context)
+                                                .colorScheme
+                                                .primaryContainer
+                                                .withAlpha(10)),
+                                    showCheckboxColumn: false,
+                                    showEmptyRows: false,
+                                    availableRowsPerPage: const [10, 20, 50],
+                                    onRowsPerPageChanged: (int? value) {
+                                      setState(() {
+                                        _rowsPerPage = value!;
+                                      });
+                                    },
+                                    rowsPerPage: _rowsPerPage,
+                                    columns: getColumns(constraints.maxWidth),
+                                    source: _userDataSource,
+                                  );
                                 },
-                                rowsPerPage: _rowsPerPage,
-                                columns: [
-                                  DataColumn(label: Text('ID')),
-                                  DataColumn(label: Text('User Name')),
-                                  DataColumn(label: Text('Designation')),
-                                DataColumn(label: Text('SAP ID')),
-                                DataColumn(label: Text('Actions'))
-                              ],
-                                source: _userDataSource,
                               ),
                             ),
                           ),
@@ -385,21 +409,24 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 10.0),
-                            Row(
+                            Wrap(
+                              spacing: 10.0,
+                              runSpacing: 10.0,
                               children: [
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     controller: _userNameController,
                                     validator:
                                         UserInputValidator.validateUsername,
                                     autovalidateMode:
-                                        AutovalidateMode.onUnfocus,
+                                        AutovalidateMode.onUserInteraction,
                                     decoration:
                                         InputDecoration(labelText: 'User Name'),
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     controller: _designationController,
                                     decoration: InputDecoration(
@@ -409,25 +436,28 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
                               ],
                             ),
                             const SizedBox(height: 10.0),
-                            Row(
+                            Wrap(
+                              spacing: 10.0,
+                              runSpacing: 10.0,
                               children: [
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     controller: _sapIdController,
                                     decoration:
                                         InputDecoration(labelText: 'SAP ID'),
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration:
                                         InputDecoration(labelText: 'Room No'),
                                     controller: _roomNoController,
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration:
                                         InputDecoration(labelText: 'Floor No'),

@@ -76,176 +76,278 @@ class _AppPlaceholderState extends State<AppPlaceholder> {
         child: FocusScope(
           autofocus: true,
           child: Scaffold(
-            body: Row(
-              children: <Widget>[
-                Container(
-                  width: _railWidth,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    border: Border(
-                      right: BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.outline.withAlpha(20),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Header with toggle button
-                      Container(
-                        height: 64,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _CustomNavButton(
-                                icon: Icons.menu,
-                                onPressed: () {
-                                  _updateRailWidth(_isExtended
-                                      ? _minRailWidth
-                                      : _maxRailWidth);
-                                },
-                                isSelected: false,
-                                showLabel: false,
-                                tooltip: _isExtended ? 'Collapse' : 'Expand',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Divider(height: 1),
-                      // Main navigation items
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Column(
-                            children: [
-                              _CustomNavButton(
-                                icon: _selectedIndex == 0
-                                    ? Icons.dashboard
-                                    : Icons.dashboard_outlined,
-                                label: 'Dashboard',
-                                onPressed: () => updateSelectedScreen(0),
-                                isSelected: _selectedIndex == 0,
-                                showLabel: _showLabels,
-                                tooltip: 'Dashboard',
-                              ),
-                              const SizedBox(height: 4),
-                              _CustomNavButton(
-                                icon: _selectedIndex == 1
-                                    ? Icons.inventory_2
-                                    : Icons.inventory_2_outlined,
-                                label: 'Items',
-                                onPressed: () => updateSelectedScreen(1),
-                                isSelected: _selectedIndex == 1,
-                                showLabel: _showLabels,
-                                tooltip: 'Items',
-                              ),
-                              const SizedBox(height: 4),
-                              _CustomNavButton(
-                                icon: _selectedIndex == 2
-                                    ? Icons.account_circle
-                                    : Icons.account_circle_outlined,
-                                label: 'Users',
-                                onPressed: () => updateSelectedScreen(2),
-                                isSelected: _selectedIndex == 2,
-                                showLabel: _showLabels,
-                                tooltip: 'Users',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Bottom section with notifications and settings
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          children: [
-                            const Divider(height: 1),
-                            const SizedBox(height: 8),
-                            Consumer<NotificationStorageService>(
-                              builder: (context, notificationService, child) {
-                                return FutureBuilder<List<AppNotification>>(
-                                  future:
-                                      notificationService.getNotifications(),
-                                  builder: (context, snapshot) {
-                                    final hasNotifications = snapshot.hasData &&
-                                        snapshot.data!.isNotEmpty;
-                                    return _CustomNavButton(
-                                      icon: _selectedIndex == 3
-                                          ? (hasNotifications
-                                              ? Icons.notifications_active
-                                              : Icons.notifications_none)
-                                          : (hasNotifications
-                                              ? Icons
-                                                  .notifications_active_outlined
-                                              : Icons
-                                                  .notifications_none_outlined),
-                                      label: 'Notifications',
-                                      onPressed: () => updateSelectedScreen(3),
-                                      isSelected: _selectedIndex == 3,
-                                      showLabel: _showLabels,
-                                      tooltip: 'Notifications',
-                                      badge: hasNotifications
-                                          ? snapshot.data!.length
-                                          : null,
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 4),
-                            _CustomNavButton(
-                              icon: _selectedIndex == 4
-                                  ? Icons.settings
-                                  : Icons.settings_outlined,
-                              label: 'Settings',
-                              onPressed: () => updateSelectedScreen(4),
-                              isSelected: _selectedIndex == 4,
-                              showLabel: _showLabels,
-                              tooltip: 'Settings',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Resize handle
-                GestureDetector(
-                  onHorizontalDragUpdate: (details) {
-                    _updateRailWidth(_railWidth + details.primaryDelta!);
-                  },
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeLeftRight,
-                    child: Center(
-                      child: Container(
-                        width: 2,
-                        height: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withAlpha(20),
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                // Main content area
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16.0, horizontal: 32.0),
-                    child: _getSelectedScreen(_selectedIndex),
-                  ),
-                ),
-              ],
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth < 600) {
+                  return _buildSmallScreenLayout();
+                } else {
+                  return _buildLargeScreenLayout();
+                }
+              },
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSmallScreenLayout() {
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            child: _getSelectedScreen(_selectedIndex),
+          ),
+        ),
+        BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: updateSelectedScreen,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(_selectedIndex == 0
+                  ? Icons.dashboard
+                  : Icons.dashboard_outlined),
+              label: 'Dashboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(_selectedIndex == 1
+                  ? Icons.inventory_2
+                  : Icons.inventory_2_outlined),
+              label: 'Items',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(_selectedIndex == 2
+                  ? Icons.account_circle
+                  : Icons.account_circle_outlined),
+              label: 'Users',
+            ),
+            BottomNavigationBarItem(
+              icon: Consumer<NotificationStorageService>(
+                builder: (context, notificationService, child) {
+                  return FutureBuilder<List<AppNotification>>(
+                    future: notificationService.getNotifications(),
+                    builder: (context, snapshot) {
+                      final hasNotifications =
+                          snapshot.hasData && snapshot.data!.isNotEmpty;
+                      return Stack(
+                        children: [
+                          Icon(_selectedIndex == 3
+                              ? (hasNotifications
+                                  ? Icons.notifications_active
+                                  : Icons.notifications_none)
+                              : (hasNotifications
+                                  ? Icons.notifications_active_outlined
+                                  : Icons.notifications_none_outlined)),
+                          if (hasNotifications)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.error,
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 12,
+                                  minHeight: 12,
+                                ),
+                                child: Text(
+                                  snapshot.data!.length > 9
+                                      ? '9+'
+                                      : snapshot.data!.length.toString(),
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onError,
+                                    fontSize: 8,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+              label: 'Notifications',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(_selectedIndex == 4
+                  ? Icons.settings
+                  : Icons.settings_outlined),
+              label: 'Settings',
+            ),
+          ],
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: Theme.of(context).colorScheme.primary,
+          unselectedItemColor: Theme.of(context).colorScheme.onSurface,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLargeScreenLayout() {
+    return Row(
+      children: <Widget>[
+        Container(
+          width: _railWidth,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border(
+              right: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withAlpha(20),
+                width: 1,
+              ),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Header with toggle button
+              Container(
+                height: 64,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _CustomNavButton(
+                        icon: Icons.menu,
+                        onPressed: () {
+                          _updateRailWidth(
+                              _isExtended ? _minRailWidth : _maxRailWidth);
+                        },
+                        isSelected: false,
+                        showLabel: false,
+                        tooltip: _isExtended ? 'Collapse' : 'Expand',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              // Main navigation items
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    children: [
+                      _CustomNavButton(
+                        icon: _selectedIndex == 0
+                            ? Icons.dashboard
+                            : Icons.dashboard_outlined,
+                        label: 'Dashboard',
+                        onPressed: () => updateSelectedScreen(0),
+                        isSelected: _selectedIndex == 0,
+                        showLabel: _showLabels,
+                        tooltip: 'Dashboard',
+                      ),
+                      const SizedBox(height: 4),
+                      _CustomNavButton(
+                        icon: _selectedIndex == 1
+                            ? Icons.inventory_2
+                            : Icons.inventory_2_outlined,
+                        label: 'Items',
+                        onPressed: () => updateSelectedScreen(1),
+                        isSelected: _selectedIndex == 1,
+                        showLabel: _showLabels,
+                        tooltip: 'Items',
+                      ),
+                      const SizedBox(height: 4),
+                      _CustomNavButton(
+                        icon: _selectedIndex == 2
+                            ? Icons.account_circle
+                            : Icons.account_circle_outlined,
+                        label: 'Users',
+                        onPressed: () => updateSelectedScreen(2),
+                        isSelected: _selectedIndex == 2,
+                        showLabel: _showLabels,
+                        tooltip: 'Users',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Bottom section with notifications and settings
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  children: [
+                    const Divider(height: 1),
+                    const SizedBox(height: 8),
+                    Consumer<NotificationStorageService>(
+                      builder: (context, notificationService, child) {
+                        return FutureBuilder<List<AppNotification>>(
+                          future: notificationService.getNotifications(),
+                          builder: (context, snapshot) {
+                            final hasNotifications =
+                                snapshot.hasData && snapshot.data!.isNotEmpty;
+                            return _CustomNavButton(
+                              icon: _selectedIndex == 3
+                                  ? (hasNotifications
+                                      ? Icons.notifications_active
+                                      : Icons.notifications_none)
+                                  : (hasNotifications
+                                      ? Icons.notifications_active_outlined
+                                      : Icons.notifications_none_outlined),
+                              label: 'Notifications',
+                              onPressed: () => updateSelectedScreen(3),
+                              isSelected: _selectedIndex == 3,
+                              showLabel: _showLabels,
+                              tooltip: 'Notifications',
+                              badge:
+                                  hasNotifications ? snapshot.data!.length : null,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 4),
+                    _CustomNavButton(
+                      icon: _selectedIndex == 4
+                          ? Icons.settings
+                          : Icons.settings_outlined,
+                      label: 'Settings',
+                      onPressed: () => updateSelectedScreen(4),
+                      isSelected: _selectedIndex == 4,
+                      showLabel: _showLabels,
+                      tooltip: 'Settings',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Resize handle
+        GestureDetector(
+          onHorizontalDragUpdate: (details) {
+            _updateRailWidth(_railWidth + details.primaryDelta!);
+          },
+          child: MouseRegion(
+            cursor: SystemMouseCursors.resizeLeftRight,
+            child: Center(
+              child: Container(
+                width: 2,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(20),
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Main content area
+        Expanded(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+            child: _getSelectedScreen(_selectedIndex),
+          ),
+        ),
+      ],
     );
   }
 

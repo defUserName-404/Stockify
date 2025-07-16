@@ -501,32 +501,58 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                           child: SingleChildScrollView(
                             child: Container(
                               width: double.infinity,
-                              child: PaginatedDataTable(
-                                headingRowColor: WidgetStateProperty.all<Color>(
-                                    Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer
-                                        .withAlpha(10)),
-                                showCheckboxColumn: false,
-                                showEmptyRows: false,
-                                availableRowsPerPage: const [10, 20, 50],
-                                onRowsPerPageChanged: (int? value) {
-                                  setState(() {
-                                    _rowsPerPage = value!;
-                                  });
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  List<DataColumn> getColumns(double maxWidth) {
+                                    if (maxWidth < 600) {
+                                      return [
+                                        DataColumn(label: Text('ID')),
+                                        DataColumn(label: Text('Asset No')),
+                                        DataColumn(label: Text('Device Type')),
+                                        DataColumn(label: Text('Actions')),
+                                      ];
+                                    } else if (maxWidth < 900) {
+                                      return [
+                                        DataColumn(label: Text('ID')),
+                                        DataColumn(label: Text('Asset No')),
+                                        DataColumn(label: Text('Model No')),
+                                        DataColumn(label: Text('Device Type')),
+                                        DataColumn(label: Text('Asset Status')),
+                                        DataColumn(label: Text('Actions')),
+                                      ];
+                                    } else {
+                                      return [
+                                        DataColumn(label: Text('ID')),
+                                        DataColumn(label: Text('Asset No')),
+                                        DataColumn(label: Text('Model No')),
+                                        DataColumn(label: Text('Serial No')),
+                                        DataColumn(label: Text('Device Type')),
+                                        DataColumn(label: Text('Warranty Date')),
+                                        DataColumn(label: Text('Asset Status')),
+                                        DataColumn(label: Text('Actions')),
+                                      ];
+                                    }
+                                  }
+
+                                  return PaginatedDataTable(
+                                    headingRowColor: WidgetStateProperty.all<Color>(
+                                        Theme.of(context)
+                                            .colorScheme
+                                            .primaryContainer
+                                            .withAlpha(10)),
+                                    showCheckboxColumn: false,
+                                    showEmptyRows: false,
+                                    availableRowsPerPage: const [10, 20, 50],
+                                    onRowsPerPageChanged: (int? value) {
+                                      setState(() {
+                                        _rowsPerPage = value!;
+                                      });
+                                    },
+                                    rowsPerPage: _rowsPerPage,
+                                    columns: getColumns(constraints.maxWidth),
+                                    source: _itemDataSource,
+                                  );
                                 },
-                                rowsPerPage: _rowsPerPage,
-                                columns: [
-                                  DataColumn(label: Text('ID')),
-                                  DataColumn(label: Text('Asset No')),
-                                  DataColumn(label: Text('Model No')),
-                                  DataColumn(label: Text('Serial No')),
-                                  DataColumn(label: Text('Device Type')),
-                                  DataColumn(label: Text('Warranty Date')),
-                                  DataColumn(label: Text('Asset Status')),
-                                  DataColumn(label: Text('Actions'))
-                                ],
-                                source: _itemDataSource,
                               ),
                             ),
                           ),
@@ -553,9 +579,12 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 10.0),
-                            Row(
+                            Wrap(
+                              spacing: 10.0,
+                              runSpacing: 10.0,
                               children: [
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     controller: _assetInputController,
                                     validator:
@@ -565,8 +594,8 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                                         InputDecoration(labelText: 'Asset No'),
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     controller: _modelInputController,
                                     validator:
@@ -579,9 +608,12 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                               ],
                             ),
                             const SizedBox(height: 10.0),
-                            Row(
+                            Wrap(
+                              spacing: 10.0,
+                              runSpacing: 10.0,
                               children: [
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     controller: _serialInputController,
                                     validator:
@@ -591,8 +623,8 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                                         InputDecoration(labelText: 'Serial No'),
                                   ),
                                 ),
-                                SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: DropdownButtonFormField<DeviceType>(
                                     value: _selectedDeviceType,
                                     decoration: InputDecoration(
@@ -614,9 +646,12 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                               ],
                             ),
                             const SizedBox(height: 10.0),
-                            Row(
+                            Wrap(
+                              spacing: 10.0,
+                              runSpacing: 10.0,
                               children: [
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     readOnly: true,
                                     decoration: InputDecoration(
@@ -647,8 +682,8 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                                     },
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     readOnly: true,
                                     validator:
@@ -682,8 +717,8 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                                     },
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: DropdownButtonFormField<AssetStatus>(
                                     value: _selectedAssetStatus,
                                     validator:
@@ -705,25 +740,28 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                               ],
                             ),
                             const SizedBox(height: 10.0),
-                            Row(
+                            Wrap(
+                              spacing: 10.0,
+                              runSpacing: 10.0,
                               children: [
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration:
                                         InputDecoration(labelText: 'Host Name'),
                                     controller: _hostNameInputController,
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration:
                                         InputDecoration(labelText: 'IP Port'),
                                     controller: _ipPortInputController,
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration: InputDecoration(
                                         labelText: 'MAC Address'),
@@ -733,33 +771,36 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                               ],
                             ),
                             const SizedBox(height: 10.0),
-                            Row(
+                            Wrap(
+                              spacing: 10.0,
+                              runSpacing: 10.0,
                               children: [
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration: InputDecoration(
                                         labelText: 'OS Version'),
                                     controller: _osVersionInputController,
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration: InputDecoration(
                                         labelText: 'Face Plate Name'),
                                     controller: _facePlateNameInputController,
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration: InputDecoration(
                                         labelText: 'Switch Port'),
                                     controller: _switchPortInputController,
                                   ),
                                 ),
-                                const SizedBox(width: 10.0),
-                                Expanded(
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
                                   child: TextFormField(
                                     decoration: InputDecoration(
                                         labelText: 'Switch IP Address'),
@@ -769,53 +810,48 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
                               ],
                             ),
                             const SizedBox(height: 10.0),
-                            Row(
+                            Wrap(
+                              spacing: 10.0,
+                              runSpacing: 10.0,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
                                 const Text('Is Password Protected?'),
-                                const SizedBox(width: 10.0),
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Radio<bool>(
-                                        value: true,
-                                        groupValue: _isPasswordProtected,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _isPasswordProtected = value;
-                                          });
-                                        },
-                                      ),
-                                      const Text('Yes'),
-                                      const SizedBox(width: 10),
-                                      Radio<bool>(
-                                        value: false,
-                                        groupValue: _isPasswordProtected,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _isPasswordProtected = value;
-                                          });
-                                        },
-                                      ),
-                                      const Text('No'),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: DropdownButtonFormField<User>(
-                                          value: _assignedUser,
-                                          decoration: InputDecoration(
-                                              labelText: 'Assigned User'),
-                                          items: _usersList.map((user) {
-                                            return DropdownMenuItem(
-                                                value: user,
-                                                child: Text(user.userName));
-                                          }).toList(),
-                                          onChanged: (newValue) {
-                                            setState(() {
-                                              _assignedUser = newValue;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ],
+                                Radio<bool>(
+                                  value: true,
+                                  groupValue: _isPasswordProtected,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isPasswordProtected = value;
+                                    });
+                                  },
+                                ),
+                                const Text('Yes'),
+                                Radio<bool>(
+                                  value: false,
+                                  groupValue: _isPasswordProtected,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isPasswordProtected = value;
+                                    });
+                                  },
+                                ),
+                                const Text('No'),
+                                SizedBox(
+                                  width: 200, // Adjust width as needed
+                                  child: DropdownButtonFormField<User>(
+                                    value: _assignedUser,
+                                    decoration: InputDecoration(
+                                        labelText: 'Assigned User'),
+                                    items: _usersList.map((user) {
+                                      return DropdownMenuItem(
+                                          value: user,
+                                          child: Text(user.userName));
+                                    }).toList(),
+                                    onChanged: (newValue) {
+                                      setState(() {
+                                        _assignedUser = newValue;
+                                      });
+                                    },
                                   ),
                                 ),
                               ],

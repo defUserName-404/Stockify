@@ -240,19 +240,18 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ItemFilterParams(assetStatus: AssetStatus.Disposed)),
       ),
     ];
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cardWidth = (constraints.maxWidth - 48) / 4;
-        return Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: cards
-              .map((cardData) => SizedBox(
-                    width: cardWidth,
-                    child: cardData,
-                  ))
-              .toList(),
-        );
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 350, // Maximum width of each card
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 1.2, // Adjust aspect ratio as needed
+      ),
+      itemCount: cards.length,
+      itemBuilder: (context, index) {
+        return cards[index];
       },
     );
   }
@@ -271,21 +270,28 @@ class _DashboardScreenState extends State<DashboardScreen>
         const SizedBox(height: 16),
         LayoutBuilder(
           builder: (context, constraints) {
-            final chartWidth = (constraints.maxWidth - 16) / 2;
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: chartWidth,
-                  child: _buildDeviceTypeChart(),
-                ),
-                const SizedBox(width: 16),
-                SizedBox(
-                  width: chartWidth,
-                  child: _buildAssetStatusChart(),
-                ),
-              ],
-            );
+            if (constraints.maxWidth < 800) {
+              return Column(
+                children: [
+                  _buildDeviceTypeChart(),
+                  const SizedBox(height: 16),
+                  _buildAssetStatusChart(),
+                ],
+              );
+            } else {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _buildDeviceTypeChart(),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildAssetStatusChart(),
+                  ),
+                ],
+              );
+            }
           },
         ),
       ],
@@ -553,39 +559,33 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
         ),
         const SizedBox(height: 16),
-        Row(
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
           children: [
-            Expanded(
-              child: _buildActionButton(
-                'Add New Item',
-                Icons.add_circle_outline,
-                AppColors.colorPrimary,
-                () {
-                  // Navigate to add item screen
-                },
-              ),
+            _buildActionButton(
+              'Add New Item',
+              Icons.add_circle_outline,
+              AppColors.colorPrimary,
+              () {
+                // Navigate to add item screen
+              },
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildActionButton(
-                'Generate Report',
-                Icons.assessment,
-                AppColors.colorAccent,
-                () {
-                  // Navigate to reports screen
-                },
-              ),
+            _buildActionButton(
+              'Generate Report',
+              Icons.assessment,
+              AppColors.colorAccent,
+              () {
+                // Navigate to reports screen
+              },
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildActionButton(
-                'Manage Users',
-                Icons.people_outline,
-                AppColors.colorGreen,
-                () {
-                  // Navigate to user management
-                },
-              ),
+            _buildActionButton(
+              'Manage Users',
+              Icons.people_outline,
+              AppColors.colorGreen,
+              () {
+                // Navigate to user management
+              },
             ),
           ],
         ),
