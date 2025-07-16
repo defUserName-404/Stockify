@@ -2,7 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
-import 'package:stockify_app_flutter/common/widget/sidebar/placeholder_widget.dart';
+import 'package:stockify_app_flutter/common/widget/sidebar/app_sidebar.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';

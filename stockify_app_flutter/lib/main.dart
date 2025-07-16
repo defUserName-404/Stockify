@@ -5,7 +5,7 @@ import 'package:stockify_app_flutter/feature/notification/service/notification_s
 
 import 'common/shared-preference/shared_preference_service.dart';
 import 'common/theme/controller/theme_controller.dart';
-import 'common/widget/sidebar/placeholder_widget.dart';
+import 'common/widget/sidebar/app_sidebar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
