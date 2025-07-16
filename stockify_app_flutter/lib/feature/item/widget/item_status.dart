@@ -16,16 +16,29 @@ class ItemStatus extends StatelessWidget {
       AssetStatus.Disposed => AppColors.colorPink,
       AssetStatus.Unknown => AppColors.colorAccent
     };
+    final icon = switch (assetStatus) {
+      AssetStatus.Active => Icons.check_circle,
+      AssetStatus.Inactive => Icons.pause_circle,
+      AssetStatus.Disposed => Icons.remove_circle,
+      AssetStatus.Unknown => Icons.help
+    };
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(4.0),
-      ),
-      child: Text(
-        assetStatus.name,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Colors.white),
+          color: color.withAlpha(20),
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(color: color, width: 1)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 6.0),
+          Text(
+            assetStatus.name,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
