@@ -460,7 +460,10 @@ class _ItemScreenState extends State<ItemScreen> {
                           width: double.infinity,
                           child: PaginatedDataTable(
                             headingRowColor: WidgetStateProperty.all<Color>(
-                                AppColors.colorAccent.withValues(alpha: 0.25)),
+                                Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer
+                                    .withOpacity(0.1)),
                             showCheckboxColumn: false,
                             showEmptyRows: false,
                             actions: [
@@ -856,6 +859,7 @@ class _ItemScreenState extends State<ItemScreen> {
 class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
   List<Item> _filteredItems = [];
+  final BuildContext context;
   final void Function(Item)? onEdit;
   final void Function(Item)? onView;
   final void Function(Item)? onDelete;
@@ -864,7 +868,7 @@ class ItemData extends DataTableSource {
   final Function(int) setSelectedRowIndex;
 
   ItemData({
-    required BuildContext context,
+    required this.context,
     this.onEdit,
     this.onView,
     this.onDelete,
@@ -894,14 +898,18 @@ class ItemData extends DataTableSource {
   DataRow getRow(int index) {
     final item = _filteredItems[index];
     final isSelected = getSelectedRowIndex() == index;
+    final isEven = index.isEven;
+    final theme = Theme.of(context);
     return DataRow.byIndex(
       index: index,
       selected: isSelected,
       color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
         if (states.contains(WidgetState.selected)) {
-          return AppColors.colorSecondary.withAlpha(50);
+          return theme.colorScheme.primary.withOpacity(0.2);
         }
-        return null;
+        return isEven
+            ? Colors.transparent
+            : theme.colorScheme.onSurface.withOpacity(0.02);
       }),
       onSelectChanged: (_) {
         if (index >= 0 && index < _filteredItems.length) {
@@ -914,7 +922,15 @@ class ItemData extends DataTableSource {
         DataCell(Text(item.assetNo)),
         DataCell(Text(item.modelNo)),
         DataCell(Text(item.serialNo)),
-        DataCell(Text(item.deviceType.name)),
+        DataCell(Chip(
+          avatar: Icon(_getDeviceTypeIcon(item.deviceType),
+              size: 16, color: _getDeviceTypeColor(item.deviceType)),
+          label: Text(item.deviceType.name),
+          backgroundColor: _getDeviceTypeColor(item.deviceType).withAlpha(10),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: _getDeviceTypeColor(item.deviceType))),
+        )),
         DataCell(
             Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
         DataCell(ItemStatus(assetStatus: item.assetStatus)),
@@ -951,4 +967,64 @@ class ItemData extends DataTableSource {
 
   @override
   int get selectedRowCount => 0;
+}
+
+IconData _getDeviceTypeIcon(DeviceType type) {
+  switch (type) {
+    case DeviceType.CPU:
+      return Icons.memory;
+    case DeviceType.Monitor:
+      return Icons.desktop_windows;
+    case DeviceType.UPS:
+      return Icons.power;
+    case DeviceType.RAM:
+      return Icons.memory_outlined;
+    case DeviceType.HDD:
+      return Icons.storage;
+    case DeviceType.SSD:
+      return Icons.save;
+    case DeviceType.Printer:
+      return Icons.print;
+    case DeviceType.Scanner:
+      return Icons.scanner;
+    case DeviceType.Projector:
+      return Icons.videocam;
+    case DeviceType.Router:
+      return Icons.router;
+    case DeviceType.Switch:
+      return Icons.switch_camera;
+    case DeviceType.Modem:
+      return Icons.router_outlined;
+    case DeviceType.Camera:
+      return Icons.camera_alt;
+    case DeviceType.Keyboard:
+      return Icons.keyboard;
+    case DeviceType.Mouse:
+      return Icons.mouse;
+    case DeviceType.Speaker:
+      return Icons.speaker;
+    default:
+      return Icons.device_unknown;
+  }
+}
+
+Color _getDeviceTypeColor(DeviceType type) {
+  switch (type) {
+    case DeviceType.CPU:
+      return AppColors.colorBlue;
+    case DeviceType.Monitor:
+      return AppColors.colorGreen;
+    case DeviceType.UPS:
+      return AppColors.colorOrange;
+    case DeviceType.RAM:
+      return AppColors.colorPurple;
+    case DeviceType.HDD:
+      return AppColors.colorPink;
+    case DeviceType.SSD:
+      return AppColors.colorPrimary;
+    case DeviceType.Scanner:
+      return AppColors.colorAccent;
+    default:
+      return AppColors.colorTextSemiLight;
+  }
 }
