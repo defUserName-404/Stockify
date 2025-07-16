@@ -2,9 +2,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/widget/placeholder/placeholder_widget.dart';
-import 'package:stockify_app_flutter/feature/dashboard/widget/chart_legend.dart';
-import 'package:stockify_app_flutter/feature/dashboard/widget/dashboard_card.dart';
-import 'package:stockify_app_flutter/feature/dashboard/widget/info_card.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
@@ -18,6 +15,8 @@ import 'package:stockify_app_flutter/feature/user/model/user.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 
+import '../widget/info_card.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -25,20 +24,60 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with TickerProviderStateMixin {
   late final ItemService _itemService;
   late final UserService _userService;
   late List<Item> _items;
   late List<User> _users;
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  int _hoveredCardIndex = -1;
+  int _selectedChartIndex = -1;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
+    super.initState();
     _itemService = ItemServiceImplementation.instance;
     _userService = UserServiceImplementation.instance;
     _items = _itemService.getAllItems();
     _users = _userService.getAllUsers();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+    _fadeController.forward();
+    _slideController.forward();
     _scheduleWarrantyNotifications();
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
   }
 
   void _scheduleWarrantyNotifications() async {
@@ -70,204 +109,532 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      _isRefreshing = true;
+    });
+    await Future.delayed(const Duration(milliseconds: 1000));
+    setState(() {
+      _items = _itemService.getAllItems();
+      _users = _userService.getAllUsers();
+      _isRefreshing = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        titleSpacing: 0,
+        surfaceTintColor: AppColors.colorTransparent,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildInfoCards(),
-            const SizedBox(height: 16),
-            _buildCharts(),
-          ],
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildWelcomeSection(),
+                const SizedBox(height: 32),
+                _buildInfoCards(),
+                const SizedBox(height: 32),
+                _buildChartsSection(),
+                const SizedBox(height: 32),
+                _buildQuickActions(),
+              ],
+            ),
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.colorPrimary, AppColors.colorAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.colorPrimary.withAlpha(30),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Welcome to Stockify',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Manage your inventory efficiently',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(20),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Image.asset(
+              'assets/icons/icon.png',
+              width: 100,
+              height: 100,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildInfoCards() {
-    return GridView.count(
-      shrinkWrap: true,
-      crossAxisCount: 4,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      children: [
-        InkWell(
-          onTap: () {
-            AppPlaceholder.navigatorKey.currentState?.updateSelectedScreen(1);
-          },
-          child: InfoCard(
-            title: 'Total Items',
-            value: _items.length.toString(),
-            icon: Icons.inventory_2,
-            color: AppColors.colorBlue,
-          ),
-        ),
-        InkWell(
-          onTap: () {},
-          child: InfoCard(
-            title: 'Total Users',
-            value: _users.length.toString(),
-            icon: Icons.people,
-            color: AppColors.colorGreen,
-          ),
-        ),
-        InkWell(
-          onTap: () {
-            AppPlaceholder.navigatorKey.currentState?.updateSelectedScreen(1,
-                itemFilterParams: ItemFilterParams(isExpiring: true));
-          },
-          child: InfoCard(
-            title: 'Items Nearing Warranty',
-            value: _getExpiringItems().length.toString(),
-            icon: Icons.warning,
-            color: AppColors.colorOrange,
-          ),
-        ),
-        InkWell(
-          onTap: () {
-            AppPlaceholder.navigatorKey.currentState?.updateSelectedScreen(1,
+    final cards = [
+      InfoCard(
+        title: 'Total Items',
+        value: _items.length.toString(),
+        icon: Icons.inventory_2,
+        color: AppColors.colorBlue,
+        index: 0,
+        onTap: () =>
+            AppPlaceholder.navigatorKey.currentState?.updateSelectedScreen(1),
+      ),
+      InfoCard(
+        title: 'Total Users',
+        value: _users.length.toString(),
+        icon: Icons.people,
+        color: AppColors.colorGreen,
+        index: 1,
+        onTap: () {},
+      ),
+      InfoCard(
+        title: 'Items Nearing Warranty',
+        value: _getExpiringItems().length.toString(),
+        icon: Icons.warning,
+        color: AppColors.colorOrange,
+        index: 2,
+        onTap: () => AppPlaceholder.navigatorKey.currentState
+            ?.updateSelectedScreen(1,
+                itemFilterParams: ItemFilterParams(isExpiring: true)),
+      ),
+      InfoCard(
+        title: 'Disposed Items',
+        value: _getDisposedItems().length.toString(),
+        icon: Icons.delete,
+        color: AppColors.colorPink,
+        index: 3,
+        onTap: () => AppPlaceholder.navigatorKey.currentState
+            ?.updateSelectedScreen(
+                1,
                 itemFilterParams:
-                    ItemFilterParams(assetStatus: AssetStatus.Disposed));
-          },
-          child: InfoCard(
-            title: 'Disposed Items',
-            value: _getDisposedItems().length.toString(),
-            icon: Icons.delete,
-            color: AppColors.colorPink,
-          ),
-        ),
-      ],
+                    ItemFilterParams(assetStatus: AssetStatus.Disposed)),
+      ),
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = (constraints.maxWidth - 48) / 4;
+        return Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: cards
+              .map((cardData) => SizedBox(
+                    width: cardWidth,
+                    child: cardData,
+                  ))
+              .toList(),
+        );
+      },
     );
   }
 
-  Widget _buildCharts() {
-    return GridView.count(
-      shrinkWrap: true,
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.5,
+  Widget _buildChartsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDeviceTypeChart(),
-        _buildAssetStatusChart(),
+        const Text(
+          'Analytics Overview',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final chartWidth = (constraints.maxWidth - 16) / 2;
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: chartWidth,
+                  child: _buildDeviceTypeChart(),
+                ),
+                const SizedBox(width: 16),
+                SizedBox(
+                  width: chartWidth,
+                  child: _buildAssetStatusChart(),
+                ),
+              ],
+            );
+          },
+        ),
       ],
     );
   }
 
   Widget _buildDeviceTypeChart() {
     final deviceTypeCounts = _getDeviceTypeCounts();
-    return DashboardCard(
-      child: Column(
-        children: [
-          const Text(
-            'Items by Device Type',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _selectedChartIndex = 0),
+      onExit: (_) => setState(() => _selectedChartIndex = -1),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        transform: Matrix4.identity()
+          ..scale(_selectedChartIndex == 0 ? 1.02 : 1.0),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: _selectedChartIndex == 0
+                    ? Theme.of(context)
+                        .colorScheme
+                        .primaryContainer
+                        .withAlpha(20)
+                    : Theme.of(context).colorScheme.surface,
+                blurRadius: _selectedChartIndex == 0 ? 20 : 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: PieChart(
-              PieChartData(
-                sections: deviceTypeCounts.entries.map((entry) {
-                  return PieChartSectionData(
-                    color: _getDeviceTypeColor(entry.key),
-                    value: entry.value.toDouble(),
-                    title: '${entry.value}',
-                    radius: 50,
-                    titleStyle: const TextStyle(
-                      fontSize: 16,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Items by Device Type',
+                    style: TextStyle(
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color:
+                          Theme.of(context).colorScheme.primary.withAlpha(50),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.pie_chart,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 200,
+                child: PieChart(
+                  PieChartData(
+                    sections: deviceTypeCounts.entries.map((entry) {
+                      return PieChartSectionData(
+                        color: _getDeviceTypeColor(entry.key),
+                        value: entry.value.toDouble(),
+                        title: '${entry.value}',
+                        radius: 60,
+                        titleStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      );
+                    }).toList(),
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 50,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: deviceTypeCounts.keys.map((type) {
+                  return InkWell(
+                    onTap: () =>
+                        _navigateToItems(ItemFilterParams(deviceType: type)),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _getDeviceTypeColor(type).withAlpha(30),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _getDeviceTypeColor(type),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: _getDeviceTypeColor(type),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            type.name,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: _getDeviceTypeColor(type),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }).toList(),
-                sectionsSpace: 2,
-                centerSpaceRadius: 40,
               ),
-            ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 16,
-            runSpacing: 8,
-            children: deviceTypeCounts.keys.map((type) {
-              return InkWell(
-                onTap: () {
-                  _navigateToItems(ItemFilterParams(deviceType: type));
-                },
-                child: ChartLegend(
-                  title: type.name,
-                  color: _getDeviceTypeColor(type),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildAssetStatusChart() {
     final assetStatusCounts = _getAssetStatusCounts();
-    return DashboardCard(
-      child: Column(
-        children: [
-          const Text(
-            'Items by Asset Status',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _selectedChartIndex = 1),
+      onExit: (_) => setState(() => _selectedChartIndex = -1),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        transform: Matrix4.identity()
+          ..scale(_selectedChartIndex == 1 ? 1.02 : 1.0),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: _selectedChartIndex == 1
+                    ? Theme.of(context)
+                        .colorScheme
+                        .primaryContainer
+                        .withAlpha(20)
+                    : Theme.of(context).colorScheme.surface,
+                blurRadius: _selectedChartIndex == 1 ? 20 : 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: BarChart(
-              BarChartData(
-                barGroups: assetStatusCounts.entries.map((entry) {
-                  return BarChartGroupData(
-                    x: entry.key.index,
-                    barRods: [
-                      BarChartRodData(
-                        toY: entry.value.toDouble(),
-                        color: _getAssetStatusColor(entry.key),
-                        width: 20,
-                      ),
-                    ],
-                  );
-                }).toList(),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        return InkWell(
-                          onTap: () {
-                            _navigateToItems(ItemFilterParams().copyWith(
-                                assetStatus:
-                                    AssetStatus.values[value.toInt()]));
-                          },
-                          child: Text(
-                            AssetStatus.values[value.toInt()].name,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        );
-                      },
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Items by Asset Status',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: true),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.colorAccent.withAlpha(10),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.bar_chart,
+                      color: AppColors.colorAccent,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 200,
+                child: BarChart(
+                  BarChartData(
+                    barGroups: assetStatusCounts.entries.map((entry) {
+                      return BarChartGroupData(
+                        x: entry.key.index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: entry.value.toDouble(),
+                            color: _getAssetStatusColor(entry.key),
+                            width: 32,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(4),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                    titlesData: FlTitlesData(
+                      show: true,
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: InkWell(
+                                onTap: () => _navigateToItems(ItemFilterParams()
+                                    .copyWith(
+                                        assetStatus:
+                                            AssetStatus.values[value.toInt()])),
+                                child: Text(
+                                  AssetStatus.values[value.toInt()].name,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: true),
+                      ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    gridData: const FlGridData(show: false),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Quick Actions',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionButton(
+                'Add New Item',
+                Icons.add_circle_outline,
+                AppColors.colorPrimary,
+                () {
+                  // Navigate to add item screen
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildActionButton(
+                'Generate Report',
+                Icons.assessment,
+                AppColors.colorAccent,
+                () {
+                  // Navigate to reports screen
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildActionButton(
+                'Manage Users',
+                Icons.people_outline,
+                AppColors.colorGreen,
+                () {
+                  // Navigate to user management
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+      String title, IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withAlpha(60),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: color.withAlpha(30),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
