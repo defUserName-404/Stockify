@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:stockify_app_flutter/feature/dashboard/widget/dashboard_card.dart';
 
-class InfoCard extends StatelessWidget {
+class InfoCard extends StatefulWidget {
   final String title;
   final String value;
   final IconData icon;
   final Color color;
+  final int index;
+  final VoidCallback onTap;
 
   const InfoCard({
     super.key,
@@ -13,55 +14,92 @@ class InfoCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
-  });
+      required this.index,
+      required this.onTap});
+
+  @override
+  State<InfoCard> createState() => _InfoCardState();
+}
+
+class _InfoCardState extends State<InfoCard> {
+  int _hoveredCardIndex = -1;
 
   @override
   Widget build(BuildContext context) {
-    return DashboardCard(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withAlpha(90), color],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hoveredCardIndex = widget.index),
+      onExit: (_) => setState(() => _hoveredCardIndex = -1),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        transform: Matrix4.identity()
+          ..scale(_hoveredCardIndex == widget.index ? 1.02 : 1.0),
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha(80),
-              shape: BoxShape.circle,
+              color: widget.color.withAlpha(50),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: _hoveredCardIndex == widget.index
+                      ? widget.color.withAlpha(30)
+                      : Colors.black.withAlpha(10),
+                  blurRadius: _hoveredCardIndex == widget.index ? 20 : 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
-            child: Icon(icon, size: 50, color: Colors.white),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: widget.color.withAlpha(30),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        widget.icon,
+                        color: widget.color,
+                        size: 24,
+                      ),
+                    ),
+                    if (_hoveredCardIndex == widget.index)
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        color: widget.color,
+                        size: 16,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  widget.value,
+                  style: TextStyle(
+                    fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-            ],
+                    color: widget.color,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
