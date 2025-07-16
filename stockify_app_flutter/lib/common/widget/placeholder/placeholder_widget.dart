@@ -306,7 +306,7 @@ class _CustomNavButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 400),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
@@ -314,7 +314,7 @@ class _CustomNavButton extends StatelessWidget {
                 isSelected ? colorScheme.primaryContainer : colorScheme.surface,
           ),
           child: Material(
-            color: Colors.transparent,
+            color: AppColors.colorTransparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: onPressed,

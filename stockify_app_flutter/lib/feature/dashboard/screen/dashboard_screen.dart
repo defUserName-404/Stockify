@@ -45,11 +45,11 @@ class _DashboardScreenState extends State<DashboardScreen>
     _items = _itemService.getAllItems();
     _users = _userService.getAllUsers();
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(
