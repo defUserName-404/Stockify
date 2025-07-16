@@ -3,6 +3,7 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:stockify_app_flutter/common/ffi/ffi_bridge.dart';
+import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 
 import '../model/user.dart';
 
@@ -40,7 +41,6 @@ class UserRepository {
     final ipPhonePtr = _toUtf8(user.ipPhone);
     final roomNoPtr = _toUtf8(user.roomNo);
     final floorPtr = _toUtf8(user.floor);
-
     _ffi.addUser(
       userNamePtr,
       designationPtr,
@@ -50,11 +50,11 @@ class UserRepository {
       floorPtr,
     );
     calloc.free(userNamePtr);
-    calloc.free(designationPtr);
-    calloc.free(sapIdPtr);
-    calloc.free(ipPhonePtr);
-    calloc.free(roomNoPtr);
-    calloc.free(floorPtr);
+    if (designationPtr != nullptr) calloc.free(designationPtr);
+    if (sapIdPtr != nullptr) calloc.free(sapIdPtr);
+    if (ipPhonePtr != nullptr) calloc.free(ipPhonePtr);
+    if (roomNoPtr != nullptr) calloc.free(roomNoPtr);
+    if (floorPtr != nullptr) calloc.free(floorPtr);
   }
 
   void editUser(User user) {
@@ -74,14 +74,32 @@ class UserRepository {
       floorPtr,
     );
     calloc.free(userNamePtr);
-    calloc.free(designationPtr);
-    calloc.free(sapIdPtr);
-    calloc.free(ipPhonePtr);
-    calloc.free(roomNoPtr);
-    calloc.free(floorPtr);
+    if (designationPtr != nullptr) calloc.free(designationPtr);
+    if (sapIdPtr != nullptr) calloc.free(sapIdPtr);
+    if (ipPhonePtr != nullptr) calloc.free(ipPhonePtr);
+    if (roomNoPtr != nullptr) calloc.free(roomNoPtr);
+    if (floorPtr != nullptr) calloc.free(floorPtr);
   }
 
   void deleteUser(int id) {
     _ffi.deleteUserById(id);
+  }
+
+  List<User> getFilteredUsers(UserFilterParams params) {
+    final searchPtr = _toUtf8(params.search);
+    final sortByPtr = _toUtf8(params.sortBy);
+    final sortOrderPtr = _toUtf8(params.sortOrder);
+    final resultPtr = _ffi.getFilteredUsers(
+      searchPtr,
+      sortByPtr,
+      sortOrderPtr,
+    );
+    final jsonString = resultPtr.toDartString();
+    _ffi.freeCString(resultPtr);
+    calloc.free(searchPtr);
+    if (sortByPtr != nullptr) calloc.free(sortByPtr);
+    calloc.free(sortOrderPtr);
+    final List<dynamic> jsonList = jsonDecode(jsonString);
+    return jsonList.map((json) => User.fromJson(json)).toList();
   }
 }

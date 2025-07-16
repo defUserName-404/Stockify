@@ -83,13 +83,11 @@ func DeleteUserById(id C.ulonglong) {
 }
 
 //export GetFilteredUsers
-func GetFilteredUsers(search, sortBy, sortOrder *C.char, page, pageSize C.int) *C.char {
+func GetFilteredUsers(search, sortBy, sortOrder *C.char) *C.char {
 	params := usermodel.UserQueryParams{
 		Search:    C.GoString(search),
 		SortBy:    C.GoString(sortBy),
 		SortOrder: C.GoString(sortOrder),
-		Page:      int(page),
-		PageSize:  int(pageSize),
 	}
 	users, err := userService.GetFilteredUsers(params)
 	if err != nil {

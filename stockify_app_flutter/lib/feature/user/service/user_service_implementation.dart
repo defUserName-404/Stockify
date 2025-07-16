@@ -1,4 +1,5 @@
 import 'package:stockify_app_flutter/feature/user/model/user.dart';
+import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 import 'package:stockify_app_flutter/feature/user/repository/user_repository.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 
@@ -35,5 +36,10 @@ class UserServiceImplementation extends UserService {
   @override
   User getUser(int id) {
     return _userRepository.getUser(id);
+  }
+
+  @override
+  List<User> getFilteredUsers(UserFilterParams params) {
+    return _userRepository.getFilteredUsers(params);
   }
 }

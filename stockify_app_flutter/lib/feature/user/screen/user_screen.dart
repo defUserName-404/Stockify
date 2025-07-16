@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/shortcuts/app_shortcuts.dart';
@@ -11,6 +9,7 @@ import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/user/util/user_validator.dart';
 import 'package:stockify_app_flutter/feature/user/widget/user_filter_dialog.dart';
+import 'package:stockify_app_flutter/feature/user/widget/user_header.dart';
 
 import '../../item/widget/item_details_text.dart';
 import '../../user/model/user.dart';
@@ -102,7 +101,7 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
         });
   }
 
-  void _refreshData() {
+  Future<void> _refreshData() async {
     setState(() {
       _userDataSource.updateFilterParams(_filterParams);
       _userDataSource.refreshData();
@@ -110,9 +109,7 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
   }
 
   void _onSearchChanged(String query) {
-    setState(() {
-      _filterParams = _filterParams.copyWith(search: query, page: 1);
-    });
+    _filterParams = _filterParams.copyWith(search: query);
     _refreshData();
   }
 
@@ -123,7 +120,7 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
         currentParams: _filterParams,
         onApplyFilter: (params) {
           setState(() {
-            _filterParams = params.copyWith(page: 1);
+            _filterParams = params;
           });
           _refreshData();
         },
@@ -180,7 +177,6 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
       roomNo: roomNo,
       floor: floor,
     );
-    log(user.toString());
     if (_editingUser != null) {
       _userService.editUser(user);
     } else {
@@ -284,18 +280,18 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
                   if (_selectedRowIndex <
                       _userDataSource._filteredUsers.length - 1) {
                     _userDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
-                    _refreshData();
                   }
                 });
+                _refreshData();
               }),
               AppShortcuts.arrowUp: VoidCallbackIntent(() {
                 _selectedRowIndex = _userDataSource.getSelectedRowIndex();
                 setState(() {
                   if (_selectedRowIndex > 0) {
                     _userDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
-                    _refreshData();
                   }
                 });
+                _refreshData();
               }),
               AppShortcuts.viewDetails: VoidCallbackIntent(() {
                 if (_selectedRowIndex != -1) {
@@ -326,104 +322,47 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
                 autofocus: true,
                 child: Stack(
                   children: <Widget>[
-                    SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          const SizedBox(height: 16.0),
-                          Container(
-                            width: double.infinity,
-                            child: PaginatedDataTable(
-                              headingRowColor: WidgetStateProperty.all<Color>(
-                                  AppColors.colorAccent
-                                      .withValues(alpha: 0.25)),
-                              showEmptyRows: false,
-                              showCheckboxColumn: false,
-                              source: _userDataSource,
-                              actions: [
-                                AppButton(
-                                    onPressed: _togglePanel,
-                                    icon: Icons.add,
-                                    iconColor: AppColors.colorAccent,
-                                    text: 'Add New User'),
-                              ],
-                              header: Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    flex: 9,
-                                    child: SearchBar(
-                                      controller: _searchInputController,
-                                      focusNode: _searchFocusNode,
-                                      padding: WidgetStateProperty.all<
-                                          EdgeInsetsGeometry>(
-                                        const EdgeInsets.symmetric(
-                                            horizontal: 16.0),
-                                      ),
-                                      leading: Icon(Icons.search,
-                                          color: AppColors.colorTextDark),
-                                      trailing: [
-                                        InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              _searchInputController.clear();
-                                              _onSearchChanged('');
-                                            });
-                                          },
-                                          child: Icon(
-                                            Icons.clear,
-                                            color: AppColors.colorTextDark,
-                                          ),
-                                        ),
-                                      ],
-                                      hintText:
-                                          'Search for users by their User Name or SAP ID',
-                                      onChanged: _onSearchChanged,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8.0),
-                                  AppButton(
-                                    onPressed: _showFilterDialog,
-                                    icon: Icons.filter_list_rounded,
-                                    iconColor: AppColors.colorTextDark,
-                                    text: 'Sort & Filter',
-                                    backgroundColor:
-                                        AppColors.colorTextSemiLight,
-                                    foregroundColor: AppColors.colorTextDark,
-                                  ),
-                                ],
-                              ),
-                              availableRowsPerPage: const [10, 20, 50],
-                              onRowsPerPageChanged: (int? value) {
-                                setState(() {
-                                  _rowsPerPage = value!;
-                                  _refreshData();
-                                });
-                              },
-                              onPageChanged: (int? firstRowIndex) {
-                                if (firstRowIndex != null) {
-                                  final newPage =
-                                      (firstRowIndex / _rowsPerPage).floor() +
-                                          1;
-                                  if (newPage != _filterParams.page) {
-                                    setState(() {
-                                      _filterParams =
-                                          _filterParams.copyWith(page: newPage);
-                                      _refreshData();
-                                    });
-                                  }
-                                }
-                              },
-                              rowsPerPage: _rowsPerPage,
-                              columns: [
-                                DataColumn(label: Text('ID')),
-                                DataColumn(label: Text('User Name')),
-                                DataColumn(label: Text('Designation')),
+                    Column(
+                      children: <Widget>[
+                        UserHeader(
+                          onAddNew: _togglePanel,
+                          onFilter: _showFilterDialog,
+                          onSearch: _onSearchChanged,
+                          searchController: _searchInputController,
+                          searchFocusNode: _searchFocusNode,
+                        ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Container(
+                              width: double.infinity,
+                              child: PaginatedDataTable(
+                                headingRowColor: WidgetStateProperty.all<Color>(
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer
+                                        .withAlpha(10)),
+                                showCheckboxColumn: false,
+                                showEmptyRows: false,
+                                availableRowsPerPage: const [10, 20, 50],
+                                onRowsPerPageChanged: (int? value) {
+                                  setState(() {
+                                    _rowsPerPage = value!;
+                                  });
+                                },
+                                rowsPerPage: _rowsPerPage,
+                                columns: [
+                                  DataColumn(label: Text('ID')),
+                                  DataColumn(label: Text('User Name')),
+                                  DataColumn(label: Text('Designation')),
                                 DataColumn(label: Text('SAP ID')),
                                 DataColumn(label: Text('Actions'))
                               ],
+                                source: _userDataSource,
+                              ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     // Side Panel (Sliding in/out)
                     AnimatedPositioned(
@@ -536,8 +475,8 @@ class _UserScreenState extends State<UserScreen> with TickerProviderStateMixin {
 
 class UserData extends DataTableSource {
   final UserService _userService = UserServiceImplementation.instance;
-  List<User> _users = [];
   List<User> _filteredUsers = [];
+  final BuildContext context;
   final void Function(User)? onEdit;
   final void Function(User)? onView;
   final void Function(User)? onDelete;
@@ -546,7 +485,7 @@ class UserData extends DataTableSource {
   final Function(int) setSelectedRowIndex;
 
   UserData({
-    required BuildContext context,
+    required this.context,
     this.onEdit,
     this.onView,
     this.onDelete,
@@ -560,11 +499,11 @@ class UserData extends DataTableSource {
 
   void updateFilterParams(UserFilterParams params) {
     _filterParams = params;
+    refreshData();
   }
 
   void refreshData() {
-    _users = _userService.getAllUsers();
-    _applyFilters();
+    _filteredUsers = _userService.getFilteredUsers(_filterParams);
     notifyListeners();
   }
 
@@ -572,53 +511,22 @@ class UserData extends DataTableSource {
     return _filteredUsers[index];
   }
 
-  void _applyFilters() {
-    _filteredUsers = _users.where((user) {
-      if (_filterParams.search.isNotEmpty) {
-        final searchLower = _filterParams.search.toLowerCase();
-        final matchesSearch =
-            user.userName.toLowerCase().contains(searchLower) ||
-                (user.sapId?.toLowerCase().contains(searchLower) ?? false);
-        ;
-        if (!matchesSearch) return false;
-      }
-      return true;
-    }).toList();
-    _filteredUsers.sort((a, b) {
-      int comparison = 0;
-      if (_filterParams.sortBy == null) {
-        comparison = a.id!.compareTo(b.id!);
-      } else {
-        switch (_filterParams.sortBy) {
-          case 'userName':
-            comparison = a.userName.compareTo(b.userName);
-            break;
-          case 'designation':
-            comparison = (a.designation ?? '').compareTo(b.designation ?? '');
-            break;
-          case 'sapId':
-            comparison = (a.sapId ?? '').compareTo(b.sapId ?? '');
-            break;
-          default:
-            comparison = a.id!.compareTo(b.id!);
-        }
-      }
-      return _filterParams.sortOrder == 'DESC' ? -comparison : comparison;
-    });
-  }
-
   @override
   DataRow getRow(int index) {
     final user = _filteredUsers[index];
     final isSelected = getSelectedRowIndex() == index;
+    final isEven = index.isEven;
+    final theme = Theme.of(context);
     return DataRow.byIndex(
       index: index,
       selected: isSelected,
       color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
         if (states.contains(WidgetState.selected)) {
-          return AppColors.colorGreen.withAlpha(20);
+          return theme.colorScheme.primary.withAlpha(40);
         }
-        return null;
+        return isEven
+            ? Colors.transparent
+            : theme.colorScheme.onSurface.withAlpha(2);
       }),
       onSelectChanged: (_) {
         if (index >= 0 && index < _filteredUsers.length) {
@@ -668,7 +576,7 @@ class UserData extends DataTableSource {
   int get rowCount => _filteredUsers.length;
 
   @override
-  bool get isRowCountApproximate => true;
+  bool get isRowCountApproximate => false;
 
   @override
   int get selectedRowCount => 0;

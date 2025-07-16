@@ -21,7 +21,7 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
   @override
   void initState() {
     super.initState();
-    _params = widget.currentParams;
+    _params = widget.currentParams.copyWith();
   }
 
   @override
@@ -46,14 +46,11 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
               items: const [
                 DropdownMenuItem(value: null, child: Text('Default')),
                 DropdownMenuItem(value: 'user_name', child: Text('User Name')),
-                DropdownMenuItem(
-                    value: 'designation', child: Text('Designation')),
                 DropdownMenuItem(value: 'sap_id', child: Text('SAP ID')),
               ],
               onChanged: (value) {
                 setState(() {
-                  final newParams = _params.copyWith(sortBy: value);
-                  widget.onApplyFilter(newParams);
+                  _params = _params.copyWith(sortBy: value);
                 });
               },
             ),
