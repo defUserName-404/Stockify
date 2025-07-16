@@ -86,6 +86,7 @@ class _InfoCardState extends State<InfoCard> {
                     fontWeight: FontWeight.bold,
                     color: widget.color,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -95,6 +96,7 @@ class _InfoCardState extends State<InfoCard> {
                     color: Colors.grey,
                     fontWeight: FontWeight.w500,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

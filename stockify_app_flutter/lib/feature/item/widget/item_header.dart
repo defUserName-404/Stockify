@@ -20,33 +20,55 @@ class ItemHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          return _buildVerticalLayout(context);
+        } else {
+          return _buildHorizontalLayout(context);
+        }
+      },
+    );
+  }
+
+  Widget _buildHorizontalLayout(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
       child: Row(
         children: [
           Expanded(
-            child: _buildSearchBar(),
+            child: _buildSearchBar(context),
           ),
           const SizedBox(width: 16.0),
-          _buildActionButtons(),
+          _buildActionButtons(context),
         ],
       ),
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildVerticalLayout(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+      child: Column(
+        children: [
+          _buildSearchBar(context),
+          const SizedBox(height: 16.0),
+          _buildActionButtons(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
     return TextField(
       focusNode: searchFocusNode,
       controller: searchController,
       onChanged: onSearch,
-      style: TextStyle(color: AppColors.colorTextDark),
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.search),
         hintText: 'Search by Asset No, Model, or Serial No...',
-        hintStyle: TextStyle(color: AppColors.colorTextDark),
         isDense: false,
-        filled: true,
-        fillColor: AppColors.colorTextSemiLight,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
         suffixIcon: searchController.text.isNotEmpty
@@ -62,8 +84,11 @@ class ItemHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Row(
+  Widget _buildActionButtons(BuildContext context) {
+    return Wrap(
+      spacing: 16.0,
+      runSpacing: 16.0,
+      alignment: WrapAlignment.end,
       children: [
         AppButton(
           onPressed: onFilter,
@@ -72,7 +97,6 @@ class ItemHeader extends StatelessWidget {
           backgroundColor: AppColors.colorTextSemiLight,
           foregroundColor: AppColors.colorTextDark,
         ),
-        const SizedBox(width: 16.0),
         AppButton(
           onPressed: onAddNew,
           icon: Icons.add,
