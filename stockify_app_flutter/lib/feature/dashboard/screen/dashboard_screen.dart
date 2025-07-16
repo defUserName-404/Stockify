@@ -35,9 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  int _hoveredCardIndex = -1;
   int _selectedChartIndex = -1;
-  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -107,18 +105,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         );
       }
     }
-  }
-
-  Future<void> _refreshData() async {
-    setState(() {
-      _isRefreshing = true;
-    });
-    await Future.delayed(const Duration(milliseconds: 1000));
-    setState(() {
-      _items = _itemService.getAllItems();
-      _users = _userService.getAllUsers();
-      _isRefreshing = false;
-    });
   }
 
   @override
