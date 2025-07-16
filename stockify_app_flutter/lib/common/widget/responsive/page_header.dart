@@ -3,20 +3,22 @@ import 'package:stockify_app_flutter/common/widget/app_button.dart';
 
 import '../../../common/theme/colors.dart';
 
-class UserHeader extends StatelessWidget {
+class PageHeader extends StatelessWidget {
   final VoidCallback onAddNew;
   final VoidCallback onFilter;
   final Function(String) onSearch;
   final TextEditingController searchController;
   final FocusNode searchFocusNode;
+  final String searchHint;
 
-  const UserHeader(
+  const PageHeader(
       {super.key,
       required this.onAddNew,
       required this.onFilter,
       required this.onSearch,
       required this.searchController,
-      required this.searchFocusNode});
+      required this.searchFocusNode,
+      required this.searchHint});
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +69,7 @@ class UserHeader extends StatelessWidget {
       style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.search),
-        hintText: 'Search for users by their User Name or SAP ID',
+        hintText: searchHint,
         isDense: false,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
@@ -100,7 +102,7 @@ class UserHeader extends StatelessWidget {
         AppButton(
           onPressed: onAddNew,
           icon: Icons.add,
-          text: 'Add New User',
+          text: 'Add New',
         ),
       ],
     );

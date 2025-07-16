@@ -1,7 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
-import 'package:stockify_app_flutter/common/widget/placeholder/placeholder_widget.dart';
+import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
+import 'package:stockify_app_flutter/common/widget/sidebar/placeholder_widget.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
@@ -24,16 +25,11 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen>
-    with TickerProviderStateMixin {
+class _DashboardScreenState extends State<DashboardScreen> {
   late final ItemService _itemService;
   late final UserService _userService;
   late List<Item> _items;
   late List<User> _users;
-  late AnimationController _fadeController;
-  late AnimationController _slideController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   int _selectedChartIndex = -1;
 
@@ -44,37 +40,10 @@ class _DashboardScreenState extends State<DashboardScreen>
     _userService = UserServiceImplementation.instance;
     _items = _itemService.getAllItems();
     _users = _userService.getAllUsers();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
-    _fadeController.forward();
-    _slideController.forward();
     _scheduleWarrantyNotifications();
   }
 
-  @override
   void dispose() {
-    _fadeController.dispose();
-    _slideController.dispose();
     super.dispose();
   }
 
@@ -114,24 +83,20 @@ class _DashboardScreenState extends State<DashboardScreen>
         title: const Text('Dashboard'),
         surfaceTintColor: AppColors.colorTransparent,
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildWelcomeSection(),
-                const SizedBox(height: 32),
-                _buildInfoCards(),
-                const SizedBox(height: 32),
-                _buildChartsSection(),
-                const SizedBox(height: 32),
-                _buildQuickActions(),
-              ],
-            ),
+      body: ScreenTransition(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildWelcomeSection(),
+              const SizedBox(height: 32),
+              _buildInfoCards(),
+              const SizedBox(height: 32),
+              _buildChartsSection(),
+              const SizedBox(height: 32),
+              _buildQuickActions(),
+            ],
           ),
         ),
       ),
@@ -207,7 +172,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         color: AppColors.colorBlue,
         index: 0,
         onTap: () =>
-            AppPlaceholder.navigatorKey.currentState?.updateSelectedScreen(1),
+            AppSidebar.navigatorKey.currentState?.updateSelectedScreen(1),
       ),
       InfoCard(
         title: 'Total Users',
@@ -223,9 +188,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         icon: Icons.warning,
         color: AppColors.colorOrange,
         index: 2,
-        onTap: () => AppPlaceholder.navigatorKey.currentState
-            ?.updateSelectedScreen(1,
-                itemFilterParams: ItemFilterParams(isExpiring: true)),
+        onTap: () => AppSidebar.navigatorKey.currentState?.updateSelectedScreen(
+            1,
+            itemFilterParams: ItemFilterParams(isExpiring: true)),
       ),
       InfoCard(
         title: 'Disposed Items',
@@ -233,11 +198,10 @@ class _DashboardScreenState extends State<DashboardScreen>
         icon: Icons.delete,
         color: AppColors.colorPink,
         index: 3,
-        onTap: () => AppPlaceholder.navigatorKey.currentState
-            ?.updateSelectedScreen(
-                1,
-                itemFilterParams:
-                    ItemFilterParams(assetStatus: AssetStatus.Disposed)),
+        onTap: () => AppSidebar.navigatorKey.currentState?.updateSelectedScreen(
+            1,
+            itemFilterParams:
+                ItemFilterParams(assetStatus: AssetStatus.Disposed)),
       ),
     ];
     return GridView.builder(
@@ -247,7 +211,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         maxCrossAxisExtent: 350, // Maximum width of each card
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
-        childAspectRatio: 1.2, // Adjust aspect ratio as needed
+        childAspectRatio: 1.2,
       ),
       itemCount: cards.length,
       itemBuilder: (context, index) {
@@ -626,7 +590,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _navigateToItems(ItemFilterParams filterParams) {
-    AppPlaceholder.navigatorKey.currentState
+    AppSidebar.navigatorKey.currentState
         ?.updateSelectedScreen(1, itemFilterParams: filterParams);
   }
 
