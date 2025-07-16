@@ -13,17 +13,17 @@ import '../../../feature/settings/screen/settings_screen.dart';
 import '../../shared-preference/shared_preference_service.dart';
 import '../../theme/colors.dart';
 
-class AppSidebar extends StatefulWidget {
-  const AppSidebar({super.key});
+class AppLayout extends StatefulWidget {
+  const AppLayout({super.key});
 
-  static final GlobalKey<_AppSidebarState> navigatorKey =
-      GlobalKey<_AppSidebarState>();
+  static final GlobalKey<_AppLayoutState> navigatorKey =
+      GlobalKey<_AppLayoutState>();
 
   @override
-  State<AppSidebar> createState() => _AppSidebarState();
+  State<AppLayout> createState() => _AppLayoutState();
 }
 
-class _AppSidebarState extends State<AppSidebar> {
+class _AppLayoutState extends State<AppLayout> {
   int _selectedIndex = 0;
   ItemFilterParams? _currentFilterParams = null;
   late double _railWidth;
@@ -296,9 +296,8 @@ class _AppSidebarState extends State<AppSidebar> {
                               isSelected: _selectedIndex == 3,
                               showLabel: _showLabels,
                               tooltip: 'Notifications',
-                              badge: hasNotifications
-                                  ? snapshot.data!.length
-                                  : null,
+                              badge:
+                                  hasNotifications ? snapshot.data!.length : null,
                             );
                           },
                         );

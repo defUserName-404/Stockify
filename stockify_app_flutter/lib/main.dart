@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/widget/sidebar/app_layout.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_service.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
 
 import 'common/shared-preference/shared_preference_service.dart';
 import 'common/theme/controller/theme_controller.dart';
-import 'common/widget/sidebar/app_sidebar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Stockify',
       theme: themeProvider.themeData,
-      home: AppSidebar(key: AppSidebar.navigatorKey),
+      home: AppLayout(key: AppLayout.navigatorKey),
       debugShowCheckedModeBanner: false,
     );
   }
