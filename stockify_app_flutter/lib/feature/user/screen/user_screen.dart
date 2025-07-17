@@ -278,6 +278,8 @@ class _UserScreenState extends State<UserScreen> {
                     _userDataSource.getRowData(_selectedRowIndex));
               }
             }),
+            AppShortcuts.cancel: VoidCallbackIntent(() => _togglePanel()),
+            AppShortcuts.submit: VoidCallbackIntent(() => _saveUser()),
           },
           child: Actions(
             actions: {
@@ -285,7 +287,7 @@ class _UserScreenState extends State<UserScreen> {
                 onInvoke: (intent) => intent.callback(),
               ),
             },
-            child: Focus(
+            child: FocusScope(
               autofocus: true,
               child: Stack(
                 children: <Widget>[

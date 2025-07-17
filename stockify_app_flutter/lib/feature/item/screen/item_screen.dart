@@ -408,6 +408,8 @@ class _ItemScreenState extends State<ItemScreen> {
                     _itemDataSource.getRowData(_selectedRowIndex));
               }
             }),
+            AppShortcuts.cancel: VoidCallbackIntent(() => _togglePanel()),
+            AppShortcuts.submit: VoidCallbackIntent(() => _saveItem()),
           },
           child: Actions(
             actions: {
@@ -415,7 +417,7 @@ class _ItemScreenState extends State<ItemScreen> {
                 onInvoke: (intent) => intent.callback(),
               ),
             },
-            child: Focus(
+            child: FocusScope(
               autofocus: true,
               child: Stack(
                 children: <Widget>[
