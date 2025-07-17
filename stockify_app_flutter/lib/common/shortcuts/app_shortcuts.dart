@@ -19,6 +19,8 @@ class AppShortcuts {
   static const editItem =
       SingleActivator(LogicalKeyboardKey.keyE, control: true);
   static const deleteItem = SingleActivator(LogicalKeyboardKey.delete);
+  static const cancel = SingleActivator(LogicalKeyboardKey.escape);
+  static const submit = SingleActivator(LogicalKeyboardKey.enter);
 
   // Navigation
   static const goToDashboard =
