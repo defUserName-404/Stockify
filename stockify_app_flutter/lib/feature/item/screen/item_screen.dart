@@ -6,11 +6,11 @@ import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/theme/controller/theme_controller.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
-import 'package:stockify_app_flutter/common/widget/app_button.dart';
 import 'package:stockify_app_flutter/common/widget/responsive/page_header.dart';
-import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
+import 'package:stockify_app_flutter/common/widget/side_panel.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
+import 'package:stockify_app_flutter/feature/item/widget/item_form.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
@@ -19,7 +19,6 @@ import '../../user/model/user.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
 import '../model/item_filter_param.dart';
-import '../util/item_validator.dart';
 import '../widget/item_details_text.dart';
 import '../widget/item_filter_dialog.dart';
 
@@ -42,32 +41,16 @@ class _ItemScreenState extends State<ItemScreen> {
   ItemFilterParams _filterParams = ItemFilterParams();
   final FocusNode _searchFocusNode = FocusNode();
   int _selectedRowIndex = -1;
-
-  late final TextEditingController _assetInputController,
-      _modelInputController,
-      _serialInputController,
-      _hostNameInputController,
-      _ipPortInputController,
-      _macAddressInputController,
-      _osVersionInputController,
-      _facePlateNameInputController,
-      _switchPortInputController,
-      _switchIpAddressInputController,
-      _searchInputController;
-  DeviceType? _selectedDeviceType;
-  AssetStatus? _selectedAssetStatus;
-  DateTime? _selectedWarrantyDate;
-  DateTime? _selectedReceivedDate;
-  bool? _isPasswordProtected;
-  User? _assignedUser;
+  late final TextEditingController _searchInputController;
   List<User> _usersList = [];
+  final GlobalKey<ItemFormState> _formKey = GlobalKey<ItemFormState>();
 
   @override
   void initState() {
     _itemService = ItemServiceImplementation.instance;
     _userService = UserServiceImplementation.instance;
     _filterParams = widget.filterParams ?? ItemFilterParams();
-    _initializeControllers();
+    _searchInputController = TextEditingController();
     _initializeItemDataSource();
     _fetchUsers();
     super.initState();
@@ -77,26 +60,6 @@ class _ItemScreenState extends State<ItemScreen> {
     setState(() {
       _usersList = _userService.getAllUsers();
     });
-  }
-
-  void _initializeControllers() {
-    _assetInputController = TextEditingController();
-    _modelInputController = TextEditingController();
-    _serialInputController = TextEditingController();
-    _hostNameInputController = TextEditingController();
-    _ipPortInputController = TextEditingController();
-    _macAddressInputController = TextEditingController();
-    _osVersionInputController = TextEditingController();
-    _facePlateNameInputController = TextEditingController();
-    _switchPortInputController = TextEditingController();
-    _switchIpAddressInputController = TextEditingController();
-    _searchInputController = TextEditingController();
-    _selectedDeviceType = _editingItem?.deviceType;
-    _selectedAssetStatus = _editingItem?.assetStatus;
-    _selectedWarrantyDate = _editingItem?.warrantyDate;
-    _selectedReceivedDate = _editingItem?.receivedDate;
-    _isPasswordProtected = _editingItem?.isPasswordProtected;
-    _assignedUser = _editingItem?.assignedTo;
   }
 
   void _initializeItemDataSource() {
@@ -144,16 +107,6 @@ class _ItemScreenState extends State<ItemScreen> {
 
   @override
   void dispose() {
-    _assetInputController.dispose();
-    _modelInputController.dispose();
-    _serialInputController.dispose();
-    _hostNameInputController.dispose();
-    _ipPortInputController.dispose();
-    _macAddressInputController.dispose();
-    _osVersionInputController.dispose();
-    _facePlateNameInputController.dispose();
-    _switchPortInputController.dispose();
-    _switchIpAddressInputController.dispose();
     _searchInputController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
@@ -161,110 +114,19 @@ class _ItemScreenState extends State<ItemScreen> {
 
   void _togglePanel({Item? item}) {
     setState(() {
-      if (item != null) {
-        _editingItem = item;
-        _assetInputController.text = item.assetNo;
-        _modelInputController.text = item.modelNo;
-        _serialInputController.text = item.serialNo;
-        _selectedDeviceType = item.deviceType;
-        _selectedReceivedDate = item.receivedDate;
-        _selectedWarrantyDate = item.warrantyDate;
-        _selectedAssetStatus = item.assetStatus;
-        _hostNameInputController.text = item.hostName ?? '';
-        _ipPortInputController.text = item.ipPort ?? '';
-        _macAddressInputController.text = item.macAddress ?? '';
-        _osVersionInputController.text = item.osVersion ?? '';
-        _facePlateNameInputController.text = item.facePlateName ?? '';
-        _switchPortInputController.text = item.switchPort ?? '';
-        _switchIpAddressInputController.text = item.switchIpAddress ?? '';
-        _isPasswordProtected = item.isPasswordProtected;
-        _assignedUser = item.assignedTo;
-      } else {
-        _editingItem = null;
-        _assetInputController.clear();
-        _modelInputController.clear();
-        _serialInputController.clear();
-        _selectedDeviceType = null;
-        _selectedReceivedDate = null;
-        _selectedWarrantyDate = null;
-        _selectedAssetStatus = null;
-        _hostNameInputController.clear();
-        _ipPortInputController.clear();
-        _macAddressInputController.clear();
-        _osVersionInputController.clear();
-        _facePlateNameInputController.clear();
-        _switchPortInputController.clear();
-        _switchIpAddressInputController.clear();
-        _isPasswordProtected = null;
-        _assignedUser = null;
-      }
+      _editingItem = item;
       _isPanelOpen = !_isPanelOpen;
     });
   }
 
-  void _saveItem() {
-    final assetNo = _assetInputController.text;
-    final modelNo = _modelInputController.text;
-    final serialNo = _serialInputController.text;
-    final deviceType = _selectedDeviceType;
-    final assetStatus = _selectedAssetStatus;
-    final receivedDate = _selectedReceivedDate;
-    final warrantyDate = _selectedWarrantyDate;
-    final hostName = _hostNameInputController.text;
-    final ipPort = _ipPortInputController.text;
-    final macAddress = _macAddressInputController.text;
-    final osVersion = _osVersionInputController.text;
-    final facePlateName = _facePlateNameInputController.text;
-    final switchPort = _switchPortInputController.text;
-    final switchIpAddress = _switchIpAddressInputController.text;
-    final isPasswordProtected = _isPasswordProtected;
-    final assignedTo = _assignedUser;
-    final item = Item(
-      id: _editingItem != null ? _editingItem!.id : null,
-      assetNo: assetNo,
-      modelNo: modelNo,
-      serialNo: serialNo,
-      deviceType: deviceType!,
-      assetStatus: assetStatus!,
-      receivedDate: receivedDate,
-      warrantyDate: warrantyDate!,
-      hostName: hostName,
-      ipPort: ipPort,
-      macAddress: macAddress,
-      osVersion: osVersion,
-      facePlateName: facePlateName,
-      switchPort: switchPort,
-      switchIpAddress: switchIpAddress,
-      isPasswordProtected: isPasswordProtected,
-      assignedTo: assignedTo,
-    );
-    if (_editingItem != null) {
+  void _saveItem(Item item) {
+    if (item.id != null) {
       _itemService.updateItem(item);
     } else {
       _itemService.addItem(item);
     }
-    _clearFields();
     _togglePanel();
     _refreshData();
-  }
-
-  void _clearFields() {
-    _assetInputController.clear();
-    _modelInputController.clear();
-    _serialInputController.clear();
-    _hostNameInputController.clear();
-    _ipPortInputController.clear();
-    _macAddressInputController.clear();
-    _osVersionInputController.clear();
-    _facePlateNameInputController.clear();
-    _switchPortInputController.clear();
-    _switchIpAddressInputController.clear();
-    _selectedDeviceType = null;
-    _selectedAssetStatus = null;
-    _selectedWarrantyDate = null;
-    _selectedReceivedDate = null;
-    _isPasswordProtected = null;
-    _assignedUser = null;
   }
 
   void _showViewDetailsDialog(Item item) {
@@ -409,7 +271,11 @@ class _ItemScreenState extends State<ItemScreen> {
               }
             }),
             AppShortcuts.cancel: VoidCallbackIntent(() => _togglePanel()),
-            AppShortcuts.submit: VoidCallbackIntent(() => _saveItem()),
+            AppShortcuts.submit: VoidCallbackIntent(() {
+              if (_isPanelOpen) {
+                _formKey.currentState?.saveItem();
+              }
+            }),
           },
           child: Actions(
             actions: {
@@ -424,7 +290,7 @@ class _ItemScreenState extends State<ItemScreen> {
                   Column(
                     children: <Widget>[
                       PageHeader(
-                        onAddNew: _togglePanel,
+                        onAddNew: () => _togglePanel(),
                         onFilter: _showFilterDialog,
                         onSearch: _onSearchChanged,
                         searchController: _searchInputController,
@@ -531,323 +397,18 @@ class _ItemScreenState extends State<ItemScreen> {
                       ),
                     ],
                   ),
-                  AnimatedPositioned(
-                    duration: Duration(milliseconds: 300),
-                    right: _isPanelOpen ? 0 : -screenWidthHalf,
-                    top: 0,
-                    bottom: 0,
-                    width: screenWidthHalf,
-                    child: Container(
-                      color: currentTheme == Brightness.light
-                          ? AppColors.colorBackground
-                          : AppColors.colorBackgroundDark,
-                      padding: EdgeInsets.all(10.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _editingItem == null ? 'Add Item' : 'Edit Item',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 10.0),
-                          Wrap(
-                            spacing: 10.0,
-                            runSpacing: 10.0,
-                            children: [
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  controller: _assetInputController,
-                                  validator: ItemInputValidator.validateAssetNo,
-                                  autovalidateMode: AutovalidateMode.always,
-                                  decoration:
-                                      InputDecoration(labelText: 'Asset No'),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  controller: _modelInputController,
-                                  validator: ItemInputValidator.validateModelNo,
-                                  autovalidateMode: AutovalidateMode.always,
-                                  decoration:
-                                      InputDecoration(labelText: 'Model No'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Wrap(
-                            spacing: 10.0,
-                            runSpacing: 10.0,
-                            children: [
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  controller: _serialInputController,
-                                  validator:
-                                      ItemInputValidator.validateSerialNo,
-                                  autovalidateMode: AutovalidateMode.always,
-                                  decoration:
-                                      InputDecoration(labelText: 'Serial No'),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: DropdownButtonFormField<DeviceType>(
-                                  value: _selectedDeviceType,
-                                  decoration:
-                                      InputDecoration(labelText: 'Device Type'),
-                                  validator:
-                                      ItemInputValidator.validateDeviceType,
-                                  autovalidateMode: AutovalidateMode.always,
-                                  items: DeviceType.values.map((type) {
-                                    return DropdownMenuItem(
-                                        value: type, child: Text(type.name));
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      _selectedDeviceType = newValue;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Wrap(
-                            spacing: 10.0,
-                            runSpacing: 10.0,
-                            children: [
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  readOnly: true,
-                                  decoration: InputDecoration(
-                                    labelText: 'Received Date',
-                                    suffixIcon: Icon(Icons.calendar_today),
-                                  ),
-                                  controller: TextEditingController(
-                                    text: _selectedReceivedDate != null
-                                        ? DateFormatter.extractDateFromDateTime(
-                                            _selectedReceivedDate!)
-                                        : "",
-                                  ),
-                                  onTap: () async {
-                                    DateTime? pickedDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: _selectedReceivedDate ??
-                                          DateTime.now(),
-                                      firstDate: DateTime(1970),
-                                      lastDate: DateTime(2038),
-                                    );
-                                    if (pickedDate != null) {
-                                      setState(() {
-                                        _selectedReceivedDate = pickedDate;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  readOnly: true,
-                                  validator:
-                                      ItemInputValidator.validateWarrantyDate,
-                                  autovalidateMode: AutovalidateMode.always,
-                                  decoration: InputDecoration(
-                                    labelText: 'Warranty Date',
-                                    suffixIcon: Icon(Icons.calendar_today),
-                                  ),
-                                  controller: TextEditingController(
-                                    text: _selectedWarrantyDate != null
-                                        ? DateFormatter.extractDateFromDateTime(
-                                            _selectedWarrantyDate!)
-                                        : "",
-                                  ),
-                                  onTap: () async {
-                                    DateTime? pickedDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: _selectedWarrantyDate ??
-                                          DateTime.now(),
-                                      firstDate: DateTime(1970),
-                                      lastDate: DateTime(2038),
-                                    );
-                                    if (pickedDate != null) {
-                                      setState(() {
-                                        _selectedWarrantyDate = pickedDate;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: DropdownButtonFormField<AssetStatus>(
-                                  value: _selectedAssetStatus,
-                                  validator:
-                                      ItemInputValidator.validateAssetStatus,
-                                  autovalidateMode: AutovalidateMode.always,
-                                  decoration: InputDecoration(
-                                      labelText: 'Asset Status'),
-                                  items: AssetStatus.values.map((type) {
-                                    return DropdownMenuItem(
-                                        value: type, child: Text(type.name));
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      _selectedAssetStatus = newValue;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Wrap(
-                            spacing: 10.0,
-                            runSpacing: 10.0,
-                            children: [
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  decoration:
-                                      InputDecoration(labelText: 'Host Name'),
-                                  controller: _hostNameInputController,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  decoration:
-                                      InputDecoration(labelText: 'IP Port'),
-                                  controller: _ipPortInputController,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  decoration:
-                                      InputDecoration(labelText: 'MAC Address'),
-                                  controller: _macAddressInputController,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Wrap(
-                            spacing: 10.0,
-                            runSpacing: 10.0,
-                            children: [
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  decoration:
-                                      InputDecoration(labelText: 'OS Version'),
-                                  controller: _osVersionInputController,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                      labelText: 'Face Plate Name'),
-                                  controller: _facePlateNameInputController,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  decoration:
-                                      InputDecoration(labelText: 'Switch Port'),
-                                  controller: _switchPortInputController,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                      labelText: 'Switch IP Address'),
-                                  controller: _switchIpAddressInputController,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Wrap(
-                            spacing: 10.0,
-                            runSpacing: 10.0,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              const Text('Is Password Protected?'),
-                              Radio<bool>(
-                                value: true,
-                                groupValue: _isPasswordProtected,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isPasswordProtected = value;
-                                  });
-                                },
-                              ),
-                              const Text('Yes'),
-                              Radio<bool>(
-                                value: false,
-                                groupValue: _isPasswordProtected,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isPasswordProtected = value;
-                                  });
-                                },
-                              ),
-                              const Text('No'),
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: DropdownButtonFormField<User>(
-                                  value: _assignedUser,
-                                  decoration: InputDecoration(
-                                      labelText: 'Assigned User'),
-                                  items: _usersList.map((user) {
-                                    return DropdownMenuItem(
-                                        value: user,
-                                        child: Text(user.userName));
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      _assignedUser = newValue;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              AppButton(
-                                  onPressed: _saveItem,
-                                  icon: Icons.add,
-                                  iconColor: AppColors.colorAccent,
-                                  text: _editingItem == null
-                                      ? 'Add Item'
-                                      : 'Save Changes'),
-                              const SizedBox(width: 10.0),
-                              AppButton(
-                                onPressed: _togglePanel,
-                                icon: Icons.cancel,
-                                iconColor: AppColors.colorTextDark,
-                                text: 'Cancel',
-                                backgroundColor: AppColors.colorTextSemiLight,
-                                foregroundColor: AppColors.colorTextDark,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                  SidePanel(
+                    isOpen: _isPanelOpen,
+                    panelWidth: screenWidthHalf,
+                    currentTheme: currentTheme,
+                    child: ItemForm(
+                      key: _formKey,
+                      editingItem: _editingItem,
+                      onSave: _saveItem,
+                      onCancel: () => _togglePanel(),
+                      usersList: _usersList,
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
