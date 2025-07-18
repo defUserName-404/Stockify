@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/shortcuts/app_shortcuts.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
+import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
 
 import '../../../common/data/service/data_service.dart';
 import '../../../common/shared-preference/shared_preference_service.dart';
@@ -107,19 +108,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                   if (outputFile != null) {
                     await dataService.generatePdfReport(filePath: outputFile);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Report generated successfully!')),
+                    CustomSnackBar.show(
+                      context: context,
+                      message: 'Report generated successfully!',
+                      type: SnackBarType.success,
                     );
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Report generation cancelled.')),
+                    CustomSnackBar.show(
+                      context: context,
+                      message: 'Report generation cancelled.',
+                      type: SnackBarType.info,
                     );
                   }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error generating report: $e')),
+                  CustomSnackBar.show(
+                    context: context,
+                    message: 'Error generating report: $e',
+                    type: SnackBarType.error,
                   );
                 }
               },
@@ -137,14 +142,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: () async {
                         try {
                           await dataService.importItemsFromCsv();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Items imported successfully from CSV!')),
+                          CustomSnackBar.show(
+                            context: context,
+                            message: 'Items imported successfully from CSV!',
+                            type: SnackBarType.success,
                           );
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error importing CSV: $e')),
+                          CustomSnackBar.show(
+                            context: context,
+                            message: 'Error importing CSV: $e',
+                            type: SnackBarType.error,
                           );
                         }
                       },
@@ -155,15 +162,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: () async {
                         try {
                           await dataService.importItemsFromExcel();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Items imported successfully from Excel!')),
+                          CustomSnackBar.show(
+                            context: context,
+                            message: 'Items imported successfully from Excel!',
+                            type: SnackBarType.success,
                           );
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text('Error importing Excel: $e')),
+                          CustomSnackBar.show(
+                            context: context,
+                            message: 'Error importing Excel: $e',
+                            type: SnackBarType.error,
                           );
                         }
                       },
@@ -184,14 +192,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: () async {
                         try {
                           await dataService.exportItemsToCsv();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Items exported successfully to CSV!')),
+                          CustomSnackBar.show(
+                            context: context,
+                            message: 'Items exported successfully to CSV!',
+                            type: SnackBarType.success,
                           );
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error exporting CSV: $e')),
+                          CustomSnackBar.show(
+                            context: context,
+                            message: 'Error exporting CSV: $e',
+                            type: SnackBarType.error,
                           );
                         }
                       },
@@ -202,14 +212,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onPressed: () async {
                       try {
                         await dataService.exportItemsToExcel();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text(
-                                  'Items exported successfully to Excel!')),
+                        CustomSnackBar.show(
+                          context: context,
+                          message: 'Items exported successfully to Excel!',
+                          type: SnackBarType.success,
                         );
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error exporting Excel: $e')),
+                        CustomSnackBar.show(
+                          context: context,
+                          message: 'Error exporting Excel: $e',
+                          type: SnackBarType.error,
                         );
                       }
                     },

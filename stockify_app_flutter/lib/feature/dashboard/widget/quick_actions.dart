@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/common/data/service/data_service.dart';
+import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
 
 import '../../../common/theme/colors.dart';
 import '../../../common/widget/sidebar/app_layout.dart';
@@ -49,19 +50,23 @@ class QuickActions extends StatelessWidget {
                   if (outputFile != null) {
                     final dataService = DataService.instance;
                     await dataService.generatePdfReport(filePath: outputFile);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Report generated successfully!')),
+                    CustomSnackBar.show(
+                      context: context,
+                      message: 'Report generated successfully!',
+                      type: SnackBarType.success,
                     );
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Report generation cancelled.')),
+                    CustomSnackBar.show(
+                      context: context,
+                      message: 'Report generation cancelled.',
+                      type: SnackBarType.info,
                     );
                   }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error generating report: $e')),
+                  CustomSnackBar.show(
+                    context: context,
+                    message: 'Error generating report: $e',
+                    type: SnackBarType.error,
                   );
                 }
               },
