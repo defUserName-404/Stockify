@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
 import 'package:stockify_app_flutter/feature/dashboard/widget/charts_section.dart';
@@ -45,9 +46,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _scheduleWarrantyNotifications() async {
+    final notificationStorageService =
+        Provider.of<NotificationStorageService>(context, listen: false);
     final expiringItems = _getExpiringItems();
     final existingNotifications =
-        await NotificationStorageService().getNotifications();
+        await notificationStorageService.getNotifications();
     for (var item in expiringItems) {
       if (!existingNotifications.any((n) => n.id == item.id)) {
         final notificationTitle = 'Warranty Expiring Soon!';
@@ -60,13 +63,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           body: notificationBody,
           payload: notificationPayload,
         );
-        NotificationStorageService().addNotification(
+        notificationStorageService.addNotification(
           AppNotification(
             id: item.id!,
             title: notificationTitle,
             body: notificationBody,
             timestamp: DateTime.now(),
             payload: notificationPayload,
+            assetName: item.assetNo,
+            itemId: item.id,
           ),
         );
       }

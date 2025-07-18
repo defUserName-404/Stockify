@@ -4,6 +4,8 @@ class AppNotification {
   final String body;
   final DateTime timestamp;
   final String? payload;
+  final String? assetName;
+  final int? itemId;
 
   AppNotification({
     required this.id,
@@ -11,6 +13,8 @@ class AppNotification {
     required this.body,
     required this.timestamp,
     this.payload,
+    this.assetName,
+    this.itemId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -19,6 +23,8 @@ class AppNotification {
         'body': body,
         'timestamp': timestamp.toIso8601String(),
         'payload': payload,
+        'assetName': assetName,
+        'itemId': itemId,
       };
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
@@ -28,5 +34,7 @@ class AppNotification {
         body: json['body'],
         timestamp: DateTime.parse(json['timestamp']),
         payload: json['payload'],
+        assetName: json['assetName'],
+        itemId: json['itemId'],
       );
 }

@@ -24,8 +24,9 @@ import '../widget/item_filter_dialog.dart';
 
 class ItemScreen extends StatefulWidget {
   final ItemFilterParams? filterParams;
+  final int? itemId;
 
-  ItemScreen({super.key, this.filterParams});
+  ItemScreen({super.key, this.filterParams, this.itemId});
 
   @override
   State<ItemScreen> createState() => _ItemScreenState();
@@ -53,6 +54,12 @@ class _ItemScreenState extends State<ItemScreen> {
     _searchInputController = TextEditingController();
     _initializeItemDataSource();
     _fetchUsers();
+    if (widget.itemId != null) {
+      final item = _itemService.getItem(widget.itemId!);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showViewDetailsDialog(item);
+      });
+    }
     super.initState();
   }
 
