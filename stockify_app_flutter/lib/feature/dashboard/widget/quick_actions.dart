@@ -28,7 +28,7 @@ class QuickActions extends StatelessWidget {
             _buildActionButton(
               'Add New Item',
               Icons.add_circle_outline,
-              AppColors.colorPrimary,
+              AppColors.colorAccent,
               () {
                 AppLayout.navigatorKey.currentState
                     ?.updateSelectedScreen(1, openAddItemPanel: true);
@@ -69,7 +69,7 @@ class QuickActions extends StatelessWidget {
             _buildActionButton(
               'Manage Users',
               Icons.people_outline,
-              AppColors.colorGreen,
+              AppColors.colorAccent,
               () {
                 AppLayout.navigatorKey.currentState?.updateSelectedScreen(2);
               },
