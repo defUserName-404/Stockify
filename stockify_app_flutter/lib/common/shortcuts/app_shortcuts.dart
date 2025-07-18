@@ -8,12 +8,12 @@ class AppShortcuts {
   static const openFilter =
       SingleActivator(LogicalKeyboardKey.keyF, control: true, shift: true);
   static const addNew = SingleActivator(LogicalKeyboardKey.keyN, control: true);
-  static const nextPage =
-      SingleActivator(LogicalKeyboardKey.arrowRight, control: true);
-  static const prevPage =
-      SingleActivator(LogicalKeyboardKey.arrowLeft, control: true);
+
   static const arrowUp = SingleActivator(LogicalKeyboardKey.arrowUp);
   static const arrowDown = SingleActivator(LogicalKeyboardKey.arrowDown);
+  static const nextPage = SingleActivator(LogicalKeyboardKey.pageDown);
+  static const previousPage = SingleActivator(LogicalKeyboardKey.pageUp);
+
   static const viewDetails =
       SingleActivator(LogicalKeyboardKey.keyV, control: true);
   static const editItem =
@@ -92,4 +92,12 @@ final List<Shortcut> shortcutList = [
       description: 'Navigate Down',
       combination: 'Down Arrow',
       icon: Icons.arrow_downward),
+  Shortcut(
+      description: 'Navigate to Next Page',
+      combination: 'Page Down',
+      icon: Icons.arrow_forward),
+  Shortcut(
+      description: 'Navigate to Previous Page',
+      combination: 'Page Up',
+      icon: Icons.arrow_back),
 ];
