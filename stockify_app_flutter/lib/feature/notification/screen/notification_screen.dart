@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
+import 'package:stockify_app_flutter/feature/item/screen/item_screen.dart'; // Import ItemScreen
 import 'package:stockify_app_flutter/feature/notification/model/app_notification.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
 
@@ -12,17 +14,25 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   late Future<List<AppNotification>> _notificationsFuture;
-  final NotificationStorageService _storageService =
-      NotificationStorageService();
+  late NotificationStorageService _storageService;
 
+  @override
   void initState() {
     super.initState();
+    _storageService =
+        Provider.of<NotificationStorageService>(context, listen: false);
     _loadNotifications();
+    _storageService.addListener(_onNotificationsChanged);
   }
 
   @override
   void dispose() {
+    _storageService.removeListener(_onNotificationsChanged);
     super.dispose();
+  }
+
+  void _onNotificationsChanged() {
+    _loadNotifications();
   }
 
   void _loadNotifications() {
@@ -76,35 +86,33 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 itemCount: notifications.length,
                 itemBuilder: (context, index) {
                   final notification = notifications[index];
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
+                  return Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      title: Text(
+                        notification.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  notification.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
+                          if (notification.assetName != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Asset: ${notification.assetName}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () =>
-                                    _deleteNotification(notification.id),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                           const SizedBox(height: 8),
                           Text(notification.body),
                           const SizedBox(height: 8),
@@ -117,6 +125,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           ),
                         ],
                       ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.redAccent),
+                        onPressed: () => _deleteNotification(notification.id),
+                      ),
+                      onTap: () {
+                        if (notification.itemId != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ItemScreen(itemId: notification.itemId!),
+                            ),
+                          );
+                        }
+                      },
                     ),
                   );
                 },
