@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:stockify_app_flutter/common/data/service/report_service.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
@@ -192,7 +193,8 @@ class DataService {
         'AssignedToID',
         'AssignedToUserName',
       ];
-      sheetObject.insertRowIterables(header, 0);
+      sheetObject.insertRowIterables(
+          header.map((e) => TextCellValue(e)).toList(), 0);
       // Add item data
       for (int i = 0; i < items.length; i++) {
         Item item = items[i];
@@ -216,7 +218,8 @@ class DataService {
           item.assignedTo?.id,
           item.assignedTo?.userName,
         ];
-        sheetObject.insertRowIterables(rowData, i + 1);
+        sheetObject.insertRowIterables(
+            rowData.map((e) => TextCellValue(e.toString())).toList(), i + 1);
       }
       String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Save Items Excel',
@@ -316,6 +319,19 @@ class DataService {
     } catch (e) {
       if (e is DataCancelledException) rethrow;
       throw DataImportException('Error importing items: $e');
+    }
+  }
+
+  Future<void> generatePdfReport({String? filePath}) async {
+    try {
+      final items = _itemService.getAllItems();
+      if (filePath != null) {
+        await ReportService.generatePdfReport(items, filePath: filePath);
+      } else {
+        await ReportService.generatePdfReport(items);
+      }
+    } catch (e) {
+      throw DataGenerateReportException('Error generating report: $e');
     }
   }
 }

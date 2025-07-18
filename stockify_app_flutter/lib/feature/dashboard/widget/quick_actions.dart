@@ -1,4 +1,6 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:stockify_app_flutter/common/data/service/data_service.dart';
 
 import '../../../common/theme/colors.dart';
 
@@ -34,8 +36,32 @@ class QuickActions extends StatelessWidget {
               'Generate Report',
               Icons.assessment,
               AppColors.colorAccent,
-              () {
-                // Navigate to reports screen
+              () async {
+                try {
+                  String? outputFile = await FilePicker.platform.saveFile(
+                    dialogTitle: 'Save Report',
+                    fileName: 'inventory_report.pdf',
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf'],
+                  );
+                  if (outputFile != null) {
+                    final dataService = DataService.instance;
+                    await dataService.generatePdfReport(filePath: outputFile);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Report generated successfully!')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Report generation cancelled.')),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error generating report: $e')),
+                  );
+                }
               },
             ),
             _buildActionButton(
