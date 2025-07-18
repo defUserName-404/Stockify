@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../common/theme/colors.dart';
 import '../model/asset_status.dart';
 import '../model/device_type.dart';
 import '../model/item_filter_param.dart';
@@ -30,7 +31,21 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Sort & Filter'),
+      title: Row(
+        children: [
+          const Icon(
+            Icons.filter_list_alt,
+            color: AppColors.colorAccent,
+          ),
+          const SizedBox(width: 8),
+          const Text('Sort & Filter'),
+        ],
+      ),
+      shape: ShapeBorder.lerp(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        0.5,
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -62,7 +77,7 @@ class _FilterDialogState extends State<FilterDialog> {
                 });
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -92,17 +107,11 @@ class _FilterDialogState extends State<FilterDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            const Text('Filter By',
+            const Text('Device Type',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             DropdownButtonFormField<DeviceType>(
               value: _params.deviceType,
-              decoration: const InputDecoration(
-                labelText: 'Device Type',
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
               items: [
                 const DropdownMenuItem(
                     value: null, child: Text('All Device Types')),
@@ -116,14 +125,11 @@ class _FilterDialogState extends State<FilterDialog> {
               },
             ),
             const SizedBox(height: 12),
+            const Text('Asset Status',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
             DropdownButtonFormField<AssetStatus>(
               value: _params.assetStatus,
-              decoration: const InputDecoration(
-                labelText: 'Asset Status',
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
               items: [
                 const DropdownMenuItem(value: null, child: Text('All Status')),
                 ...AssetStatus.values.map((status) =>
@@ -145,18 +151,53 @@ class _FilterDialogState extends State<FilterDialog> {
               _params = ItemFilterParams();
             });
           },
-          child: const Text('Reset'),
+          style: Theme.of(context).textButtonTheme.style!.copyWith(
+                foregroundColor:
+                    WidgetStateProperty.all<Color>(AppColors.colorTextDark),
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  AppColors.colorTextSemiLight,
+                ),
+              ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.refresh),
+              const SizedBox(width: 8),
+              const Text('Reset'),
+            ],
+          ),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          style: Theme.of(context).textButtonTheme.style!.copyWith(
+                foregroundColor:
+                    WidgetStateProperty.all<Color>(AppColors.colorTextDark),
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  AppColors.colorTextSemiLight,
+                ),
+              ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.cancel),
+              const SizedBox(width: 8),
+              const Text('Cancel'),
+            ],
+          ),
         ),
         TextButton(
           onPressed: () {
             widget.onApplyFilter(_params);
             Navigator.of(context).pop();
           },
-          child: const Text('Apply'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check),
+              const SizedBox(width: 8),
+              const Text('Apply'),
+            ],
+          ),
         ),
       ],
     );

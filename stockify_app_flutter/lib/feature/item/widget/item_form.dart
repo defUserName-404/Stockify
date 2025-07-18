@@ -351,7 +351,7 @@ class ItemFormState extends State<ItemForm> {
                 widget.editingItem == null
                     ? Icons.add_circle_outline
                     : Icons.edit_outlined,
-                color: Theme.of(context).colorScheme.primary,
+                color: AppColors.colorAccent,
               ),
               const SizedBox(width: 12),
               Text(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stockify_app_flutter/common/theme/colors.dart';
 
 class ItemDetailsText extends StatelessWidget {
   const ItemDetailsText(
@@ -14,12 +13,15 @@ class ItemDetailsText extends StatelessWidget {
       children: [
         Text(
           '$label: ',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16),
         ),
         SizedBox(width: 8),
         Text(
           itemText,
-          style: TextStyle(fontSize: 16, color: AppColors.colorAccent),
+          style: TextStyle(
+              fontSize: 18,
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.bold),
         ),
       ],
     );

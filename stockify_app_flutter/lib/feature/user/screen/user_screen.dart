@@ -152,16 +152,32 @@ class _UserScreenState extends State<UserScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
+        shape: ShapeBorder.lerp(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          0.5,
+        ),
         content: const Text('Are you sure you want to delete this user?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: Theme.of(context).textButtonTheme.style!.copyWith(
+                  foregroundColor:
+                      WidgetStateProperty.all<Color>(AppColors.colorTextDark),
+                  backgroundColor: WidgetStateProperty.all<Color>(
+                      AppColors.colorTextSemiLight),
+                ),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child:
-                const Text('Yes', style: TextStyle(color: AppColors.colorPink)),
+            style: Theme.of(context).textButtonTheme.style!.copyWith(
+                  foregroundColor:
+                      WidgetStateProperty.all<Color>(AppColors.colorText),
+                  backgroundColor:
+                      WidgetStateProperty.all<Color>(AppColors.colorPink),
+                ),
+            child: const Text('Yes'),
           ),
         ],
       ),
