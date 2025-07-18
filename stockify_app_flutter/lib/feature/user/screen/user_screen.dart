@@ -5,11 +5,11 @@ import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/theme/controller/theme_controller.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
+import 'package:stockify_app_flutter/common/widget/app_dialogs.dart';
 import 'package:stockify_app_flutter/common/widget/responsive/page_header.dart';
 import 'package:stockify_app_flutter/common/widget/side_panel.dart';
 import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
-import 'package:stockify_app_flutter/feature/user/widget/user_filter_dialog.dart';
 import 'package:stockify_app_flutter/feature/user/widget/user_form.dart';
 
 import '../../item/widget/item_details_text.dart';
@@ -76,17 +76,15 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   void _showFilterDialog() {
-    showDialog(
+    AppDialogs.showUserFilterDialog(
       context: context,
-      builder: (context) => UserFilterDialog(
-        currentParams: _filterParams,
-        onApplyFilter: (params) {
-          setState(() {
-            _filterParams = params;
-          });
-          _refreshData();
-        },
-      ),
+      currentParams: _filterParams,
+      onApplyFilter: (params) {
+        setState(() {
+          _filterParams = params;
+        });
+        _refreshData();
+      },
     );
   }
 
@@ -115,121 +113,37 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   void _showViewDetailsDialog(User user) {
-    showDialog(
+    AppDialogs.showDetailsDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Row(
+      title: 'User Details',
+      icon: Icons.person_outline,
+      content: SingleChildScrollView(
+        child: Wrap(
+          spacing: 16,
+          runSpacing: 16,
           children: [
-            Icon(
-              Icons.person_outline,
-              color: AppColors.colorAccent,
-            ),
-            const SizedBox(width: 8.0),
-            Text('User Details'),
+            ItemDetailsText(label: 'User Name', itemText: '${user.userName}'),
+            if (user.designation != null)
+              ItemDetailsText(
+                  label: 'Designation', itemText: '${user.designation}'),
+            if (user.sapId != null)
+              ItemDetailsText(label: 'SAP ID', itemText: '${user.sapId}'),
+            if (user.ipPhone != null)
+              ItemDetailsText(label: 'IP Phone', itemText: '${user.ipPhone!}'),
+            if (user.roomNo != null)
+              ItemDetailsText(label: 'Room No', itemText: '${user.roomNo!}'),
+            if (user.floor != null)
+              ItemDetailsText(label: 'Floor No', itemText: '${user.floor}'),
           ],
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        content: SingleChildScrollView(
-          child: Wrap(
-            spacing: 64,
-            runSpacing: 16,
-            children: [
-              ItemDetailsText(label: 'User Name', itemText: '${user.userName}'),
-              if (user.designation != null)
-                ItemDetailsText(
-                    label: 'Designation', itemText: '${user.designation}'),
-              if (user.sapId != null)
-                ItemDetailsText(label: 'SAP ID', itemText: '${user.sapId}'),
-              if (user.ipPhone != null)
-                ItemDetailsText(
-                    label: 'IP Phone', itemText: '${user.ipPhone!}'),
-              if (user.roomNo != null)
-                ItemDetailsText(label: 'Room No', itemText: '${user.roomNo!}'),
-              if (user.floor != null)
-                ItemDetailsText(label: 'Floor No', itemText: '${user.floor}'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.close),
-                const SizedBox(width: 8),
-                const Text('Close'),
-              ],
-            ),
-            style: Theme.of(context).textButtonTheme.style!.copyWith(
-                  foregroundColor:
-                      WidgetStateProperty.all<Color>(AppColors.colorTextDark),
-                  backgroundColor: WidgetStateProperty.all<Color>(
-                      AppColors.colorTextSemiLight),
-                ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
       ),
     );
   }
 
   void _showDeleteConfirmationDialog(User user) async {
-    final confirmDelete = await showDialog<bool>(
+    final confirmDelete = await AppDialogs.showDeleteConfirmationDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.dangerous_rounded,
-              color: AppColors.colorAccent,
-            ),
-            const SizedBox(width: 8),
-            const Text('Confirm Deletion'),
-          ],
-        ),
-        content: const Text('Are you sure you want to delete this user?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            style: Theme.of(context).textButtonTheme.style!.copyWith(
-                  foregroundColor:
-                      WidgetStateProperty.all<Color>(AppColors.colorTextDark),
-                  backgroundColor: WidgetStateProperty.all<Color>(
-                      AppColors.colorTextSemiLight),
-                ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.cancel_outlined),
-                const SizedBox(width: 8),
-                const Text('Cancel'),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: Theme.of(context).textButtonTheme.style!.copyWith(
-                  foregroundColor:
-                      WidgetStateProperty.all<Color>(AppColors.colorText),
-                  backgroundColor:
-                      WidgetStateProperty.all<Color>(AppColors.colorPink),
-                ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.delete),
-                const SizedBox(width: 8),
-                const Text('Yes'),
-              ],
-            ),
-          ),
-        ],
-      ),
+      itemName: 'user',
     );
     if (confirmDelete == true) {
       _userService.deleteUser(user.id!);

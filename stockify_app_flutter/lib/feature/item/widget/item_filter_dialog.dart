@@ -5,21 +5,21 @@ import '../model/asset_status.dart';
 import '../model/device_type.dart';
 import '../model/item_filter_param.dart';
 
-class FilterDialog extends StatefulWidget {
+class ItemFilterDialog extends StatefulWidget {
   final ItemFilterParams currentParams;
   final Function(ItemFilterParams) onApplyFilter;
 
-  const FilterDialog({
+  const ItemFilterDialog({
     Key? key,
     required this.currentParams,
     required this.onApplyFilter,
   }) : super(key: key);
 
   @override
-  State<FilterDialog> createState() => _FilterDialogState();
+  State<ItemFilterDialog> createState() => _ItemFilterDialogState();
 }
 
-class _FilterDialogState extends State<FilterDialog> {
+class _ItemFilterDialogState extends State<ItemFilterDialog> {
   late ItemFilterParams _params;
 
   @override
@@ -41,10 +41,8 @@ class _FilterDialogState extends State<FilterDialog> {
           const Text('Sort & Filter'),
         ],
       ),
-      shape: ShapeBorder.lerp(
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        0.5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -82,7 +80,13 @@ class _FilterDialogState extends State<FilterDialog> {
               children: [
                 Expanded(
                   child: RadioListTile<String>(
-                    title: const Text('Ascending'),
+                    title: Row(
+                      children: [
+                        const Icon(Icons.arrow_upward),
+                        const SizedBox(width: 8),
+                        const Text('Ascending'),
+                      ],
+                    ),
                     value: 'ASC',
                     groupValue: _params.sortOrder,
                     onChanged: (value) {
@@ -94,7 +98,13 @@ class _FilterDialogState extends State<FilterDialog> {
                 ),
                 Expanded(
                   child: RadioListTile<String>(
-                    title: const Text('Descending'),
+                    title: Row(
+                      children: [
+                        const Icon(Icons.arrow_downward),
+                        const SizedBox(width: 8),
+                        const Text('Descending'),
+                      ],
+                    ),
                     value: 'DESC',
                     groupValue: _params.sortOrder,
                     onChanged: (value) {
