@@ -145,7 +145,19 @@ class _ItemScreenState extends State<ItemScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Item Details'),
+        title: Row(
+          children: [
+            Icon(
+              Icons.info,
+              color: AppColors.colorAccent,
+            ),
+            const SizedBox(width: 8.0),
+            Text('Item Details'),
+          ],
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +206,20 @@ class _ItemScreenState extends State<ItemScreen> {
         ),
         actions: [
           TextButton(
-            child: const Text('Close'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.close),
+                const SizedBox(width: 8),
+                const Text('Close'),
+              ],
+            ),
+            style: Theme.of(context).textButtonTheme.style!.copyWith(
+                  foregroundColor:
+                      WidgetStateProperty.all<Color>(AppColors.colorTextDark),
+                  backgroundColor: WidgetStateProperty.all<Color>(
+                      AppColors.colorTextSemiLight),
+                ),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -206,17 +231,54 @@ class _ItemScreenState extends State<ItemScreen> {
     final confirmDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Deletion'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.dangerous_rounded,
+              color: AppColors.colorAccent,
+            ),
+            const SizedBox(width: 8),
+            const Text('Confirm Deletion'),
+          ],
+        ),
         content: const Text('Are you sure you want to delete this item?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            style: Theme.of(context).textButtonTheme.style!.copyWith(
+                  foregroundColor:
+                      WidgetStateProperty.all<Color>(AppColors.colorTextDark),
+                  backgroundColor: WidgetStateProperty.all<Color>(
+                      AppColors.colorTextSemiLight),
+                ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.cancel_outlined),
+                const SizedBox(width: 8),
+                const Text('Cancel'),
+              ],
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child:
-                const Text('Yes', style: TextStyle(color: AppColors.colorPink)),
+            style: Theme.of(context).textButtonTheme.style!.copyWith(
+                  foregroundColor:
+                      WidgetStateProperty.all<Color>(AppColors.colorText),
+                  backgroundColor:
+                      WidgetStateProperty.all<Color>(AppColors.colorPink),
+                ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.delete),
+                const SizedBox(width: 8),
+                const Text('Yes'),
+              ],
+            ),
           ),
         ],
       ),

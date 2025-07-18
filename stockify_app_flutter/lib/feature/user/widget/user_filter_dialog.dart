@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 
+import '../../../common/theme/colors.dart';
+
 class UserFilterDialog extends StatefulWidget {
   final UserFilterParams currentParams;
   final Function(UserFilterParams) onApplyFilter;
@@ -27,7 +29,21 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Sort & Filter'),
+      title: Row(
+        children: [
+          const Icon(
+            Icons.filter_list_alt,
+            color: AppColors.colorAccent,
+          ),
+          const SizedBox(width: 8),
+          const Text('Sort & Filter'),
+        ],
+      ),
+      shape: ShapeBorder.lerp(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        0.5,
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -54,7 +70,7 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
                 });
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -93,18 +109,53 @@ class _UserFilterDialogState extends State<UserFilterDialog> {
               _params = UserFilterParams();
             });
           },
-          child: const Text('Reset'),
+          style: Theme.of(context).textButtonTheme.style!.copyWith(
+                foregroundColor:
+                    WidgetStateProperty.all<Color>(AppColors.colorTextDark),
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  AppColors.colorTextSemiLight,
+                ),
+              ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.refresh),
+              const SizedBox(width: 8),
+              const Text('Reset'),
+            ],
+          ),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          style: Theme.of(context).textButtonTheme.style!.copyWith(
+                foregroundColor:
+                    WidgetStateProperty.all<Color>(AppColors.colorTextDark),
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  AppColors.colorTextSemiLight,
+                ),
+              ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.cancel),
+              const SizedBox(width: 8),
+              const Text('Cancel'),
+            ],
+          ),
         ),
         TextButton(
           onPressed: () {
             widget.onApplyFilter(_params);
             Navigator.of(context).pop();
           },
-          child: const Text('Apply'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check),
+              const SizedBox(width: 8),
+              const Text('Apply'),
+            ],
+          ),
         ),
       ],
     );

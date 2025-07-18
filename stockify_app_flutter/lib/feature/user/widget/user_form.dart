@@ -180,7 +180,7 @@ class UserFormState extends State<UserForm> {
                 widget.editingUser == null
                     ? Icons.person_add_outlined
                     : Icons.edit_outlined,
-                color: Theme.of(context).colorScheme.primary,
+                color: AppColors.colorAccent,
               ),
               const SizedBox(width: 12),
               Text(
