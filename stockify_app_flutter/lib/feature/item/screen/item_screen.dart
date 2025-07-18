@@ -45,6 +45,9 @@ class _ItemScreenState extends State<ItemScreen> {
   late final TextEditingController _searchInputController;
   List<User> _usersList = [];
   final GlobalKey<ItemFormState> _formKey = GlobalKey<ItemFormState>();
+  final GlobalKey<PaginatedDataTableState> _paginatedDataTableKey =
+      GlobalKey<PaginatedDataTableState>();
+  int _firstRowIndex = 0;
 
   @override
   void initState() {
@@ -71,24 +74,26 @@ class _ItemScreenState extends State<ItemScreen> {
 
   void _initializeItemDataSource() {
     _itemDataSource = ItemData(
-        context: context,
-        onEdit: (item) => _togglePanel(item: item),
-        filterParams: _filterParams,
-        rowsPerPage: _rowsPerPage,
-        onView: (item) => _showViewDetailsDialog(item),
-        onDelete: (item) => _showDeleteConfirmationDialog(item),
-        getSelectedRowIndex: () => _selectedRowIndex,
-        setSelectedRowIndex: (index) {
-          setState(() {
-            _selectedRowIndex = index;
-          });
+      context: context,
+      onEdit: (item) => _togglePanel(item: item),
+      filterParams: _filterParams,
+      rowsPerPage: _rowsPerPage,
+      onView: (item) => _showViewDetailsDialog(item),
+      onDelete: (item) => _showDeleteConfirmationDialog(item),
+      getSelectedRowIndex: () => _selectedRowIndex,
+      setSelectedRowIndex: (index) {
+        setState(() {
+          _selectedRowIndex = index;
         });
+      },
+    );
   }
 
   void _refreshData() {
     setState(() {
       _itemDataSource.updateFilterParams(_filterParams);
       _itemDataSource.refreshData();
+      _selectedRowIndex = -1; // Reset selected row index on data refresh
     });
   }
 
@@ -241,23 +246,32 @@ class _ItemScreenState extends State<ItemScreen> {
                 VoidCallbackIntent(() => _showFilterDialog()),
             AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
             AppShortcuts.arrowDown: VoidCallbackIntent(() {
-              _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
-              setState(() {
-                if (_selectedRowIndex <
-                    _itemDataSource._filteredItems.length - 1) {
-                  _itemDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
-                }
-              });
-              _refreshData();
+              int newIndex = _selectedRowIndex;
+              if (newIndex < _itemDataSource.rowCount - 1) {
+                newIndex++;
+                setState(() {
+                  _selectedRowIndex = newIndex;
+                  if (newIndex >= _firstRowIndex + _rowsPerPage) {
+                    _firstRowIndex = (newIndex ~/ _rowsPerPage) * _rowsPerPage;
+                    _paginatedDataTableKey.currentState?.pageTo(_firstRowIndex);
+                  }
+                });
+                _itemDataSource.notifySelectionChanged();
+              }
             }),
             AppShortcuts.arrowUp: VoidCallbackIntent(() {
-              _selectedRowIndex = _itemDataSource.getSelectedRowIndex();
-              setState(() {
-                if (_selectedRowIndex > 0) {
-                  _itemDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
-                }
-              });
-              _refreshData();
+              int newIndex = _selectedRowIndex;
+              if (newIndex > 0) {
+                newIndex--;
+                setState(() {
+                  _selectedRowIndex = newIndex;
+                  if (newIndex < _firstRowIndex) {
+                    _firstRowIndex = (newIndex ~/ _rowsPerPage) * _rowsPerPage;
+                    _paginatedDataTableKey.currentState?.pageTo(_firstRowIndex);
+                  }
+                });
+                _itemDataSource.notifySelectionChanged();
+              }
             }),
             AppShortcuts.viewDetails: VoidCallbackIntent(() {
               if (_selectedRowIndex != -1) {
@@ -281,6 +295,26 @@ class _ItemScreenState extends State<ItemScreen> {
             AppShortcuts.submit: VoidCallbackIntent(() {
               if (_isPanelOpen) {
                 _formKey.currentState?.saveItem();
+              }
+            }),
+            AppShortcuts.nextPage: VoidCallbackIntent(() {
+              final newFirstRowIndex = _firstRowIndex + _rowsPerPage;
+              if (newFirstRowIndex < _itemDataSource.rowCount) {
+                setState(() {
+                  _firstRowIndex = newFirstRowIndex;
+                  _selectedRowIndex = newFirstRowIndex;
+                });
+                _paginatedDataTableKey.currentState?.pageTo(newFirstRowIndex);
+              }
+            }),
+            AppShortcuts.previousPage: VoidCallbackIntent(() {
+              final newFirstRowIndex = _firstRowIndex - _rowsPerPage;
+              if (newFirstRowIndex >= 0) {
+                setState(() {
+                  _firstRowIndex = newFirstRowIndex;
+                  _selectedRowIndex = newFirstRowIndex;
+                });
+                _paginatedDataTableKey.currentState?.pageTo(newFirstRowIndex);
               }
             }),
           },
@@ -379,6 +413,14 @@ class _ItemScreenState extends State<ItemScreen> {
                                 }
 
                                 return PaginatedDataTable(
+                                  key: _paginatedDataTableKey,
+                                  initialFirstRowIndex: _firstRowIndex,
+                                  onPageChanged: (rowIndex) {
+                                    setState(() {
+                                      _firstRowIndex = rowIndex;
+                                      _selectedRowIndex = rowIndex;
+                                    });
+                                  },
                                   headingRowColor:
                                       WidgetStateProperty.all<Color>(
                                           Theme.of(context)
@@ -436,6 +478,7 @@ class ItemData extends DataTableSource {
   ItemFilterParams _filterParams;
   final int Function() getSelectedRowIndex;
   final Function(int) setSelectedRowIndex;
+  final int rowsPerPage;
 
   ItemData({
     required this.context,
@@ -445,7 +488,7 @@ class ItemData extends DataTableSource {
     required this.getSelectedRowIndex,
     required this.setSelectedRowIndex,
     required ItemFilterParams filterParams,
-    required int rowsPerPage,
+    required this.rowsPerPage,
   }) : _filterParams = filterParams {
     refreshData();
   }
@@ -457,6 +500,10 @@ class ItemData extends DataTableSource {
 
   void refreshData() {
     _filteredItems = _itemService.getFilteredItems(_filterParams);
+    notifyListeners();
+  }
+
+  void notifySelectionChanged() {
     notifyListeners();
   }
 

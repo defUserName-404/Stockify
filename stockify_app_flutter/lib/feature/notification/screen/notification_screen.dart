@@ -14,16 +14,18 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  late Future<List<AppNotification>> _notificationsFuture;
   late NotificationStorageService _storageService;
+  Future<List<AppNotification>> _notificationsFuture = Future.value([]);
 
   @override
   void initState() {
     super.initState();
-    _storageService =
-        Provider.of<NotificationStorageService>(context, listen: false);
-    _loadNotifications();
-    _storageService.addListener(_onNotificationsChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _storageService =
+          Provider.of<NotificationStorageService>(context, listen: false);
+      _loadNotifications();
+      _storageService.addListener(_onNotificationsChanged);
+    });
   }
 
   @override
