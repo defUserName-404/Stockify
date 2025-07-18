@@ -132,41 +132,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextButton(
-                    child: const Text('CSV'),
-                    onPressed: () async {
-                      try {
-                        await dataService.importItemsFromCsv();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text(
-                                  'Items imported successfully from CSV!')),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error importing CSV: $e')),
-                        );
-                      }
-                    },
-                  ),
+                  _buildImportExportButtons(
+                      text: 'CSV',
+                      onPressed: () async {
+                        try {
+                          await dataService.importItemsFromCsv();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Items imported successfully from CSV!')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error importing CSV: $e')),
+                          );
+                        }
+                      },
+                      imageAsset: 'assets/icons/csv-icon.png'),
                   const SizedBox(width: 16),
-                  TextButton(
-                    child: const Text('Excel'),
-                    onPressed: () async {
-                      try {
-                        await dataService.importItemsFromExcel();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text(
-                                  'Items imported successfully from Excel!')),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error importing Excel: $e')),
-                        );
-                      }
-                    },
-                  ),
+                  _buildImportExportButtons(
+                      text: 'Excel',
+                      onPressed: () async {
+                        try {
+                          await dataService.importItemsFromExcel();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Items imported successfully from Excel!')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Error importing Excel: $e')),
+                          );
+                        }
+                      },
+                      imageAsset: 'assets/icons/microsoft-excel-icon-logo.png'),
                 ],
               ),
             ),
@@ -178,26 +179,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextButton(
-                    child: const Text('CSV'),
-                    onPressed: () async {
-                      try {
-                        await dataService.exportItemsToCsv();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content:
-                                  Text('Items exported successfully to CSV!')),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error exporting CSV: $e')),
-                        );
-                      }
-                    },
-                  ),
+                  _buildImportExportButtons(
+                      text: 'CSV',
+                      onPressed: () async {
+                        try {
+                          await dataService.exportItemsToCsv();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Items exported successfully to CSV!')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error exporting CSV: $e')),
+                          );
+                        }
+                      },
+                      imageAsset: 'assets/icons/csv-icon.png'),
                   const SizedBox(width: 16),
-                  TextButton(
-                    child: const Text('Excel'),
+                  _buildImportExportButtons(
+                    text: 'Excel',
                     onPressed: () async {
                       try {
                         await dataService.exportItemsToExcel();
@@ -212,6 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         );
                       }
                     },
+                    imageAsset: 'assets/icons/microsoft-excel-icon-logo.png',
                   ),
                 ],
               ),
@@ -219,6 +221,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImportExportButtons(
+      {required String text,
+      required VoidCallback onPressed,
+      required String imageAsset}) {
+    return TextButton(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            imageAsset,
+            width: 24,
+            height: 24,
+            color: AppColors.colorAccent,
+          ),
+          const SizedBox(width: 8),
+          Text(text, style: const TextStyle(fontSize: 16)),
+        ],
+      ),
+      onPressed: onPressed,
     );
   }
 }
