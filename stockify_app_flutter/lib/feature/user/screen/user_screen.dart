@@ -34,6 +34,9 @@ class _UserScreenState extends State<UserScreen> {
   int _selectedRowIndex = -1;
   late final TextEditingController _searchInputController;
   final GlobalKey<UserFormState> _formKey = GlobalKey<UserFormState>();
+  final GlobalKey<PaginatedDataTableState> _paginatedDataTableKey =
+      GlobalKey<PaginatedDataTableState>();
+  int _firstRowIndex = 0;
 
   @override
   void initState() {
@@ -63,6 +66,7 @@ class _UserScreenState extends State<UserScreen> {
     setState(() {
       _userDataSource.updateFilterParams(_filterParams);
       _userDataSource.refreshData();
+      _selectedRowIndex = -1; // Reset selected row index on data refresh
     });
   }
 
@@ -187,23 +191,32 @@ class _UserScreenState extends State<UserScreen> {
                 VoidCallbackIntent(() => _showFilterDialog()),
             AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
             AppShortcuts.arrowDown: VoidCallbackIntent(() {
-              _selectedRowIndex = _userDataSource.getSelectedRowIndex();
-              setState(() {
-                if (_selectedRowIndex <
-                    _userDataSource._filteredUsers.length - 1) {
-                  _userDataSource.setSelectedRowIndex(_selectedRowIndex + 1);
-                }
-              });
-              _refreshData();
+              int newIndex = _selectedRowIndex;
+              if (newIndex < _userDataSource.rowCount - 1) {
+                newIndex++;
+                setState(() {
+                  _selectedRowIndex = newIndex;
+                  if (newIndex >= _firstRowIndex + _rowsPerPage) {
+                    _firstRowIndex = (newIndex ~/ _rowsPerPage) * _rowsPerPage;
+                    _paginatedDataTableKey.currentState?.pageTo(_firstRowIndex);
+                  }
+                });
+                _userDataSource.notifySelectionChanged();
+              }
             }),
             AppShortcuts.arrowUp: VoidCallbackIntent(() {
-              _selectedRowIndex = _userDataSource.getSelectedRowIndex();
-              setState(() {
-                if (_selectedRowIndex > 0) {
-                  _userDataSource.setSelectedRowIndex(_selectedRowIndex - 1);
-                }
-              });
-              _refreshData();
+              int newIndex = _selectedRowIndex;
+              if (newIndex > 0) {
+                newIndex--;
+                setState(() {
+                  _selectedRowIndex = newIndex;
+                  if (newIndex < _firstRowIndex) {
+                    _firstRowIndex = (newIndex ~/ _rowsPerPage) * _rowsPerPage;
+                    _paginatedDataTableKey.currentState?.pageTo(_firstRowIndex);
+                  }
+                });
+                _userDataSource.notifySelectionChanged();
+              }
             }),
             AppShortcuts.viewDetails: VoidCallbackIntent(() {
               if (_selectedRowIndex != -1) {
@@ -227,6 +240,26 @@ class _UserScreenState extends State<UserScreen> {
             AppShortcuts.submit: VoidCallbackIntent(() {
               if (_isPanelOpen) {
                 _formKey.currentState?.saveUser();
+              }
+            }),
+            AppShortcuts.nextPage: VoidCallbackIntent(() {
+              final newFirstRowIndex = _firstRowIndex + _rowsPerPage;
+              if (newFirstRowIndex < _userDataSource.rowCount) {
+                setState(() {
+                  _firstRowIndex = newFirstRowIndex;
+                  _selectedRowIndex = newFirstRowIndex;
+                });
+                _paginatedDataTableKey.currentState?.pageTo(newFirstRowIndex);
+              }
+            }),
+            AppShortcuts.previousPage: VoidCallbackIntent(() {
+              final newFirstRowIndex = _firstRowIndex - _rowsPerPage;
+              if (newFirstRowIndex >= 0) {
+                setState(() {
+                  _firstRowIndex = newFirstRowIndex;
+                  _selectedRowIndex = newFirstRowIndex;
+                });
+                _paginatedDataTableKey.currentState?.pageTo(newFirstRowIndex);
               }
             }),
           },
@@ -283,6 +316,14 @@ class _UserScreenState extends State<UserScreen> {
                                 }
 
                                 return PaginatedDataTable(
+                                  key: _paginatedDataTableKey,
+                                  initialFirstRowIndex: _firstRowIndex,
+                                  onPageChanged: (rowIndex) {
+                                    setState(() {
+                                      _firstRowIndex = rowIndex;
+                                      _selectedRowIndex = rowIndex;
+                                    });
+                                  },
                                   headingRowColor:
                                       WidgetStateProperty.all<Color>(
                                           Theme.of(context)
@@ -360,6 +401,10 @@ class UserData extends DataTableSource {
 
   void refreshData() {
     _filteredUsers = _userService.getFilteredUsers(_filterParams);
+    notifyListeners();
+  }
+
+  void notifySelectionChanged() {
     notifyListeners();
   }
 
