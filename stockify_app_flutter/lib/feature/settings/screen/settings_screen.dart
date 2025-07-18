@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/shortcuts/app_shortcuts.dart';
@@ -92,6 +93,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
               ),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf),
+              title: const Text('Generate Report'),
+              subtitle: const Text('Generate a PDF report of the inventory.'),
+              onTap: () async {
+                try {
+                  String? outputFile = await FilePicker.platform.saveFile(
+                    dialogTitle: 'Save Report',
+                    fileName: 'inventory_report.pdf',
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf'],
+                  );
+                  if (outputFile != null) {
+                    await dataService.generatePdfReport(filePath: outputFile);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Report generated successfully!')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Report generation cancelled.')),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error generating report: $e')),
+                  );
+                }
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.upload_file),
               title: const Text('Import Data'),
