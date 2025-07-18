@@ -1,12 +1,10 @@
-# Stockify: Inventory Management System
-
-![Stockify Logo](images/icon.png)
+# <img src="images/icon.png" alt="Stockify Logo" width="40" height="40"> Stockify: Inventory Management System
 
 A robust and intuitive desktop application designed for efficient inventory and user management. Stockify helps businesses and individuals keep track of their assets, manage user assignments, and generate comprehensive reports with ease.
 
 ## Table of Contents
 
-- [Stockify: Inventory Management System](#stockify-inventory-management-system)
+- [ Stockify: Inventory Management System](#-stockify-inventory-management-system)
 	- [Table of Contents](#table-of-contents)
 	- [Features](#features)
 	- [Screenshots](#screenshots)
