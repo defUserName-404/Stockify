@@ -6,6 +6,7 @@ import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/theme/controller/theme_controller.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
+import 'package:stockify_app_flutter/common/widget/app_dialogs.dart';
 import 'package:stockify_app_flutter/common/widget/responsive/page_header.dart';
 import 'package:stockify_app_flutter/common/widget/side_panel.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
@@ -20,7 +21,6 @@ import '../model/device_type.dart';
 import '../model/item.dart';
 import '../model/item_filter_param.dart';
 import '../widget/item_details_text.dart';
-import '../widget/item_filter_dialog.dart';
 
 class ItemScreen extends StatefulWidget {
   final ItemFilterParams? filterParams;
@@ -103,17 +103,15 @@ class _ItemScreenState extends State<ItemScreen> {
   }
 
   void _showFilterDialog() {
-    showDialog(
+    AppDialogs.showItemFilterDialog(
       context: context,
-      builder: (context) => FilterDialog(
-        currentParams: _filterParams,
-        onApplyFilter: (params) {
-          setState(() {
-            _filterParams = params;
-          });
-          _refreshData();
-        },
-      ),
+      currentParams: _filterParams,
+      onApplyFilter: (params) {
+        setState(() {
+          _filterParams = params;
+        });
+        _refreshData();
+      },
     );
   }
 
@@ -142,151 +140,65 @@ class _ItemScreenState extends State<ItemScreen> {
   }
 
   void _showViewDetailsDialog(Item item) {
-    showDialog(
+    AppDialogs.showDetailsDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Row(
+      title: 'Item Details',
+      icon: Icons.inventory_2_outlined,
+      content: SingleChildScrollView(
+        child: Wrap(
+          spacing: 16,
+          runSpacing: 16,
           children: [
-            Icon(
-              Icons.inventory_2_outlined,
-              color: AppColors.colorAccent,
-            ),
-            const SizedBox(width: 8.0),
-            Text('Item Details'),
+            ItemDetailsText(label: 'Asset No', itemText: '${item.assetNo}'),
+            ItemDetailsText(label: 'Model No', itemText: '${item.modelNo}'),
+            ItemDetailsText(label: 'Serial No', itemText: '${item.serialNo}'),
+            ItemDetailsText(
+                label: 'Device Type', itemText: '${item.deviceType.name}'),
+            if (item.receivedDate != null)
+              ItemDetailsText(
+                  label: 'Received Date',
+                  itemText:
+                      '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
+            ItemDetailsText(
+                label: 'Warranty Date',
+                itemText:
+                    '${DateFormatter.extractDateFromDateTime(item.warrantyDate)}'),
+            ItemDetailsText(
+                label: 'Status', itemText: '${item.assetStatus.name}'),
+            if (item.hostName != null)
+              ItemDetailsText(label: 'Host Name', itemText: '${item.hostName}'),
+            if (item.ipPort != null)
+              ItemDetailsText(label: 'IP Address', itemText: '${item.ipPort}'),
+            if (item.macAddress != null)
+              ItemDetailsText(
+                  label: 'MAC Address', itemText: '${item.macAddress}'),
+            if (item.osVersion != null)
+              ItemDetailsText(
+                  label: 'OS Version', itemText: '${item.osVersion}'),
+            if (item.facePlateName != null)
+              ItemDetailsText(
+                  label: 'Face Plate Name', itemText: '${item.facePlateName}'),
+            if (item.switchPort != null)
+              ItemDetailsText(
+                  label: 'Switch Port', itemText: '${item.switchPort}'),
+            if (item.switchIpAddress != null)
+              ItemDetailsText(
+                  label: 'Switch IP Address',
+                  itemText: '${item.switchIpAddress}'),
+            if (item.assignedTo != null)
+              ItemDetailsText(
+                  label: 'Assigned User',
+                  itemText: '${item.assignedTo!.userName}'),
           ],
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        content: SingleChildScrollView(
-          child: Wrap(
-            spacing: 64,
-            runSpacing: 16,
-            children: [
-              ItemDetailsText(label: 'Asset No', itemText: '${item.assetNo}'),
-              ItemDetailsText(label: 'Model No', itemText: '${item.modelNo}'),
-              ItemDetailsText(label: 'Serial No', itemText: '${item.serialNo}'),
-              ItemDetailsText(
-                  label: 'Device Type', itemText: '${item.deviceType.name}'),
-              if (item.receivedDate != null)
-                ItemDetailsText(
-                    label: 'Received Date',
-                    itemText:
-                        '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
-              ItemDetailsText(
-                  label: 'Warranty Date',
-                  itemText:
-                      '${DateFormatter.extractDateFromDateTime(item.warrantyDate)}'),
-              ItemDetailsText(
-                  label: 'Status', itemText: '${item.assetStatus.name}'),
-              if (item.hostName != null)
-                ItemDetailsText(
-                    label: 'Host Name', itemText: '${item.hostName}'),
-              if (item.ipPort != null)
-                ItemDetailsText(
-                    label: 'IP Address', itemText: '${item.ipPort}'),
-              if (item.macAddress != null)
-                ItemDetailsText(
-                    label: 'MAC Address', itemText: '${item.macAddress}'),
-              if (item.osVersion != null)
-                ItemDetailsText(
-                    label: 'OS Version', itemText: '${item.osVersion}'),
-              if (item.facePlateName != null)
-                ItemDetailsText(
-                    label: 'Face Plate Name',
-                    itemText: '${item.facePlateName}'),
-              if (item.switchPort != null)
-                ItemDetailsText(
-                    label: 'Switch Port', itemText: '${item.switchPort}'),
-              if (item.switchIpAddress != null)
-                ItemDetailsText(
-                    label: 'Switch IP Address',
-                    itemText: '${item.switchIpAddress}'),
-              if (item.assignedTo != null)
-                ItemDetailsText(
-                    label: 'Assigned User',
-                    itemText: '${item.assignedTo!.userName}'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.close),
-                const SizedBox(width: 8),
-                const Text('Close'),
-              ],
-            ),
-            style: Theme.of(context).textButtonTheme.style!.copyWith(
-                  foregroundColor:
-                      WidgetStateProperty.all<Color>(AppColors.colorTextDark),
-                  backgroundColor: WidgetStateProperty.all<Color>(
-                      AppColors.colorTextSemiLight),
-                ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
       ),
     );
   }
 
   void _showDeleteConfirmationDialog(Item item) async {
-    final confirmDelete = await showDialog<bool>(
+    final confirmDelete = await AppDialogs.showDeleteConfirmationDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.dangerous_rounded,
-              color: AppColors.colorAccent,
-            ),
-            const SizedBox(width: 8),
-            const Text('Confirm Deletion'),
-          ],
-        ),
-        content: const Text('Are you sure you want to delete this item?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            style: Theme.of(context).textButtonTheme.style!.copyWith(
-                  foregroundColor:
-                      WidgetStateProperty.all<Color>(AppColors.colorTextDark),
-                  backgroundColor: WidgetStateProperty.all<Color>(
-                      AppColors.colorTextSemiLight),
-                ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.cancel_outlined),
-                const SizedBox(width: 8),
-                const Text('Cancel'),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: Theme.of(context).textButtonTheme.style!.copyWith(
-                  foregroundColor:
-                      WidgetStateProperty.all<Color>(AppColors.colorText),
-                  backgroundColor:
-                      WidgetStateProperty.all<Color>(AppColors.colorPink),
-                ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.delete),
-                const SizedBox(width: 8),
-                const Text('Yes'),
-              ],
-            ),
-          ),
-        ],
-      ),
+      itemName: 'item',
     );
     if (confirmDelete == true) {
       _itemService.deleteItem(item.id!);
