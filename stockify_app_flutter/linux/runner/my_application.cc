@@ -3,6 +3,8 @@
 #include <flutter_linux/flutter_linux.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#include <libgen.h>
+
 #endif
 
 #include "flutter/generated_plugin_registrant.h"
@@ -47,8 +49,20 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "Stockify");
   }
 
+    char exe_path[4096];
+    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+    if (len != -1) {
+        exe_path[len] = '\0';
+        char *exe_dir = dirname(exe_path);
+        char icon_path[4096];
+        snprintf(icon_path, sizeof(icon_path), "%s/data/flutter_assets/assets/icons/icon.png", exe_dir);
+        gtk_window_set_icon_from_file(GTK_WINDOW(window), icon_path, NULL);
+    } else {
+        // fallback icon or log warning
+        g_warning("Failed to get executable path, using default icon");
+    }
   // After creating the window and before showing it
-  gtk_window_set_icon_from_file(GTK_WINDOW(window), "assets/icons/icon.png", NULL);
+//  gtk_window_set_icon_from_file(GTK_WINDOW(window), "/usr/share/icons/hicolor/256x256/apps/Stockify.png", NULL);
 
   gtk_window_set_default_size(window, 1280, 720);
   gtk_widget_show(GTK_WIDGET(window));
