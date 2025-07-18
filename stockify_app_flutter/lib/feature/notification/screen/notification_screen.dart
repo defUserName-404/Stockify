@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
-import 'package:stockify_app_flutter/feature/item/screen/item_screen.dart'; // Import ItemScreen
 import 'package:stockify_app_flutter/feature/notification/model/app_notification.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
+
+import '../../../common/widget/sidebar/app_layout.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -131,13 +132,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                       onTap: () {
                         if (notification.itemId != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ItemScreen(itemId: notification.itemId!),
-                            ),
-                          );
+                          AppLayout.navigatorKey.currentState
+                              ?.updateSelectedScreen(1);
                         }
                       },
                     ),

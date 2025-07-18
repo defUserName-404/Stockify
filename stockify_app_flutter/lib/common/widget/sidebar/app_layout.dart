@@ -296,8 +296,9 @@ class _AppLayoutState extends State<AppLayout> {
                               isSelected: _selectedIndex == 3,
                               showLabel: _showLabels,
                               tooltip: 'Notifications',
-                              badge:
-                                  hasNotifications ? snapshot.data!.length : null,
+                              badge: hasNotifications
+                                  ? snapshot.data!.length
+                                  : null,
                             );
                           },
                         );
