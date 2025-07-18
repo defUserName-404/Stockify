@@ -26,6 +26,7 @@ class AppLayout extends StatefulWidget {
 class _AppLayoutState extends State<AppLayout> {
   int _selectedIndex = 0;
   ItemFilterParams? _currentFilterParams = null;
+  bool _openAddItemPanel = false;
   late double _railWidth;
   bool _isExtended = false;
   bool _showLabels = false;
@@ -360,7 +361,9 @@ class _AppLayoutState extends State<AppLayout> {
       case 0:
         return const DashboardScreen();
       case 1:
-        return ItemScreen(filterParams: _currentFilterParams);
+        return ItemScreen(
+            filterParams: _currentFilterParams,
+            openAddItemPanel: _openAddItemPanel);
       case 2:
         return UserScreen();
       case 3:
@@ -372,10 +375,12 @@ class _AppLayoutState extends State<AppLayout> {
     }
   }
 
-  void updateSelectedScreen(int index, {ItemFilterParams? itemFilterParams}) {
+  void updateSelectedScreen(int index,
+      {ItemFilterParams? itemFilterParams, bool openAddItemPanel = false}) {
     setState(() {
       _selectedIndex = index;
       _currentFilterParams = itemFilterParams;
+      _openAddItemPanel = openAddItemPanel;
     });
   }
 }

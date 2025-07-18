@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/common/data/service/data_service.dart';
 
 import '../../../common/theme/colors.dart';
+import '../../../common/widget/sidebar/app_layout.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -29,7 +30,8 @@ class QuickActions extends StatelessWidget {
               Icons.add_circle_outline,
               AppColors.colorPrimary,
               () {
-                // Navigate to add item screen
+                AppLayout.navigatorKey.currentState
+                    ?.updateSelectedScreen(1, openAddItemPanel: true);
               },
             ),
             _buildActionButton(
@@ -69,7 +71,7 @@ class QuickActions extends StatelessWidget {
               Icons.people_outline,
               AppColors.colorGreen,
               () {
-                // Navigate to user management
+                AppLayout.navigatorKey.currentState?.updateSelectedScreen(2);
               },
             ),
           ],
