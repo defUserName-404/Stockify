@@ -148,7 +148,7 @@ class _ItemScreenState extends State<ItemScreen> {
         title: Row(
           children: [
             Icon(
-              Icons.info,
+              Icons.inventory_2_outlined,
               color: AppColors.colorAccent,
             ),
             const SizedBox(width: 8.0),
@@ -158,51 +158,56 @@ class _ItemScreenState extends State<ItemScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ItemDetailsText(label: 'Asset No', itemText: '${item.assetNo}'),
-            ItemDetailsText(label: 'Model No', itemText: '${item.modelNo}'),
-            ItemDetailsText(label: 'Serial No', itemText: '${item.serialNo}'),
-            ItemDetailsText(
-                label: 'Device Type', itemText: '${item.deviceType.name}'),
-            if (item.receivedDate != null)
+        content: SingleChildScrollView(
+          child: Wrap(
+            spacing: 64,
+            runSpacing: 16,
+            children: [
+              ItemDetailsText(label: 'Asset No', itemText: '${item.assetNo}'),
+              ItemDetailsText(label: 'Model No', itemText: '${item.modelNo}'),
+              ItemDetailsText(label: 'Serial No', itemText: '${item.serialNo}'),
               ItemDetailsText(
-                  label: 'Received Date',
+                  label: 'Device Type', itemText: '${item.deviceType.name}'),
+              if (item.receivedDate != null)
+                ItemDetailsText(
+                    label: 'Received Date',
+                    itemText:
+                        '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
+              ItemDetailsText(
+                  label: 'Warranty Date',
                   itemText:
-                      '${DateFormatter.extractDateFromDateTime(item.receivedDate!)}'),
-            ItemDetailsText(
-                label: 'Warranty Date',
-                itemText:
-                    '${DateFormatter.extractDateFromDateTime(item.warrantyDate)}'),
-            ItemDetailsText(
-                label: 'Status', itemText: '${item.assetStatus.name}'),
-            if (item.hostName != null)
-              ItemDetailsText(label: 'Host Name', itemText: '${item.hostName}'),
-            if (item.ipPort != null)
-              ItemDetailsText(label: 'IP Address', itemText: '${item.ipPort}'),
-            if (item.macAddress != null)
+                      '${DateFormatter.extractDateFromDateTime(item.warrantyDate)}'),
               ItemDetailsText(
-                  label: 'MAC Address', itemText: '${item.macAddress}'),
-            if (item.osVersion != null)
-              ItemDetailsText(
-                  label: 'OS Version', itemText: '${item.osVersion}'),
-            if (item.facePlateName != null)
-              ItemDetailsText(
-                  label: 'Face Plate Name', itemText: '${item.facePlateName}'),
-            if (item.switchPort != null)
-              ItemDetailsText(
-                  label: 'Switch Port', itemText: '${item.switchPort}'),
-            if (item.switchIpAddress != null)
-              ItemDetailsText(
-                  label: 'Switch IP Address',
-                  itemText: '${item.switchIpAddress}'),
-            if (item.assignedTo != null)
-              ItemDetailsText(
-                  label: 'Assigned User',
-                  itemText: '${item.assignedTo!.userName}'),
-          ],
+                  label: 'Status', itemText: '${item.assetStatus.name}'),
+              if (item.hostName != null)
+                ItemDetailsText(
+                    label: 'Host Name', itemText: '${item.hostName}'),
+              if (item.ipPort != null)
+                ItemDetailsText(
+                    label: 'IP Address', itemText: '${item.ipPort}'),
+              if (item.macAddress != null)
+                ItemDetailsText(
+                    label: 'MAC Address', itemText: '${item.macAddress}'),
+              if (item.osVersion != null)
+                ItemDetailsText(
+                    label: 'OS Version', itemText: '${item.osVersion}'),
+              if (item.facePlateName != null)
+                ItemDetailsText(
+                    label: 'Face Plate Name',
+                    itemText: '${item.facePlateName}'),
+              if (item.switchPort != null)
+                ItemDetailsText(
+                    label: 'Switch Port', itemText: '${item.switchPort}'),
+              if (item.switchIpAddress != null)
+                ItemDetailsText(
+                    label: 'Switch IP Address',
+                    itemText: '${item.switchIpAddress}'),
+              if (item.assignedTo != null)
+                ItemDetailsText(
+                    label: 'Assigned User',
+                    itemText: '${item.assignedTo!.userName}'),
+            ],
+          ),
         ),
         actions: [
           TextButton(

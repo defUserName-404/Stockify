@@ -118,28 +118,56 @@ class _UserScreenState extends State<UserScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('User Details'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            ItemDetailsText(label: 'User Name', itemText: '${user.userName}'),
-            if (user.designation != null)
-              ItemDetailsText(
-                  label: 'Designation', itemText: '${user.designation}'),
-            if (user.sapId != null)
-              ItemDetailsText(label: 'SAP ID', itemText: '${user.sapId}'),
-            if (user.ipPhone != null)
-              ItemDetailsText(label: 'IP Phone', itemText: '${user.ipPhone!}'),
-            if (user.roomNo != null)
-              ItemDetailsText(label: 'Room No', itemText: '${user.roomNo!}'),
-            if (user.floor != null)
-              ItemDetailsText(label: 'Floor No', itemText: '${user.floor}'),
+            Icon(
+              Icons.person_outline,
+              color: AppColors.colorAccent,
+            ),
+            const SizedBox(width: 8.0),
+            Text('User Details'),
           ],
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        content: SingleChildScrollView(
+          child: Wrap(
+            spacing: 64,
+            runSpacing: 16,
+            children: [
+              ItemDetailsText(label: 'User Name', itemText: '${user.userName}'),
+              if (user.designation != null)
+                ItemDetailsText(
+                    label: 'Designation', itemText: '${user.designation}'),
+              if (user.sapId != null)
+                ItemDetailsText(label: 'SAP ID', itemText: '${user.sapId}'),
+              if (user.ipPhone != null)
+                ItemDetailsText(
+                    label: 'IP Phone', itemText: '${user.ipPhone!}'),
+              if (user.roomNo != null)
+                ItemDetailsText(label: 'Room No', itemText: '${user.roomNo!}'),
+              if (user.floor != null)
+                ItemDetailsText(label: 'Floor No', itemText: '${user.floor}'),
+            ],
+          ),
         ),
         actions: [
           TextButton(
-            child: const Text('Close'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.close),
+                const SizedBox(width: 8),
+                const Text('Close'),
+              ],
+            ),
+            style: Theme.of(context).textButtonTheme.style!.copyWith(
+                  foregroundColor:
+                      WidgetStateProperty.all<Color>(AppColors.colorTextDark),
+                  backgroundColor: WidgetStateProperty.all<Color>(
+                      AppColors.colorTextSemiLight),
+                ),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -151,11 +179,18 @@ class _UserScreenState extends State<UserScreen> {
     final confirmDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Deletion'),
-        shape: ShapeBorder.lerp(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          0.5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.dangerous_rounded,
+              color: AppColors.colorAccent,
+            ),
+            const SizedBox(width: 8),
+            const Text('Confirm Deletion'),
+          ],
         ),
         content: const Text('Are you sure you want to delete this user?'),
         actions: [
@@ -167,7 +202,14 @@ class _UserScreenState extends State<UserScreen> {
                   backgroundColor: WidgetStateProperty.all<Color>(
                       AppColors.colorTextSemiLight),
                 ),
-            child: const Text('Cancel'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.cancel_outlined),
+                const SizedBox(width: 8),
+                const Text('Cancel'),
+              ],
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -177,7 +219,14 @@ class _UserScreenState extends State<UserScreen> {
                   backgroundColor:
                       WidgetStateProperty.all<Color>(AppColors.colorPink),
                 ),
-            child: const Text('Yes'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.delete),
+                const SizedBox(width: 8),
+                const Text('Yes'),
+              ],
+            ),
           ),
         ],
       ),

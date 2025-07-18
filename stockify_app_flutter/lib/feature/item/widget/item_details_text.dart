@@ -9,21 +9,29 @@ class ItemDetailsText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          '$label: ',
-          style: TextStyle(fontSize: 16),
-        ),
-        SizedBox(width: 8),
-        Text(
-          itemText,
-          style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.bold),
-        ),
-      ],
+    return SizedBox(
+      width: 200,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            itemText,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
