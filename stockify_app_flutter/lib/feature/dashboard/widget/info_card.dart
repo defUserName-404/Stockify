@@ -8,12 +8,12 @@ class InfoCard extends StatefulWidget {
   final int index;
   final VoidCallback onTap;
 
-  const InfoCard({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
+  const InfoCard(
+      {super.key,
+      required this.title,
+      required this.value,
+      required this.icon,
+      required this.color,
       required this.index,
       required this.onTap});
 
@@ -93,7 +93,6 @@ class _InfoCardState extends State<InfoCard> {
                   widget.title,
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.grey,
                     fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,
