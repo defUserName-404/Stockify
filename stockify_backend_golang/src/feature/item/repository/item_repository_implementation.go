@@ -25,13 +25,13 @@ func (r *itemRepository) AddItem(item model.Item) {
 
 func (r *itemRepository) GetAllItems() []model.Item {
 	var items []model.Item
-	db.DB.Find(&items)
+	db.DB.Preload("AssignedTo").Find(&items)    
 	return items
 }
 
 func (r *itemRepository) GetItemById(id uint64) model.Item {
 	var item model.Item
-	db.DB.First(&item, id)
+	db.DB.Preload("AssignedTo").First(&item, id)
 	return item
 }
 
@@ -50,7 +50,7 @@ func (r *itemRepository) DeleteItemById(id uint64) {
 }
 
 func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]model.Item, error) {
-	database := db.DB.Model(&model.Item{})
+	database := db.DB.Model(&model.Item{}).Preload("AssignedTo")
 
 	// Filtering
 	if params.DeviceType != nil {
