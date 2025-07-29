@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/shortcuts/app_shortcuts.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
-import 'package:stockify_app_flutter/common/theme/controller/theme_controller.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
 import 'package:stockify_app_flutter/common/widget/app_dialogs.dart';
 import 'package:stockify_app_flutter/common/widget/responsive/page_header.dart';
-import 'package:stockify_app_flutter/common/widget/side_panel.dart';
 import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/user/widget/user_form.dart';
@@ -28,14 +25,11 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   late final UserService _userService;
   int _rowsPerPage = 10;
-  bool _isPanelOpen = false;
-  User? _editingUser;
   late UserData _userDataSource;
   UserFilterParams _filterParams = UserFilterParams();
   final FocusNode _searchFocusNode = FocusNode();
   int _selectedRowIndex = -1;
   late final TextEditingController _searchInputController;
-  final GlobalKey<UserFormState> _formKey = GlobalKey<UserFormState>();
   final GlobalKey<PaginatedDataTableState> _paginatedDataTableKey =
       GlobalKey<PaginatedDataTableState>();
   int _firstRowIndex = 0;
@@ -51,7 +45,7 @@ class _UserScreenState extends State<UserScreen> {
   void _initializeUserDataSource() {
     _userDataSource = UserData(
         context: context,
-        onEdit: (user) => _togglePanel(user: user),
+        onEdit: (user) => _openUserFormDialog(user: user),
         filterParams: _filterParams,
         rowsPerPage: _rowsPerPage,
         onView: (user) => _showViewDetailsDialog(user),
@@ -97,11 +91,30 @@ class _UserScreenState extends State<UserScreen> {
     super.dispose();
   }
 
-  void _togglePanel({User? user}) {
-    setState(() {
-      _editingUser = user;
-      _isPanelOpen = !_isPanelOpen;
-    });
+  Future<void> _openUserFormDialog({User? user}) async {
+    final savedUser = await showDialog<User>(
+      context: context,
+      builder: (context) => Dialog(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width > 800
+              ? MediaQuery.of(context).size.width / 2
+              : MediaQuery.of(context).size.width * 0.9,
+          child: UserForm(
+            editingUser: user,
+            onSave: (newUser) {
+              Navigator.of(context).pop(newUser);
+            },
+            onCancel: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      ),
+    );
+
+    if (savedUser != null) {
+      _saveUser(savedUser);
+    }
   }
 
   void _saveUser(User user) {
@@ -110,7 +123,6 @@ class _UserScreenState extends State<UserScreen> {
     } else {
       _userService.addUser(user);
     }
-    _togglePanel();
     _refreshData();
   }
 
@@ -155,9 +167,6 @@ class _UserScreenState extends State<UserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidthHalf = MediaQuery.of(context).size.width / 2;
-    final currentTheme =
-        Provider.of<ThemeController>(context).themeData.brightness;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Users'),
@@ -170,7 +179,7 @@ class _UserScreenState extends State<UserScreen> {
                 VoidCallbackIntent(() => _searchFocusNode.requestFocus()),
             AppShortcuts.openFilter:
                 VoidCallbackIntent(() => _showFilterDialog()),
-            AppShortcuts.addNew: VoidCallbackIntent(() => _togglePanel()),
+            AppShortcuts.addNew: VoidCallbackIntent(() => _openUserFormDialog()),
             AppShortcuts.arrowDown: VoidCallbackIntent(() {
               int newIndex = _selectedRowIndex;
               if (newIndex < _userDataSource.rowCount - 1) {
@@ -207,7 +216,7 @@ class _UserScreenState extends State<UserScreen> {
             }),
             AppShortcuts.editItem: VoidCallbackIntent(() {
               if (_selectedRowIndex != -1) {
-                _togglePanel(
+                _openUserFormDialog(
                     user: _userDataSource.getRowData(_selectedRowIndex));
               }
             }),
@@ -215,12 +224,6 @@ class _UserScreenState extends State<UserScreen> {
               if (_selectedRowIndex != -1) {
                 _showDeleteConfirmationDialog(
                     _userDataSource.getRowData(_selectedRowIndex));
-              }
-            }),
-            AppShortcuts.cancel: VoidCallbackIntent(() => _togglePanel()),
-            AppShortcuts.submit: VoidCallbackIntent(() {
-              if (_isPanelOpen) {
-                _formKey.currentState?.saveUser();
               }
             }),
             AppShortcuts.nextPage: VoidCallbackIntent(() {
@@ -252,95 +255,78 @@ class _UserScreenState extends State<UserScreen> {
             },
             child: FocusScope(
               autofocus: true,
-              child: Stack(
+              child: Column(
                 children: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      PageHeader(
-                        onAddNew: () => _togglePanel(),
-                        onFilter: _showFilterDialog,
-                        onSearch: _onSearchChanged,
-                        searchController: _searchInputController,
-                        searchFocusNode: _searchFocusNode,
-                        searchHint:
-                            'Search for users by their User Name or SAP ID',
-                      ),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Container(
-                            width: double.infinity,
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                List<DataColumn> getColumns(double maxWidth) {
-                                  if (maxWidth < 600) {
-                                    return [
-                                      DataColumn(label: Text('ID')),
-                                      DataColumn(label: Text('User Name')),
-                                      DataColumn(label: Text('Actions')),
-                                    ];
-                                  } else if (maxWidth < 900) {
-                                    return [
-                                      DataColumn(label: Text('ID')),
-                                      DataColumn(label: Text('User Name')),
-                                      DataColumn(label: Text('Designation')),
-                                      DataColumn(label: Text('Actions')),
-                                    ];
-                                  } else {
-                                    return [
-                                      DataColumn(label: Text('ID')),
-                                      DataColumn(label: Text('User Name')),
-                                      DataColumn(label: Text('Designation')),
-                                      DataColumn(label: Text('SAP ID')),
-                                      DataColumn(label: Text('Actions')),
-                                    ];
-                                  }
-                                }
+                  PageHeader(
+                    onAddNew: () => _openUserFormDialog(),
+                    onFilter: _showFilterDialog,
+                    onSearch: _onSearchChanged,
+                    searchController: _searchInputController,
+                    searchFocusNode: _searchFocusNode,
+                    searchHint:
+                        'Search for users by their User Name or SAP ID',
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Container(
+                        width: double.infinity,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            _userDataSource.screenWidth = constraints.maxWidth;
+                            List<DataColumn> getColumns(double maxWidth) {
+                              if (maxWidth < 600) {
+                                return [
+                                  const DataColumn(label: Text('User Name')),
+                                  const DataColumn(label: Text('Actions')),
+                                ];
+                              } else if (maxWidth < 900) {
+                                return [
+                                  const DataColumn(label: Text('User Name')),
+                                  const DataColumn(label: Text('Designation')),
+                                  const DataColumn(label: Text('Actions')),
+                                ];
+                              } else {
+                                return [
+                                  const DataColumn(label: Text('User Name')),
+                                  const DataColumn(label: Text('Designation')),
+                                  const DataColumn(label: Text('SAP ID')),
+                                  const DataColumn(label: Text('Actions')),
+                                ];
+                              }
+                            }
 
-                                return PaginatedDataTable(
-                                  key: _paginatedDataTableKey,
-                                  initialFirstRowIndex: _firstRowIndex,
-                                  onPageChanged: (rowIndex) {
-                                    setState(() {
-                                      _firstRowIndex = rowIndex;
-                                      _selectedRowIndex = rowIndex;
-                                    });
-                                  },
-                                  headingRowColor:
-                                      WidgetStateProperty.all<Color>(
-                                          Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer
-                                              .withAlpha(10)),
-                                  showCheckboxColumn: false,
-                                  showEmptyRows: false,
-                                  availableRowsPerPage: const [10, 20, 50],
-                                  onRowsPerPageChanged: (int? value) {
-                                    setState(() {
-                                      _rowsPerPage = value!;
-                                    });
-                                  },
-                                  rowsPerPage: _rowsPerPage,
-                                  columns: getColumns(constraints.maxWidth),
-                                  source: _userDataSource,
-                                );
+                            return PaginatedDataTable(
+                              key: _paginatedDataTableKey,
+                              initialFirstRowIndex: _firstRowIndex,
+                              onPageChanged: (rowIndex) {
+                                setState(() {
+                                  _firstRowIndex = rowIndex;
+                                  _selectedRowIndex = rowIndex;
+                                });
                               },
-                            ),
-                          ),
+                              headingRowColor:
+                                  WidgetStateProperty.all<Color>(
+                                      Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer
+                                          .withAlpha(10)),
+                              showCheckboxColumn: false,
+                              showEmptyRows: false,
+                              availableRowsPerPage: const [10, 20, 50],
+                              onRowsPerPageChanged: (int? value) {
+                                setState(() {
+                                  _rowsPerPage = value!;
+                                });
+                              },
+                              rowsPerPage: _rowsPerPage,
+                              columns: getColumns(constraints.maxWidth),
+                              source: _userDataSource,
+                            );
+                          },
                         ),
                       ),
-                    ],
-                  ),
-                  SidePanel(
-                    isOpen: _isPanelOpen,
-                    panelWidth: screenWidthHalf,
-                    currentTheme: currentTheme,
-                    child: UserForm(
-                      key: _formKey,
-                      editingUser: _editingUser,
-                      onSave: _saveUser,
-                      onCancel: () => _togglePanel(),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

@@ -4,23 +4,25 @@ class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
   List<Item> _filteredItems = [];
   final BuildContext context;
-  final void Function(Item)? onEdit;
-  final void Function(Item)? onView;
-  final void Function(Item)? onDelete;
+  final void Function(Item) onEdit;
+  final void Function(Item) onView;
+  final void Function(Item) onDelete;
   ItemFilterParams _filterParams;
   final int Function() getSelectedRowIndex;
   final Function(int) setSelectedRowIndex;
   final int rowsPerPage;
+  double screenWidth;
 
   ItemData({
     required this.context,
-    this.onEdit,
-    this.onView,
-    this.onDelete,
+    required this.onEdit,
+    required this.onView,
+    required this.onDelete,
     required this.getSelectedRowIndex,
     required this.setSelectedRowIndex,
     required ItemFilterParams filterParams,
     required this.rowsPerPage,
+    this.screenWidth = 600,
   }) : _filterParams = filterParams {
     refreshData();
   }
@@ -66,8 +68,43 @@ class ItemData extends DataTableSource {
         }
         notifyListeners();
       },
-      cells: [
-        DataCell(Text(item.id?.toString() ?? '')),
+      cells: _getCells(item),
+    );
+  }
+
+  List<DataCell> _getCells(Item item) {
+    if (screenWidth < 600) {
+      return [
+        DataCell(Text(item.assetNo)),
+        DataCell(Chip(
+          avatar: Icon(_getDeviceTypeIcon(item.deviceType),
+              size: 16, color: _getDeviceTypeColor(item.deviceType)),
+          label: Text(item.deviceType.name),
+          backgroundColor: _getDeviceTypeColor(item.deviceType).withAlpha(10),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: _getDeviceTypeColor(item.deviceType))),
+        )),
+        _buildActionsCell(item),
+      ];
+    } else if (screenWidth < 900) {
+      return [
+        DataCell(Text(item.assetNo)),
+        DataCell(Text(item.modelNo)),
+        DataCell(Chip(
+          avatar: Icon(_getDeviceTypeIcon(item.deviceType),
+              size: 16, color: _getDeviceTypeColor(item.deviceType)),
+          label: Text(item.deviceType.name),
+          backgroundColor: _getDeviceTypeColor(item.deviceType).withAlpha(10),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: _getDeviceTypeColor(item.deviceType))),
+        )),
+        DataCell(ItemStatus(assetStatus: item.assetStatus)),
+        _buildActionsCell(item),
+      ];
+    } else {
+      return [
         DataCell(Text(item.assetNo)),
         DataCell(Text(item.modelNo)),
         DataCell(Text(item.serialNo)),
@@ -80,32 +117,35 @@ class ItemData extends DataTableSource {
               borderRadius: BorderRadius.circular(8),
               side: BorderSide(color: _getDeviceTypeColor(item.deviceType))),
         )),
-        DataCell(
-            Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
+        DataCell(Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
         DataCell(ItemStatus(assetStatus: item.assetStatus)),
-        DataCell(Row(
-          children: [
-            ActionWidget(
-              icon: Icons.remove_red_eye_rounded,
-              onTap: () => onView!(item),
-              message: 'View Item Details',
-            ),
-            const SizedBox(width: 10.0),
-            ActionWidget(
-              icon: Icons.edit,
-              onTap: () => onEdit!(item),
-              message: 'Edit Item',
-            ),
-            const SizedBox(width: 10.0),
-            ActionWidget(
-              icon: Icons.delete,
-              onTap: () => onDelete!(item),
-              message: 'Delete Item',
-            )
-          ],
-        ))
+        _buildActionsCell(item),
+      ];
+    }
+  }
+
+  DataCell _buildActionsCell(Item item) {
+    return DataCell(Row(
+      children: [
+        ActionWidget(
+          icon: Icons.remove_red_eye_rounded,
+          onTap: () => onView(item),
+          message: 'View Item Details',
+        ),
+        const SizedBox(width: 10.0),
+        ActionWidget(
+          icon: Icons.edit,
+          onTap: () => onEdit(item),
+          message: 'Edit Item',
+        ),
+        const SizedBox(width: 10.0),
+        ActionWidget(
+          icon: Icons.delete,
+          onTap: () => onDelete(item),
+          message: 'Delete Item',
+        )
       ],
-    );
+    ));
   }
 
   @override

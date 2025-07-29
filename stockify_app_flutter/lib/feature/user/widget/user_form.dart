@@ -71,7 +71,7 @@ class UserFormState extends State<UserForm> {
     super.dispose();
   }
 
-  void saveUser() {
+  void _saveUser() {
     if (formKey.currentState?.validate() ?? false) {
       final user = User(
         id: widget.editingUser?.id,
@@ -225,8 +225,7 @@ class UserFormState extends State<UserForm> {
                                 child: _buildFormField(
                                   label: 'User Name',
                                   controller: _userNameController,
-                                  validator:
-                                      UserInputValidator.validateUsername,
+                                  validator: UserInputValidator.validateUsername,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -329,7 +328,7 @@ class UserFormState extends State<UserForm> {
               Flexible(
                 flex: 2,
                 child: AppButton(
-                  onPressed: saveUser,
+                  onPressed: _saveUser,
                   icon: widget.editingUser == null
                       ? Icons.person_add
                       : Icons.save,

@@ -46,11 +46,15 @@ class ItemFormState extends State<ItemForm> {
   DateTime? _selectedReceivedDate;
   bool? _isPasswordProtected;
   User? _assignedUser;
+  final FocusNode _assetNoFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _assetNoFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -109,10 +113,11 @@ class ItemFormState extends State<ItemForm> {
     _switchPortInputController.dispose();
     _switchIpAddressInputController.dispose();
     _scrollController.dispose();
+    _assetNoFocusNode.dispose();
     super.dispose();
   }
 
-  void saveItem() {
+  void _saveItem() {
     if (formKey.currentState?.validate() ?? false) {
       final item = Item(
         id: widget.editingItem?.id,
@@ -160,6 +165,7 @@ class ItemFormState extends State<ItemForm> {
     bool readOnly = false,
     TextInputType? keyboardType,
     int? maxLines = 1,
+    FocusNode? focusNode,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,6 +186,7 @@ class ItemFormState extends State<ItemForm> {
           readOnly: readOnly,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          focusNode: focusNode,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -397,6 +404,7 @@ class ItemFormState extends State<ItemForm> {
                                   label: 'Asset Number',
                                   controller: _assetInputController,
                                   validator: ItemInputValidator.validateAssetNo,
+                                  focusNode: _assetNoFocusNode,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -416,6 +424,7 @@ class ItemFormState extends State<ItemForm> {
                                 label: 'Asset Number',
                                 controller: _assetInputController,
                                 validator: ItemInputValidator.validateAssetNo,
+                                focusNode: _assetNoFocusNode,
                               ),
                               const SizedBox(height: 16),
                               _buildFormField(
@@ -770,7 +779,7 @@ class ItemFormState extends State<ItemForm> {
               Flexible(
                 flex: 2,
                 child: AppButton(
-                  onPressed: saveItem,
+                  onPressed: _saveItem,
                   icon: widget.editingItem == null ? Icons.add : Icons.save,
                   text:
                       widget.editingItem == null ? 'Add Item' : 'Save Changes',
