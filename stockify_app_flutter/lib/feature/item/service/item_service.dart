@@ -1,7 +1,7 @@
 import '../model/item.dart';
 import '../model/item_filter_param.dart';
 
-abstract class ItemService {
+abstract interface class ItemService {
   void addItem(Item item);
 
   void updateItem(Item item);

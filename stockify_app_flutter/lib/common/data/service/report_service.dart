@@ -147,7 +147,7 @@ class ReportService {
       ),
     );
     final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/inventory_report.pdf');
+    final file = File(filePath ?? '${dir.path}/inventory_report.pdf');
     await file.writeAsBytes(await pdf.save());
     OpenFile.open(file.path);
   }

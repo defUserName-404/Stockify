@@ -117,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     CustomSnackBar.show(
                       context: context,
                       message: 'Report generation cancelled.',
-                      type: SnackBarType.info,
+                      type: SnackBarType.error,
                     );
                   }
                 } catch (e) {

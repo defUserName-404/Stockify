@@ -5,6 +5,7 @@ import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
 import 'package:stockify_app_flutter/common/widget/app_dialogs.dart';
+import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
 import 'package:stockify_app_flutter/common/widget/responsive/page_header.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
@@ -159,8 +160,18 @@ class _ItemScreenState extends State<ItemScreen> {
   void _saveItem(Item item) {
     if (item.id != null) {
       _itemService.updateItem(item);
+      CustomSnackBar.show(
+        context: context,
+        message: 'Item updated successfully',
+        type: SnackBarType.success,
+      );
     } else {
       _itemService.addItem(item);
+      CustomSnackBar.show(
+        context: context,
+        message: 'Item added successfully',
+        type: SnackBarType.success,
+      );
     }
     _refreshData();
   }
@@ -228,6 +239,11 @@ class _ItemScreenState extends State<ItemScreen> {
     );
     if (confirmDelete == true) {
       _itemService.deleteItem(item.id!);
+      CustomSnackBar.show(
+        context: context,
+        message: 'Item deleted successfully',
+        type: SnackBarType.success,
+      );
       _refreshData();
     }
   }

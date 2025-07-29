@@ -9,6 +9,7 @@ import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/user/widget/user_form.dart';
 
+import '../../../common/widget/custom_snackbar.dart';
 import '../../item/widget/item_details_text.dart';
 import '../../user/model/user.dart';
 import '../service/user_service.dart';
@@ -55,7 +56,8 @@ class _UserScreenState extends State<UserScreen> {
           setState(() {
             _selectedRowIndex = index;
           });
-        });
+      },
+    );
   }
 
   Future<void> _refreshData() async {
@@ -111,7 +113,6 @@ class _UserScreenState extends State<UserScreen> {
         ),
       ),
     );
-
     if (savedUser != null) {
       _saveUser(savedUser);
     }
@@ -120,8 +121,18 @@ class _UserScreenState extends State<UserScreen> {
   void _saveUser(User user) {
     if (user.id != null) {
       _userService.editUser(user);
+      CustomSnackBar.show(
+        context: context,
+        message: 'User updated successfully',
+        type: SnackBarType.success,
+      );
     } else {
       _userService.addUser(user);
+      CustomSnackBar.show(
+        context: context,
+        message: 'User added successfully',
+        type: SnackBarType.success,
+      );
     }
     _refreshData();
   }
@@ -161,6 +172,11 @@ class _UserScreenState extends State<UserScreen> {
     );
     if (confirmDelete == true) {
       _userService.deleteUser(user.id!);
+      CustomSnackBar.show(
+        context: context,
+        message: 'User deleted successfully',
+        type: SnackBarType.success,
+      );
       _refreshData();
     }
   }
@@ -294,7 +310,6 @@ class _UserScreenState extends State<UserScreen> {
                                 ];
                               }
                             }
-
                             return PaginatedDataTable(
                               key: _paginatedDataTableKey,
                               initialFirstRowIndex: _firstRowIndex,
