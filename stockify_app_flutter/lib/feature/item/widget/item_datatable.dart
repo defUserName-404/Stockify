@@ -7,6 +7,8 @@ class ItemData extends DataTableSource {
   final void Function(Item) onEdit;
   final void Function(Item) onView;
   final void Function(Item) onDelete;
+  final void Function(DeviceType) onFilterByDeviceType;
+  final void Function(AssetStatus) onFilterByAssetStatus;
   ItemFilterParams _filterParams;
   final int Function() getSelectedRowIndex;
   final Function(int) setSelectedRowIndex;
@@ -18,6 +20,8 @@ class ItemData extends DataTableSource {
     required this.onEdit,
     required this.onView,
     required this.onDelete,
+    required this.onFilterByDeviceType,
+    required this.onFilterByAssetStatus,
     required this.getSelectedRowIndex,
     required this.setSelectedRowIndex,
     required ItemFilterParams filterParams,
@@ -76,31 +80,50 @@ class ItemData extends DataTableSource {
     if (screenWidth < 600) {
       return [
         DataCell(Text(item.assetNo)),
-        DataCell(Chip(
-          avatar: Icon(_getDeviceTypeIcon(item.deviceType),
-              size: 16, color: _getDeviceTypeColor(item.deviceType)),
-          label: Text(item.deviceType.name),
-          backgroundColor: _getDeviceTypeColor(item.deviceType).withAlpha(10),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: _getDeviceTypeColor(item.deviceType))),
-        )),
+        DataCell(
+          InkWell(
+            onTap: () => onFilterByDeviceType(item.deviceType),
+            child: Chip(
+              avatar: Icon(_getDeviceTypeIcon(item.deviceType),
+                  size: 16, color: _getDeviceTypeColor(item.deviceType)),
+              label: Text(item.deviceType.name),
+              backgroundColor:
+                  _getDeviceTypeColor(item.deviceType).withAlpha(10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side:
+                      BorderSide(color: _getDeviceTypeColor(item.deviceType))),
+            ),
+          ),
+        ),
         _buildActionsCell(item),
       ];
     } else if (screenWidth < 900) {
       return [
         DataCell(Text(item.assetNo)),
         DataCell(Text(item.modelNo)),
-        DataCell(Chip(
-          avatar: Icon(_getDeviceTypeIcon(item.deviceType),
-              size: 16, color: _getDeviceTypeColor(item.deviceType)),
-          label: Text(item.deviceType.name),
-          backgroundColor: _getDeviceTypeColor(item.deviceType).withAlpha(10),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: _getDeviceTypeColor(item.deviceType))),
-        )),
-        DataCell(ItemStatus(assetStatus: item.assetStatus)),
+        DataCell(
+          InkWell(
+            onTap: () => onFilterByDeviceType(item.deviceType),
+            child: Chip(
+              avatar: Icon(_getDeviceTypeIcon(item.deviceType),
+                  size: 16, color: _getDeviceTypeColor(item.deviceType)),
+              label: Text(item.deviceType.name),
+              backgroundColor:
+                  _getDeviceTypeColor(item.deviceType).withAlpha(10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side:
+                      BorderSide(color: _getDeviceTypeColor(item.deviceType))),
+            ),
+          ),
+        ),
+        DataCell(
+          InkWell(
+            onTap: () => onFilterByAssetStatus(item.assetStatus),
+            child: ItemStatus(assetStatus: item.assetStatus),
+          ),
+        ),
         _buildActionsCell(item),
       ];
     } else {
@@ -108,17 +131,29 @@ class ItemData extends DataTableSource {
         DataCell(Text(item.assetNo)),
         DataCell(Text(item.modelNo)),
         DataCell(Text(item.serialNo)),
-        DataCell(Chip(
-          avatar: Icon(_getDeviceTypeIcon(item.deviceType),
-              size: 16, color: _getDeviceTypeColor(item.deviceType)),
-          label: Text(item.deviceType.name),
-          backgroundColor: _getDeviceTypeColor(item.deviceType).withAlpha(10),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: _getDeviceTypeColor(item.deviceType))),
-        )),
+        DataCell(
+          InkWell(
+            onTap: () => onFilterByDeviceType(item.deviceType),
+            child: Chip(
+              avatar: Icon(_getDeviceTypeIcon(item.deviceType),
+                  size: 16, color: _getDeviceTypeColor(item.deviceType)),
+              label: Text(item.deviceType.name),
+              backgroundColor:
+                  _getDeviceTypeColor(item.deviceType).withAlpha(10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side:
+                      BorderSide(color: _getDeviceTypeColor(item.deviceType))),
+            ),
+          ),
+        ),
         DataCell(Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
-        DataCell(ItemStatus(assetStatus: item.assetStatus)),
+        DataCell(
+          InkWell(
+            onTap: () => onFilterByAssetStatus(item.assetStatus),
+            child: ItemStatus(assetStatus: item.assetStatus),
+          ),
+        ),
         _buildActionsCell(item),
       ];
     }

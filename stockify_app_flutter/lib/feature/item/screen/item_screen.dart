@@ -15,6 +15,7 @@ import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 
 import '../../user/model/user.dart';
+import '../model/asset_status.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
 import '../model/item_filter_param.dart';
@@ -92,6 +93,8 @@ class _ItemScreenState extends State<ItemScreen> {
           _selectedRowIndex = index;
         });
       },
+      onFilterByDeviceType: (type) => _filterByDeviceType(type),
+      onFilterByAssetStatus: (status) => _filterByAssetStatus(status),
     );
   }
 
@@ -248,6 +251,32 @@ class _ItemScreenState extends State<ItemScreen> {
     }
   }
 
+  void _onSort(String sortBy) {
+    String sortOrder = 'ASC';
+    if (_filterParams.sortBy == sortBy) {
+      sortOrder = _filterParams.sortOrder == 'ASC' ? 'DESC' : 'ASC';
+    }
+    setState(() {
+      _filterParams =
+          _filterParams.copyWith(sortBy: sortBy, sortOrder: sortOrder);
+    });
+    _refreshData();
+  }
+
+  void _filterByDeviceType(DeviceType type) {
+    setState(() {
+      _filterParams = _filterParams.copyWith(deviceType: type);
+    });
+    _refreshData();
+  }
+
+  void _filterByAssetStatus(AssetStatus status) {
+    setState(() {
+      _filterParams = _filterParams.copyWith(assetStatus: status);
+    });
+    _refreshData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -330,6 +359,22 @@ class _ItemScreenState extends State<ItemScreen> {
                 _paginatedDataTableKey.currentState?.pageTo(newFirstRowIndex);
               }
             }),
+            AppShortcuts.sortAsc: VoidCallbackIntent(() {
+              if (_filterParams.sortBy != null) {
+                setState(() {
+                  _filterParams = _filterParams.copyWith(sortOrder: 'ASC');
+                });
+                _refreshData();
+              }
+            }),
+            AppShortcuts.sortDesc: VoidCallbackIntent(() {
+              if (_filterParams.sortBy != null) {
+                setState(() {
+                  _filterParams = _filterParams.copyWith(sortOrder: 'DESC');
+                });
+                _refreshData();
+              }
+            }),
           },
           child: Actions(
             actions: {
@@ -392,35 +437,6 @@ class _ItemScreenState extends State<ItemScreen> {
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             _itemDataSource.screenWidth = constraints.maxWidth;
-                            List<DataColumn> getColumns(double maxWidth) {
-                              if (maxWidth < 600) {
-                                return [
-                                  const DataColumn(label: Text('Asset No')),
-                                  const DataColumn(label: Text('Device Type')),
-                                  const DataColumn(label: Text('Actions')),
-                                ];
-                              } else if (maxWidth < 900) {
-                                return [
-                                  const DataColumn(label: Text('Asset No')),
-                                  const DataColumn(label: Text('Model No')),
-                                  const DataColumn(label: Text('Device Type')),
-                                  const DataColumn(label: Text('Asset Status')),
-                                  const DataColumn(label: Text('Actions')),
-                                ];
-                              } else {
-                                return [
-                                  const DataColumn(label: Text('Asset No')),
-                                  const DataColumn(label: Text('Model No')),
-                                  const DataColumn(label: Text('Serial No')),
-                                  const DataColumn(label: Text('Device Type')),
-                                  const DataColumn(
-                                      label: Text('Warranty Date')),
-                                  const DataColumn(label: Text('Asset Status')),
-                                  const DataColumn(label: Text('Actions')),
-                                ];
-                              }
-                            }
-
                             return PaginatedDataTable(
                               key: _paginatedDataTableKey,
                               initialFirstRowIndex: _firstRowIndex,
@@ -444,7 +460,7 @@ class _ItemScreenState extends State<ItemScreen> {
                                 });
                               },
                               rowsPerPage: _rowsPerPage,
-                              columns: getColumns(constraints.maxWidth),
+                              columns: _getColumns(constraints.maxWidth),
                               source: _itemDataSource,
                             );
                           },
@@ -457,6 +473,75 @@ class _ItemScreenState extends State<ItemScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  List<DataColumn> _getColumns(double maxWidth) {
+    List<DataColumn> columns = [];
+    if (maxWidth < 600) {
+      columns = [
+        DataColumn(
+            label: _buildSortableHeader('Asset No', 'asset_no'),
+            onSort: (columnIndex, ascending) => _onSort('asset_no')),
+        DataColumn(
+            label: _buildSortableHeader('Device Type', 'device_type'),
+            onSort: (columnIndex, ascending) => _onSort('device_type')),
+        const DataColumn(label: Text('Actions')),
+      ];
+    } else if (maxWidth < 900) {
+      columns = [
+        DataColumn(
+            label: _buildSortableHeader('Asset No', 'asset_no'),
+            onSort: (columnIndex, ascending) => _onSort('asset_no')),
+        DataColumn(
+            label: _buildSortableHeader('Model No', 'model_no'),
+            onSort: (columnIndex, ascending) => _onSort('model_no')),
+        DataColumn(
+            label: _buildSortableHeader('Device Type', 'device_type'),
+            onSort: (columnIndex, ascending) => _onSort('device_type')),
+        DataColumn(
+            label: _buildSortableHeader('Asset Status', 'asset_status'),
+            onSort: (columnIndex, ascending) => _onSort('asset_status')),
+        const DataColumn(label: Text('Actions')),
+      ];
+    } else {
+      columns = [
+        DataColumn(
+            label: _buildSortableHeader('Asset No', 'asset_no'),
+            onSort: (columnIndex, ascending) => _onSort('asset_no')),
+        DataColumn(
+            label: _buildSortableHeader('Model No', 'model_no'),
+            onSort: (columnIndex, ascending) => _onSort('model_no')),
+        DataColumn(
+            label: _buildSortableHeader('Serial No', 'serial_no'),
+            onSort: (columnIndex, ascending) => _onSort('serial_no')),
+        DataColumn(label: Text('Device Type')),
+        DataColumn(
+            label: _buildSortableHeader('Warranty Date', 'warranty_date'),
+            onSort: (columnIndex, ascending) => _onSort('warranty_date')),
+        DataColumn(label: Text('Asset Status')),
+        const DataColumn(label: Text('Actions')),
+      ];
+    }
+    return columns;
+  }
+
+  Widget _buildSortableHeader(String title, String sortKey) {
+    return InkWell(
+      onTap: () => _onSort(sortKey),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title),
+          if (_filterParams.sortBy == sortKey)
+            Icon(
+              _filterParams.sortOrder == 'ASC'
+                  ? Icons.arrow_upward
+                  : Icons.arrow_downward,
+              size: 16,
+            )
+        ],
       ),
     );
   }
