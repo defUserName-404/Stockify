@@ -1,5 +1,34 @@
 part of '../screen/item_screen.dart';
 
+class _ActionsCell extends StatefulWidget {
+  final bool isSelected;
+  final List<Widget> actions;
+
+  const _ActionsCell({required this.isSelected, required this.actions});
+
+  @override
+  State<_ActionsCell> createState() => _ActionsCellState();
+}
+
+class _ActionsCellState extends State<_ActionsCell> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool showActions = widget.isSelected || _isHovered;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: showActions
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: widget.actions,
+            )
+          : const Icon(Icons.more_horiz),
+    );
+  }
+}
+
 class ItemData extends DataTableSource {
   final ItemService _itemService = ItemServiceImplementation.instance;
   List<Item> _filteredItems = [];
@@ -72,11 +101,11 @@ class ItemData extends DataTableSource {
         }
         notifyListeners();
       },
-      cells: _getCells(item),
+      cells: _getCells(item, isSelected),
     );
   }
 
-  List<DataCell> _getCells(Item item) {
+  List<DataCell> _getCells(Item item, bool isSelected) {
     if (screenWidth < 600) {
       return [
         DataCell(Text(item.assetNo)),
@@ -96,7 +125,7 @@ class ItemData extends DataTableSource {
             ),
           ),
         ),
-        _buildActionsCell(item),
+        _buildActionsCell(item, isSelected),
       ];
     } else if (screenWidth < 900) {
       return [
@@ -124,7 +153,7 @@ class ItemData extends DataTableSource {
             child: ItemStatus(assetStatus: item.assetStatus),
           ),
         ),
-        _buildActionsCell(item),
+        _buildActionsCell(item, isSelected),
       ];
     } else {
       return [
@@ -154,14 +183,15 @@ class ItemData extends DataTableSource {
             child: ItemStatus(assetStatus: item.assetStatus),
           ),
         ),
-        _buildActionsCell(item),
+        _buildActionsCell(item, isSelected),
       ];
     }
   }
 
-  DataCell _buildActionsCell(Item item) {
-    return DataCell(Row(
-      children: [
+  DataCell _buildActionsCell(Item item, bool isSelected) {
+    return DataCell(_ActionsCell(
+      isSelected: isSelected,
+      actions: [
         ActionWidget(
           icon: Icons.remove_red_eye_rounded,
           onTap: () => onView(item),

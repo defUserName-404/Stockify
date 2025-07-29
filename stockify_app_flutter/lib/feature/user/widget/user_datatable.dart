@@ -1,5 +1,34 @@
 part of '../screen/user_screen.dart';
 
+class _ActionsCell extends StatefulWidget {
+  final bool isSelected;
+  final List<Widget> actions;
+
+  const _ActionsCell({required this.isSelected, required this.actions});
+
+  @override
+  State<_ActionsCell> createState() => _ActionsCellState();
+}
+
+class _ActionsCellState extends State<_ActionsCell> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool showActions = widget.isSelected || _isHovered;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: showActions
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: widget.actions,
+            )
+          : const Icon(Icons.more_horiz),
+    );
+  }
+}
+
 class UserData extends DataTableSource {
   final UserService _userService = UserServiceImplementation.instance;
   List<User> _filteredUsers = [];
@@ -67,36 +96,37 @@ class UserData extends DataTableSource {
         }
         notifyListeners();
       },
-      cells: _getCells(user),
+      cells: _getCells(user, isSelected),
     );
   }
 
-  List<DataCell> _getCells(User user) {
+  List<DataCell> _getCells(User user, bool isSelected) {
     if (screenWidth < 600) {
       return [
         DataCell(Text(user.userName)),
-        _buildActionsCell(user),
+        _buildActionsCell(user, isSelected),
       ];
     } else if (screenWidth < 900) {
       return [
         DataCell(Text(user.userName)),
         DataCell(Text(user.designation ?? '')),
-        _buildActionsCell(user),
+        _buildActionsCell(user, isSelected),
       ];
     } else {
       return [
         DataCell(Text(user.userName)),
         DataCell(Text(user.designation ?? '')),
         DataCell(Text(user.sapId ?? '')),
-        _buildActionsCell(user),
+        _buildActionsCell(user, isSelected),
       ];
     }
   }
 
-  DataCell _buildActionsCell(User user) {
+  DataCell _buildActionsCell(User user, bool isSelected) {
     return DataCell(
-      Row(
-        children: [
+      _ActionsCell(
+        isSelected: isSelected,
+        actions: [
           ActionWidget(
             icon: Icons.remove_red_eye_rounded,
             onTap: () {
