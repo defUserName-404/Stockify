@@ -40,7 +40,6 @@ class ItemRepository {
     final facePlateNamePtr = _toUtf8(item.facePlateName);
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
-    final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
     final assignedToID = item.assignedTo?.id ?? 0;
     _ffi.addItemFull(
       assetNoPtr,
@@ -57,7 +56,6 @@ class ItemRepository {
       facePlateNamePtr,
       switchPortPtr,
       switchIpAddressPtr,
-      isPasswordProtected,
       assignedToID,
     );
     // Free allocated memory
@@ -110,7 +108,6 @@ class ItemRepository {
     final facePlateNamePtr = _toUtf8(item.facePlateName);
     final switchPortPtr = _toUtf8(item.switchPort);
     final switchIpAddressPtr = _toUtf8(item.switchIpAddress);
-    final isPasswordProtected = item.isPasswordProtected == true ? 1 : 0;
     final assignedToID = item.assignedTo?.id != null ? item.assignedTo!.id : 0;
     _ffi.updateItemFull(
       id!,
@@ -128,7 +125,6 @@ class ItemRepository {
       facePlateNamePtr,
       switchPortPtr,
       switchIpAddressPtr,
-      isPasswordProtected,
       assignedToID!,
     );
     // Free allocated memory

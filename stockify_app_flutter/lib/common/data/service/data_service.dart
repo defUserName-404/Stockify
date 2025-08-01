@@ -46,7 +46,6 @@ class DataService {
         'FacePlateName',
         'SwitchPort',
         'SwitchIpAddress',
-        'IsPasswordProtected',
         'AssignedToID',
         'AssignedToUserName',
       ]);
@@ -68,7 +67,6 @@ class DataService {
           item.facePlateName,
           item.switchPort,
           item.switchIpAddress,
-          item.isPasswordProtected == true ? 1 : 0,
           item.assignedTo?.id,
           item.assignedTo?.userName,
         ]);
@@ -150,7 +148,6 @@ class DataService {
               facePlateName: itemMap['FacePlateName']?.toString(),
               switchPort: itemMap['SwitchPort']?.toString(),
               switchIpAddress: itemMap['SwitchIpAddress']?.toString(),
-              isPasswordProtected: itemMap['IsPasswordProtected'] == 1,
               assignedTo: assignedTo,
             );
             _itemService.addItem(item);
@@ -189,7 +186,6 @@ class DataService {
         'FacePlateName',
         'SwitchPort',
         'SwitchIpAddress',
-        'IsPasswordProtected',
         'AssignedToID',
         'AssignedToUserName',
       ];
@@ -214,7 +210,6 @@ class DataService {
           item.facePlateName,
           item.switchPort,
           item.switchIpAddress,
-          item.isPasswordProtected == true ? 1 : 0,
           item.assignedTo?.id,
           item.assignedTo?.userName,
         ];
@@ -303,7 +298,6 @@ class DataService {
                 facePlateName: itemMap['FacePlateName']?.toString(),
                 switchPort: itemMap['SwitchPort']?.toString(),
                 switchIpAddress: itemMap['SwitchIpAddress']?.toString(),
-                isPasswordProtected: itemMap['IsPasswordProtected'] == 1,
                 assignedTo: assignedTo,
               );
               _itemService.addItem(item);
