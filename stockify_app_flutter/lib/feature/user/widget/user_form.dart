@@ -225,7 +225,8 @@ class UserFormState extends State<UserForm> {
                                 child: _buildFormField(
                                   label: 'User Name',
                                   controller: _userNameController,
-                                  validator: UserInputValidator.validateUsername,
+                                  validator:
+                                      UserInputValidator.validateUsername,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -312,29 +313,22 @@ class UserFormState extends State<UserForm> {
             ),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Flexible(
-                flex: 1,
-                child: AppButton(
-                  onPressed: widget.onCancel,
-                  icon: Icons.cancel,
-                  iconColor: AppColors.colorTextDark,
-                  text: 'Cancel',
-                  backgroundColor: AppColors.colorTextSemiLight,
-                  foregroundColor: AppColors.colorTextDark,
-                ),
+              AppButton(
+                onPressed: widget.onCancel,
+                icon: Icons.cancel,
+                iconColor: AppColors.colorTextDark,
+                text: 'Cancel',
+                backgroundColor: AppColors.colorTextSemiLight,
+                foregroundColor: AppColors.colorTextDark,
               ),
               const SizedBox(width: 16),
-              Flexible(
-                flex: 2,
-                child: AppButton(
-                  onPressed: _saveUser,
-                  icon: widget.editingUser == null
-                      ? Icons.person_add
-                      : Icons.save,
-                  text:
-                      widget.editingUser == null ? 'Add User' : 'Save Changes',
-                ),
+              AppButton(
+                onPressed: _saveUser,
+                icon:
+                    widget.editingUser == null ? Icons.person_add : Icons.save,
+                text: widget.editingUser == null ? 'Add User' : 'Save Changes',
               ),
             ],
           ),
