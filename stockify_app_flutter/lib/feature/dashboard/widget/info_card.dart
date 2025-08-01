@@ -40,7 +40,7 @@ class _InfoCardState extends State<InfoCard> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: widget.color.withAlpha(50),
+              color: widget.color.withAlpha(20),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
@@ -61,20 +61,20 @@ class _InfoCardState extends State<InfoCard> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: widget.color.withAlpha(30),
+                        color: widget.color.withAlpha(50),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         widget.icon,
                         color: widget.color,
-                        size: 24,
+                        size: 30,
                       ),
                     ),
                     if (_hoveredCardIndex == widget.index)
                       Icon(
                         Icons.arrow_forward_ios,
                         color: widget.color,
-                        size: 16,
+                        size: 20,
                       ),
                   ],
                 ),
@@ -82,7 +82,7 @@ class _InfoCardState extends State<InfoCard> {
                 Text(
                   widget.value,
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
                     color: widget.color,
                   ),

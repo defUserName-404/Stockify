@@ -93,6 +93,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               const WelcomeSection(),
               const SizedBox(height: 32),
+              const QuickActions(),
+              const SizedBox(height: 32),
               InfoCardsGrid(
                 totalItems: _items.length,
                 totalUsers: _users.length,
@@ -104,8 +106,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 deviceTypeCounts: _getDeviceTypeCounts(),
                 assetStatusCounts: _getAssetStatusCounts(),
               ),
-              const SizedBox(height: 32),
-              const QuickActions(),
             ],
           ),
         ),
