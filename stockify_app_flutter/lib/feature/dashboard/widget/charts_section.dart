@@ -77,7 +77,7 @@ class _ChartsSectionState extends State<ChartsSection> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
+            color: Theme.of(context).colorScheme.primaryContainer.withAlpha(20),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
@@ -205,7 +205,7 @@ class _ChartsSectionState extends State<ChartsSection> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
+            color: Theme.of(context).colorScheme.primaryContainer.withAlpha(20),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
@@ -260,7 +260,7 @@ class _ChartsSectionState extends State<ChartsSection> {
                             color: _getAssetStatusColor(entry.key),
                             width: 32,
                             borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(4),
+                              top: Radius.circular(8),
                             ),
                           ),
                         ],
@@ -271,6 +271,7 @@ class _ChartsSectionState extends State<ChartsSection> {
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
+                          interval: 1,
                           getTitlesWidget: (value, meta) {
                             return Padding(
                               padding: const EdgeInsets.only(top: 8),
@@ -292,7 +293,7 @@ class _ChartsSectionState extends State<ChartsSection> {
                         ),
                       ),
                       leftTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: true),
+                        sideTitles: SideTitles(showTitles: true, interval: 1),
                       ),
                       topTitles: const AxisTitles(
                         sideTitles: SideTitles(showTitles: false),

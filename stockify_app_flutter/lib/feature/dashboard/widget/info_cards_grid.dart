@@ -12,12 +12,13 @@ class InfoCardsGrid extends StatelessWidget {
   final int expiringItems;
   final int disposedItems;
 
-  const InfoCardsGrid(
-      {super.key,
-      required this.totalItems,
-      required this.totalUsers,
-      required this.expiringItems,
-      required this.disposedItems});
+  const InfoCardsGrid({
+    super.key,
+    required this.totalItems,
+    required this.totalUsers,
+    required this.expiringItems,
+    required this.disposedItems,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,8 @@ class InfoCardsGrid extends StatelessWidget {
         icon: Icons.people,
         color: AppColors.colorGreen,
         index: 1,
-        onTap: () {},
+        onTap: () =>
+            AppLayout.navigatorKey.currentState?.updateSelectedScreen(2),
       ),
       InfoCard(
         title: 'Items Nearing Warranty',
@@ -46,8 +48,9 @@ class InfoCardsGrid extends StatelessWidget {
         color: AppColors.colorOrange,
         index: 2,
         onTap: () => AppLayout.navigatorKey.currentState?.updateSelectedScreen(
-            1,
-            itemFilterParams: ItemFilterParams(isExpiring: true)),
+          1,
+          itemFilterParams: ItemFilterParams(isExpiring: true),
+        ),
       ),
       InfoCard(
         title: 'Disposed Items',
@@ -56,23 +59,26 @@ class InfoCardsGrid extends StatelessWidget {
         color: AppColors.colorPink,
         index: 3,
         onTap: () => AppLayout.navigatorKey.currentState?.updateSelectedScreen(
-            1,
-            itemFilterParams:
-                ItemFilterParams(assetStatus: AssetStatus.Disposed)),
+          1,
+          itemFilterParams: ItemFilterParams(assetStatus: AssetStatus.Disposed),
+        ),
       ),
     ];
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 350,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 1.2,
-      ),
-      itemCount: cards.length,
-      itemBuilder: (context, index) {
-        return cards[index];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = (constraints.maxWidth ~/ 300).clamp(1, 4);
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: cards.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.2,
+          ),
+          itemBuilder: (context, index) => cards[index],
+        );
       },
     );
   }
