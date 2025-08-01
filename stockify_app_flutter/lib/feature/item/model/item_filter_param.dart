@@ -1,5 +1,12 @@
 import 'asset_status.dart';
 import 'device_type.dart';
+import '../../user/model/user.dart';
+
+enum WarrantyDateFilterType {
+  day,
+  month,
+  year,
+}
 
 class ItemFilterParams {
   final String search;
@@ -8,6 +15,9 @@ class ItemFilterParams {
   final DeviceType? deviceType;
   final AssetStatus? assetStatus;
   final bool isExpiring;
+  final DateTime? warrantyDate;
+  final WarrantyDateFilterType? warrantyDateFilterType;
+  final User? assignedTo;
 
   ItemFilterParams({
     this.search = '',
@@ -16,6 +26,9 @@ class ItemFilterParams {
     this.deviceType,
     this.assetStatus,
     this.isExpiring = false,
+    this.warrantyDate,
+    this.warrantyDateFilterType,
+    this.assignedTo,
   });
 
   ItemFilterParams copyWith({
@@ -24,6 +37,10 @@ class ItemFilterParams {
     Object? sortOrder = const _Sentinel(),
     Object? deviceType = const _Sentinel(),
     Object? assetStatus = const _Sentinel(),
+    Object? isExpiring = const _Sentinel(),
+    Object? warrantyDate = const _Sentinel(),
+    Object? warrantyDateFilterType = const _Sentinel(),
+    Object? assignedTo = const _Sentinel(),
   }) {
     return ItemFilterParams(
       search:
@@ -40,6 +57,18 @@ class ItemFilterParams {
       assetStatus: identical(assetStatus, const _Sentinel())
           ? this.assetStatus
           : assetStatus as AssetStatus?,
+      isExpiring: identical(isExpiring, const _Sentinel())
+          ? this.isExpiring
+          : isExpiring as bool,
+      warrantyDate: identical(warrantyDate, const _Sentinel())
+          ? this.warrantyDate
+          : warrantyDate as DateTime?,
+      warrantyDateFilterType: identical(warrantyDateFilterType, const _Sentinel())
+          ? this.warrantyDateFilterType
+          : warrantyDateFilterType as WarrantyDateFilterType?,
+      assignedTo: identical(assignedTo, const _Sentinel())
+          ? this.assignedTo
+          : assignedTo as User?,
     );
   }
 
@@ -53,7 +82,10 @@ class ItemFilterParams {
           sortOrder == other.sortOrder &&
           deviceType == other.deviceType &&
           assetStatus == other.assetStatus &&
-          isExpiring == other.isExpiring;
+          isExpiring == other.isExpiring &&
+          warrantyDate == other.warrantyDate &&
+          warrantyDateFilterType == other.warrantyDateFilterType &&
+          assignedTo == other.assignedTo;
 
   @override
   int get hashCode =>
@@ -62,7 +94,10 @@ class ItemFilterParams {
       sortOrder.hashCode ^
       deviceType.hashCode ^
       assetStatus.hashCode ^
-      isExpiring.hashCode;
+      isExpiring.hashCode ^
+      warrantyDate.hashCode ^
+      warrantyDateFilterType.hashCode ^
+      assignedTo.hashCode;
 }
 
 // Sentinel class to distinguish between null and not-provided

@@ -60,7 +60,19 @@ func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]mode
 		database = database.Where("asset_status = ?", *params.AssetStatus)
 	}
 	if params.WarrantyDate != nil {
-		database = database.Where("warranty_date = ?", *params.WarrantyDate)
+		switch params.WarrantyDateFilterType {
+		case "day":
+			database = database.Where("STRFTIME('%Y-%m-%d', warranty_date) = ?", params.WarrantyDate.Format("2006-01-02"))
+		case "month":
+			database = database.Where("STRFTIME('%Y-%m', warranty_date) = ?", params.WarrantyDate.Format("2006-01"))
+		case "year":
+			database = database.Where("STRFTIME('%Y', warranty_date) = ?", params.WarrantyDate.Format("2006"))
+		default:
+			database = database.Where("warranty_date = ?", *params.WarrantyDate)
+		}
+	}
+	if params.AssignedToID != nil && *params.AssignedToID != 0 {
+		database = database.Where("assigned_to_id = ?", *params.AssignedToID)
 	}
 
 	// Searching

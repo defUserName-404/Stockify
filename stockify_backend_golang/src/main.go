@@ -254,6 +254,8 @@ func GetFilteredItems(
 	deviceType *C.char,
 	assetStatus *C.char,
 	warrantyDate C.longlong,
+	warrantyDateFilterType *C.char,
+	assignedToID C.ulonglong,
 	search *C.char,
 	sortBy *C.char,
 	sortOrder *C.char,
@@ -261,11 +263,16 @@ func GetFilteredItems(
 	searchStr := C.GoString(search)
 	sortByStr := C.GoString(sortBy)
 	sortOrderStr := C.GoString(sortOrder)
+	warrantyDateFilterTypeStr := C.GoString(warrantyDateFilterType)
+	assignedToIDVal := uint64(assignedToID)
+
 	params := model.ItemFilterParams{
-		Search:    searchStr,
-		SortBy:    sortByStr,
-		SortOrder: sortOrderStr,
+		Search:                 searchStr,
+		SortBy:                 sortByStr,
+		SortOrder:              sortOrderStr,
+		WarrantyDateFilterType: warrantyDateFilterTypeStr,
 	}
+
 	if dt := C.GoString(deviceType); dt != "" {
 		tmp := model.DeviceType(dt)
 		params.DeviceType = &tmp
@@ -278,6 +285,10 @@ func GetFilteredItems(
 		t := time.Unix(int64(warrantyDate), 0)
 		params.WarrantyDate = &t
 	}
+	if assignedToIDVal != 0 {
+		params.AssignedToID = &assignedToIDVal
+	}
+
 	items, err := itemService.GetFilteredItems(params)
 	if err != nil {
 		return jsonError("Failed to filter items")

@@ -151,12 +151,17 @@ class ItemRepository {
     final searchPtr = _toUtf8(params.search);
     final deviceTypePtr = _toUtf8(params.deviceType?.toString());
     final assetStatusPtr = _toUtf8(params.assetStatus?.toString());
+    final warrantyDate = _toUnixTimestamp(params.warrantyDate);
+    final warrantyDateFilterTypePtr = _toUtf8(params.warrantyDateFilterType?.name);
+    final assignedToID = params.assignedTo?.id ?? 0;
     final sortByPtr = _toUtf8(params.sortBy);
     final sortOrderPtr = _toUtf8(params.sortOrder);
     final resultPtr = _ffi.getFilteredItems(
       deviceTypePtr,
       assetStatusPtr,
-      0,
+      warrantyDate,
+      warrantyDateFilterTypePtr,
+      assignedToID,
       searchPtr,
       sortByPtr,
       sortOrderPtr,
@@ -166,6 +171,7 @@ class ItemRepository {
     calloc.free(searchPtr);
     if (deviceTypePtr != nullptr) calloc.free(deviceTypePtr);
     if (assetStatusPtr != nullptr) calloc.free(assetStatusPtr);
+    if (warrantyDateFilterTypePtr != nullptr) calloc.free(warrantyDateFilterTypePtr);
     if (sortByPtr != nullptr) calloc.free(sortByPtr);
     calloc.free(sortOrderPtr);
     final List<dynamic> jsonList = jsonDecode(jsonString);

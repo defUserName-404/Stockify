@@ -121,6 +121,7 @@ class _ItemScreenState extends State<ItemScreen> {
         });
         _refreshData();
       },
+      usersList: _usersList,
     );
   }
 
@@ -395,13 +396,16 @@ class _ItemScreenState extends State<ItemScreen> {
                     searchHint: 'Search by Asset No, Model, or Serial No...',
                   ),
                   if (_filterParams.deviceType != null ||
-                      _filterParams.assetStatus != null)
+                      _filterParams.assetStatus != null ||
+                      _filterParams.warrantyDate != null ||
+                      _filterParams.assignedTo != null)
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16.0, vertical: 8.0),
                       child: Wrap(
                         spacing: 8.0,
+                        runSpacing: 8.0,
                         children: [
                           if (_filterParams.deviceType != null)
                             Chip(
@@ -423,6 +427,31 @@ class _ItemScreenState extends State<ItemScreen> {
                                 setState(() {
                                   _filterParams =
                                       _filterParams.copyWith(assetStatus: null);
+                                });
+                                _refreshData();
+                              },
+                            ),
+                          if (_filterParams.warrantyDate != null)
+                            Chip(
+                              label: Text(
+                                  'Warranty Date: ${DateFormatter.extractDateFromDateTime(_filterParams.warrantyDate!)} (${_filterParams.warrantyDateFilterType!.name})'),
+                              onDeleted: () {
+                                setState(() {
+                                  _filterParams = _filterParams.copyWith(
+                                      warrantyDate: null,
+                                      warrantyDateFilterType: null);
+                                });
+                                _refreshData();
+                              },
+                            ),
+                          if (_filterParams.assignedTo != null)
+                            Chip(
+                              label: Text(
+                                  'Assigned To: ${_filterParams.assignedTo!.userName}'),
+                              onDeleted: () {
+                                setState(() {
+                                  _filterParams =
+                                      _filterParams.copyWith(assignedTo: null);
                                 });
                                 _refreshData();
                               },
