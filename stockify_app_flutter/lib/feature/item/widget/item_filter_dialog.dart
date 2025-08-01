@@ -167,71 +167,6 @@ class _ItemFilterDialogState extends State<ItemFilterDialog> {
               },
             ),
             const SizedBox(height: 16),
-            const Text('Warranty Date Filter',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _warrantyDateController,
-              readOnly: true,
-              decoration: InputDecoration(
-                hintText: 'Select Date',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.calendar_today),
-                  onPressed: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: _params.warrantyDate ?? DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        _params = _params.copyWith(warrantyDate: pickedDate);
-                        _warrantyDateController.text =
-                            DateFormatter.extractDateFromDateTime(pickedDate);
-                      });
-                    }
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Column(
-              children: [
-                RadioListTile<WarrantyDateFilterType?>(
-                  title: const Text('Filter by Day'),
-                  value: WarrantyDateFilterType.day,
-                  groupValue: _params.warrantyDateFilterType,
-                  onChanged: (value) {
-                    setState(() {
-                      _params = _params.copyWith(warrantyDateFilterType: value);
-                    });
-                  },
-                ),
-                RadioListTile<WarrantyDateFilterType?>(
-                  title: const Text('Filter by Month'),
-                  value: WarrantyDateFilterType.month,
-                  groupValue: _params.warrantyDateFilterType,
-                  onChanged: (value) {
-                    setState(() {
-                      _params = _params.copyWith(warrantyDateFilterType: value);
-                    });
-                  },
-                ),
-                RadioListTile<WarrantyDateFilterType?>(
-                  title: const Text('Filter by Year'),
-                  value: WarrantyDateFilterType.year,
-                  groupValue: _params.warrantyDateFilterType,
-                  onChanged: (value) {
-                    setState(() {
-                      _params = _params.copyWith(warrantyDateFilterType: value);
-                    });
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             const Text('Assigned User',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
@@ -256,7 +191,6 @@ class _ItemFilterDialogState extends State<ItemFilterDialog> {
           onPressed: () {
             setState(() {
               _params = ItemFilterParams();
-              _warrantyDateController.clear();
             });
           },
           style: Theme.of(context).textButtonTheme.style!.copyWith(
