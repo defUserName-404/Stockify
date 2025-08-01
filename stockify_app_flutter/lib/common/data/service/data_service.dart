@@ -46,7 +46,6 @@ class DataService {
         'FacePlateName',
         'SwitchPort',
         'SwitchIpAddress',
-        'IsPasswordProtected',
         'AssignedToID',
         'AssignedToUserName',
       ]);
@@ -68,7 +67,6 @@ class DataService {
           item.facePlateName,
           item.switchPort,
           item.switchIpAddress,
-          item.isPasswordProtected == true ? 1 : 0,
           item.assignedTo?.id,
           item.assignedTo?.userName,
         ]);
@@ -114,12 +112,10 @@ class DataService {
               itemMap[header[i].toString()] = row[i];
             }
             // Convert data types
-            DeviceType deviceType = DeviceType.values.firstWhere(
-                (e) => e.name == itemMap['DeviceType'],
-                orElse: () => DeviceType.Unknown);
-            AssetStatus assetStatus = AssetStatus.values.firstWhere(
-                (e) => e.name == itemMap['AssetStatus'],
-                orElse: () => AssetStatus.Unknown);
+            DeviceType deviceType = DeviceType.values
+                .firstWhere((e) => e.name == itemMap['DeviceType']);
+            AssetStatus assetStatus = AssetStatus.values
+                .firstWhere((e) => e.name == itemMap['AssetStatus']);
             DateTime? receivedDate;
             if (itemMap['ReceivedDate'] != null &&
                 itemMap['ReceivedDate'].toString().isNotEmpty) {
@@ -150,7 +146,6 @@ class DataService {
               facePlateName: itemMap['FacePlateName']?.toString(),
               switchPort: itemMap['SwitchPort']?.toString(),
               switchIpAddress: itemMap['SwitchIpAddress']?.toString(),
-              isPasswordProtected: itemMap['IsPasswordProtected'] == 1,
               assignedTo: assignedTo,
             );
             _itemService.addItem(item);
@@ -189,7 +184,6 @@ class DataService {
         'FacePlateName',
         'SwitchPort',
         'SwitchIpAddress',
-        'IsPasswordProtected',
         'AssignedToID',
         'AssignedToUserName',
       ];
@@ -214,7 +208,6 @@ class DataService {
           item.facePlateName,
           item.switchPort,
           item.switchIpAddress,
-          item.isPasswordProtected == true ? 1 : 0,
           item.assignedTo?.id,
           item.assignedTo?.userName,
         ];
@@ -266,12 +259,10 @@ class DataService {
                 itemMap[header[j].toString()] = row[j]?.value;
               }
               // Convert data types
-              DeviceType deviceType = DeviceType.values.firstWhere(
-                  (e) => e.name == itemMap['DeviceType'],
-                  orElse: () => DeviceType.Unknown);
-              AssetStatus assetStatus = AssetStatus.values.firstWhere(
-                  (e) => e.name == itemMap['AssetStatus'],
-                  orElse: () => AssetStatus.Unknown);
+              DeviceType deviceType = DeviceType.values
+                  .firstWhere((e) => e.name == itemMap['DeviceType']);
+              AssetStatus assetStatus = AssetStatus.values
+                  .firstWhere((e) => e.name == itemMap['AssetStatus']);
               DateTime? receivedDate;
               if (itemMap['ReceivedDate'] != null &&
                   itemMap['ReceivedDate'].toString().isNotEmpty) {
@@ -303,7 +294,6 @@ class DataService {
                 facePlateName: itemMap['FacePlateName']?.toString(),
                 switchPort: itemMap['SwitchPort']?.toString(),
                 switchIpAddress: itemMap['SwitchIpAddress']?.toString(),
-                isPasswordProtected: itemMap['IsPasswordProtected'] == 1,
                 assignedTo: assignedTo,
               );
               _itemService.addItem(item);

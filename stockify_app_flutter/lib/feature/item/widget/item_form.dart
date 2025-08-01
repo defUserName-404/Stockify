@@ -44,13 +44,16 @@ class ItemFormState extends State<ItemForm> {
   AssetStatus? _selectedAssetStatus;
   DateTime? _selectedWarrantyDate;
   DateTime? _selectedReceivedDate;
-  bool? _isPasswordProtected;
   User? _assignedUser;
+  final FocusNode _assetNoFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _assetNoFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -92,7 +95,6 @@ class ItemFormState extends State<ItemForm> {
     _selectedAssetStatus = widget.editingItem?.assetStatus;
     _selectedWarrantyDate = widget.editingItem?.warrantyDate;
     _selectedReceivedDate = widget.editingItem?.receivedDate;
-    _isPasswordProtected = widget.editingItem?.isPasswordProtected;
     _assignedUser = widget.editingItem?.assignedTo;
   }
 
@@ -109,10 +111,11 @@ class ItemFormState extends State<ItemForm> {
     _switchPortInputController.dispose();
     _switchIpAddressInputController.dispose();
     _scrollController.dispose();
+    _assetNoFocusNode.dispose();
     super.dispose();
   }
 
-  void saveItem() {
+  void _saveItem() {
     if (formKey.currentState?.validate() ?? false) {
       final item = Item(
         id: widget.editingItem?.id,
@@ -130,7 +133,6 @@ class ItemFormState extends State<ItemForm> {
         facePlateName: _facePlateNameInputController.text,
         switchPort: _switchPortInputController.text,
         switchIpAddress: _switchIpAddressInputController.text,
-        isPasswordProtected: _isPasswordProtected,
         assignedTo: _assignedUser,
       );
       widget.onSave(item);
@@ -160,6 +162,7 @@ class ItemFormState extends State<ItemForm> {
     bool readOnly = false,
     TextInputType? keyboardType,
     int? maxLines = 1,
+    FocusNode? focusNode,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,6 +183,7 @@ class ItemFormState extends State<ItemForm> {
           readOnly: readOnly,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          focusNode: focusNode,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -271,65 +275,6 @@ class ItemFormState extends State<ItemForm> {
     );
   }
 
-  Widget _buildRadioGroup() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Password Protected',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withAlpha(30),
-            ),
-            borderRadius: BorderRadius.circular(8),
-            color: Theme.of(context).colorScheme.surface,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: RadioListTile<bool>(
-                  title: const Text('Yes'),
-                  value: true,
-                  groupValue: _isPasswordProtected,
-                  onChanged: (value) {
-                    setState(() {
-                      _isPasswordProtected = value;
-                    });
-                  },
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              Expanded(
-                child: RadioListTile<bool>(
-                  title: const Text('No'),
-                  value: false,
-                  groupValue: _isPasswordProtected,
-                  onChanged: (value) {
-                    setState(() {
-                      _isPasswordProtected = value;
-                    });
-                  },
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -397,6 +342,7 @@ class ItemFormState extends State<ItemForm> {
                                   label: 'Asset Number',
                                   controller: _assetInputController,
                                   validator: ItemInputValidator.validateAssetNo,
+                                  focusNode: _assetNoFocusNode,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -416,6 +362,7 @@ class ItemFormState extends State<ItemForm> {
                                 label: 'Asset Number',
                                 controller: _assetInputController,
                                 validator: ItemInputValidator.validateAssetNo,
+                                focusNode: _assetNoFocusNode,
                               ),
                               const SizedBox(height: 16),
                               _buildFormField(
@@ -720,8 +667,6 @@ class ItemFormState extends State<ItemForm> {
                             ],
                           ),
                         const SizedBox(height: 16),
-                        _buildRadioGroup(),
-                        const SizedBox(height: 16),
                         _buildDropdownField<User>(
                           label: 'Assigned User',
                           value: _assignedUser,
@@ -770,7 +715,7 @@ class ItemFormState extends State<ItemForm> {
               Flexible(
                 flex: 2,
                 child: AppButton(
-                  onPressed: saveItem,
+                  onPressed: _saveItem,
                   icon: widget.editingItem == null ? Icons.add : Icons.save,
                   text:
                       widget.editingItem == null ? 'Add Item' : 'Save Changes',

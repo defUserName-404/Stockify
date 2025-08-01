@@ -21,56 +21,96 @@ class CustomSnackBar {
     if (icon != null) return icon;
     switch (type) {
       case SnackBarType.success:
-        return Icons.check_circle_outline;
+        return Icons.check_circle;
       case SnackBarType.error:
-        return Icons.error_outline;
+        return Icons.error;
       case SnackBarType.info:
-        return Icons.info_outline;
+        return Icons.info;
     }
   }
 
-  static void show(
-      {required BuildContext context,
-      required String message,
-      required SnackBarType type,
-      IconData? icon}) {
+  static void show({
+    required BuildContext context,
+    required String message,
+    required SnackBarType type,
+    IconData? icon,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-          decoration: BoxDecoration(
-            color: _getBackgroundColor(type, context),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _getIcon(type),
-                color: Colors.white,
-              ),
-              const SizedBox(width: 12.0),
-              Flexible(
-                child: Text(
-                  message,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
+        content: Center(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width - 32,
+            ),
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(16),
+              shadowColor: Colors.black26,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 12.0,
+                ),
+                decoration: BoxDecoration(
+                  color: _getBackgroundColor(type, context),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(20),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IntrinsicWidth(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(30),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Icon(
+                          _getIcon(type, icon: icon),
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12.0),
+                      Flexible(
+                        child: Text(
+                          message,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2,
+                          ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                        ),
+                      ),
+                    ],
                   ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
                 ),
               ),
-            ],
+            ),
           ),
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
         dismissDirection: DismissDirection.horizontal,
+        margin: const EdgeInsets.only(
+          bottom: 16,
+          left: 16,
+          right: 16,
+        ),
+        padding: EdgeInsets.zero,
       ),
     );
   }

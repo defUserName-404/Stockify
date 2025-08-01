@@ -19,7 +19,6 @@ class Item {
   final String? facePlateName;
   final String? switchPort;
   final String? switchIpAddress;
-  final bool? isPasswordProtected;
   final User? assignedTo;
 
   Item(
@@ -38,7 +37,6 @@ class Item {
       this.facePlateName,
       this.switchPort,
       this.switchIpAddress,
-      this.isPasswordProtected,
       this.assignedTo});
 
   @override
@@ -59,7 +57,6 @@ class Item {
         'facePlateName: $facePlateName, '
         'switchPort: $switchPort, '
         'switchIpAddress: $switchIpAddress, '
-        'isPasswordProtected: $isPasswordProtected, '
         'assignedTo: $assignedTo'
         '}';
   }
@@ -85,7 +82,6 @@ class Item {
       facePlateName: json['FacePlateName'],
       switchPort: json['SwitchPort'],
       switchIpAddress: json['SwitchIpAddress'],
-      isPasswordProtected: json['IsPasswordProtected'] == 1,
       assignedTo:
           json['AssignedTo'] != null ? User.fromJson(json['AssignedTo']) : null,
     );

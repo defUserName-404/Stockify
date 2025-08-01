@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/feature/item/model/item_filter_param.dart';
+import 'package:stockify_app_flutter/feature/user/model/user.dart';
 import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 
 import '../../feature/item/widget/item_filter_dialog.dart';
@@ -120,12 +121,14 @@ class AppDialogs {
     required BuildContext context,
     required ItemFilterParams currentParams,
     required Function(ItemFilterParams) onApplyFilter,
+    required List<User> usersList,
   }) {
     return showDialog(
       context: context,
       builder: (context) => ItemFilterDialog(
         currentParams: currentParams,
         onApplyFilter: onApplyFilter,
+        usersList: usersList,
       ),
     );
   }

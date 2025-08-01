@@ -1,12 +1,10 @@
 package model
 
-import "time"
-
 type ItemFilterParams struct {
 	Search       string
 	DeviceType   *DeviceType
 	AssetStatus  *AssetStatus
-	WarrantyDate *time.Time
+	AssignedToID *uint64
 	SortBy       string
 	SortOrder    string
 }

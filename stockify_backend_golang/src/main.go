@@ -136,7 +136,6 @@ func AddItemFull(
 	facePlateName *C.char,
 	switchPort *C.char,
 	switchIpAddress *C.char,
-	isPasswordProtected C.int,
 	assignedToID C.ulonglong,
 ) {
 	var receivedTime *time.Time
@@ -145,30 +144,27 @@ func AddItemFull(
 		receivedTime = &t
 	}
 	warrantyTime := time.Unix(int64(warrantyDate), 0)
-	b := isPasswordProtected != 0
-	passwordProtected := &b
 	var assignedTo *uint64
 	if assignedToID != 0 {
 		idVal := uint64(assignedToID)
 		assignedTo = &idVal
 	}
 	item := model.Item{
-		AssetNo:             C.GoString(assetNo),
-		ModelNo:             C.GoString(modelNo),
-		DeviceType:          model.DeviceType(C.GoString(deviceType)),
-		SerialNo:            C.GoString(serialNo),
-		ReceivedDate:        receivedTime,
-		WarrantyDate:        warrantyTime,
-		AssetStatus:         model.AssetStatus(C.GoString(assetStatus)),
-		HostName:            cStringOrNil(hostName),
-		IpPort:              cStringOrNil(ipPort),
-		MacAddress:          cStringOrNil(macAddress),
-		OsVersion:           cStringOrNil(osVersion),
-		FacePlateName:       cStringOrNil(facePlateName),
-		SwitchPort:          cStringOrNil(switchPort),
-		SwitchIpAddress:     cStringOrNil(switchIpAddress),
-		IsPasswordProtected: passwordProtected,
-		AssignedToID:        assignedTo,
+		AssetNo:         C.GoString(assetNo),
+		ModelNo:         C.GoString(modelNo),
+		DeviceType:      model.DeviceType(C.GoString(deviceType)),
+		SerialNo:        C.GoString(serialNo),
+		ReceivedDate:    receivedTime,
+		WarrantyDate:    warrantyTime,
+		AssetStatus:     model.AssetStatus(C.GoString(assetStatus)),
+		HostName:        cStringOrNil(hostName),
+		IpPort:          cStringOrNil(ipPort),
+		MacAddress:      cStringOrNil(macAddress),
+		OsVersion:       cStringOrNil(osVersion),
+		FacePlateName:   cStringOrNil(facePlateName),
+		SwitchPort:      cStringOrNil(switchPort),
+		SwitchIpAddress: cStringOrNil(switchIpAddress),
+		AssignedToID:    assignedTo,
 	}
 	itemService.AddItem(item)
 }
@@ -213,7 +209,6 @@ func UpdateItemFull(
 	facePlateName *C.char,
 	switchPort *C.char,
 	switchIpAddress *C.char,
-	isPasswordProtected C.int,
 	assignedToID C.ulonglong,
 ) {
 	var receivedTime *time.Time
@@ -222,31 +217,28 @@ func UpdateItemFull(
 		receivedTime = &t
 	}
 	warrantyTime := time.Unix(int64(warrantyDate), 0)
-	b := isPasswordProtected != 0
-	passwordProtected := &b
 	var assignedTo *uint64
 	if assignedToID != 0 {
 		idVal := uint64(assignedToID)
 		assignedTo = &idVal
 	}
 	item := model.Item{
-		ID:                  uint64(id),
-		AssetNo:             C.GoString(assetNo),
-		ModelNo:             C.GoString(modelNo),
-		DeviceType:          model.DeviceType(C.GoString(deviceType)),
-		SerialNo:            C.GoString(serialNo),
-		ReceivedDate:        receivedTime,
-		WarrantyDate:        warrantyTime,
-		AssetStatus:         model.AssetStatus(C.GoString(assetStatus)),
-		HostName:            cStringOrNil(hostName),
-		IpPort:              cStringOrNil(ipPort),
-		MacAddress:          cStringOrNil(macAddress),
-		OsVersion:           cStringOrNil(osVersion),
-		FacePlateName:       cStringOrNil(facePlateName),
-		SwitchPort:          cStringOrNil(switchPort),
-		SwitchIpAddress:     cStringOrNil(switchIpAddress),
-		IsPasswordProtected: passwordProtected,
-		AssignedToID:        assignedTo,
+		ID:              uint64(id),
+		AssetNo:         C.GoString(assetNo),
+		ModelNo:         C.GoString(modelNo),
+		DeviceType:      model.DeviceType(C.GoString(deviceType)),
+		SerialNo:        C.GoString(serialNo),
+		ReceivedDate:    receivedTime,
+		WarrantyDate:    warrantyTime,
+		AssetStatus:     model.AssetStatus(C.GoString(assetStatus)),
+		HostName:        cStringOrNil(hostName),
+		IpPort:          cStringOrNil(ipPort),
+		MacAddress:      cStringOrNil(macAddress),
+		OsVersion:       cStringOrNil(osVersion),
+		FacePlateName:   cStringOrNil(facePlateName),
+		SwitchPort:      cStringOrNil(switchPort),
+		SwitchIpAddress: cStringOrNil(switchIpAddress),
+		AssignedToID:    assignedTo,
 	}
 
 	itemService.UpdateItem(item)
@@ -261,7 +253,7 @@ func DeleteItemById(id C.ulonglong) {
 func GetFilteredItems(
 	deviceType *C.char,
 	assetStatus *C.char,
-	warrantyDate C.longlong,
+	assignedToID C.ulonglong,
 	search *C.char,
 	sortBy *C.char,
 	sortOrder *C.char,
@@ -269,11 +261,14 @@ func GetFilteredItems(
 	searchStr := C.GoString(search)
 	sortByStr := C.GoString(sortBy)
 	sortOrderStr := C.GoString(sortOrder)
+	assignedToIDVal := uint64(assignedToID)
+
 	params := model.ItemFilterParams{
 		Search:    searchStr,
 		SortBy:    sortByStr,
 		SortOrder: sortOrderStr,
 	}
+
 	if dt := C.GoString(deviceType); dt != "" {
 		tmp := model.DeviceType(dt)
 		params.DeviceType = &tmp
@@ -282,10 +277,10 @@ func GetFilteredItems(
 		tmp := model.AssetStatus(as)
 		params.AssetStatus = &tmp
 	}
-	if int64(warrantyDate) != 0 {
-		t := time.Unix(int64(warrantyDate), 0)
-		params.WarrantyDate = &t
+	if assignedToIDVal != 0 {
+		params.AssignedToID = &assignedToIDVal
 	}
+
 	items, err := itemService.GetFilteredItems(params)
 	if err != nil {
 		return jsonError("Failed to filter items")

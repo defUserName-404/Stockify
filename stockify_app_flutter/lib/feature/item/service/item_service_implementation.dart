@@ -4,7 +4,7 @@ import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 
 import '../repository/item_repository.dart';
 
-class ItemServiceImplementation extends ItemService {
+class ItemServiceImplementation implements ItemService {
   ItemServiceImplementation._privateConstructor();
 
   static final ItemServiceImplementation _instance =

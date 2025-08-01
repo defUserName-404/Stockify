@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
+import 'package:stockify_app_flutter/feature/user/model/user.dart';
 
 import '../../../common/theme/colors.dart';
 import '../model/asset_status.dart';
@@ -8,11 +10,13 @@ import '../model/item_filter_param.dart';
 class ItemFilterDialog extends StatefulWidget {
   final ItemFilterParams currentParams;
   final Function(ItemFilterParams) onApplyFilter;
+  final List<User> usersList;
 
   const ItemFilterDialog({
     Key? key,
     required this.currentParams,
     required this.onApplyFilter,
+    required this.usersList,
   }) : super(key: key);
 
   @override
@@ -21,11 +25,22 @@ class ItemFilterDialog extends StatefulWidget {
 
 class _ItemFilterDialogState extends State<ItemFilterDialog> {
   late ItemFilterParams _params;
+  late TextEditingController _warrantyDateController;
 
   @override
   void initState() {
     super.initState();
     _params = widget.currentParams;
+    _warrantyDateController = TextEditingController(
+        text: _params.warrantyDate != null
+            ? DateFormatter.extractDateFromDateTime(_params.warrantyDate!)
+            : '');
+  }
+
+  @override
+  void dispose() {
+    _warrantyDateController.dispose();
+    super.dispose();
   }
 
   @override
@@ -148,6 +163,23 @@ class _ItemFilterDialogState extends State<ItemFilterDialog> {
               onChanged: (value) {
                 setState(() {
                   _params = _params.copyWith(assetStatus: value);
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            const Text('Assigned User',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<User>(
+              value: _params.assignedTo,
+              items: [
+                const DropdownMenuItem(value: null, child: Text('All Users')),
+                ...widget.usersList.map((user) =>
+                    DropdownMenuItem(value: user, child: Text(user.userName))),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _params = _params.copyWith(assignedTo: value);
                 });
               },
             ),

@@ -20,7 +20,6 @@ typedef AddItemFullC = Void Function(
   Pointer<Utf8> facePlateName,
   Pointer<Utf8> switchPort,
   Pointer<Utf8> switchIpAddress,
-  Int32 isPasswordProtected,
   Uint64 assignedToID,
 );
 typedef AddItemFullDart = void Function(
@@ -38,7 +37,6 @@ typedef AddItemFullDart = void Function(
   Pointer<Utf8> facePlateName,
   Pointer<Utf8> switchPort,
   Pointer<Utf8> switchIpAddress,
-  int isPasswordProtected,
   int assignedToID,
 );
 
@@ -64,7 +62,6 @@ typedef UpdateItemFullC = Void Function(
   Pointer<Utf8> facePlateName,
   Pointer<Utf8> switchPort,
   Pointer<Utf8> switchIpAddress,
-  Int32 isPasswordProtected,
   Uint64 assignedToID,
 );
 typedef UpdateItemFullDart = void Function(
@@ -83,7 +80,6 @@ typedef UpdateItemFullDart = void Function(
   Pointer<Utf8> facePlateName,
   Pointer<Utf8> switchPort,
   Pointer<Utf8> switchIpAddress,
-  int isPasswordProtected,
   int assignedToID,
 );
 
@@ -94,6 +90,8 @@ typedef GetFilteredItemsC = Pointer<Utf8> Function(
   Pointer<Utf8> deviceType,
   Pointer<Utf8> assetStatus,
   Int64 warrantyDate,
+  Pointer<Utf8> warrantyDateFilterType,
+  Uint64 assignedToID,
   Pointer<Utf8> search,
   Pointer<Utf8> sortBy,
   Pointer<Utf8> sortOrder,
@@ -102,6 +100,8 @@ typedef GetFilteredItemsDart = Pointer<Utf8> Function(
   Pointer<Utf8> deviceType,
   Pointer<Utf8> assetStatus,
   int warrantyDate,
+  Pointer<Utf8> warrantyDateFilterType,
+  int assignedToID,
   Pointer<Utf8> search,
   Pointer<Utf8> sortBy,
   Pointer<Utf8> sortOrder,
