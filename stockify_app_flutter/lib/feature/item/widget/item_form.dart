@@ -699,27 +699,21 @@ class ItemFormState extends State<ItemForm> {
             ),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Flexible(
-                flex: 1,
-                child: AppButton(
-                  onPressed: widget.onCancel,
-                  icon: Icons.cancel,
-                  iconColor: AppColors.colorTextDark,
-                  text: 'Cancel',
-                  backgroundColor: AppColors.colorTextSemiLight,
-                  foregroundColor: AppColors.colorTextDark,
-                ),
+              AppButton(
+                onPressed: widget.onCancel,
+                icon: Icons.cancel,
+                iconColor: AppColors.colorTextDark,
+                text: 'Cancel',
+                backgroundColor: AppColors.colorTextSemiLight,
+                foregroundColor: AppColors.colorTextDark,
               ),
               const SizedBox(width: 16),
-              Flexible(
-                flex: 2,
-                child: AppButton(
-                  onPressed: _saveItem,
-                  icon: widget.editingItem == null ? Icons.add : Icons.save,
-                  text:
-                      widget.editingItem == null ? 'Add Item' : 'Save Changes',
-                ),
+              AppButton(
+                onPressed: _saveItem,
+                icon: widget.editingItem == null ? Icons.add : Icons.save,
+                text: widget.editingItem == null ? 'Add Item' : 'Save Changes',
               ),
             ],
           ),
