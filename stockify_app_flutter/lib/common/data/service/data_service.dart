@@ -112,12 +112,10 @@ class DataService {
               itemMap[header[i].toString()] = row[i];
             }
             // Convert data types
-            DeviceType deviceType = DeviceType.values.firstWhere(
-                (e) => e.name == itemMap['DeviceType'],
-                orElse: () => DeviceType.Unknown);
-            AssetStatus assetStatus = AssetStatus.values.firstWhere(
-                (e) => e.name == itemMap['AssetStatus'],
-                orElse: () => AssetStatus.Unknown);
+            DeviceType deviceType = DeviceType.values
+                .firstWhere((e) => e.name == itemMap['DeviceType']);
+            AssetStatus assetStatus = AssetStatus.values
+                .firstWhere((e) => e.name == itemMap['AssetStatus']);
             DateTime? receivedDate;
             if (itemMap['ReceivedDate'] != null &&
                 itemMap['ReceivedDate'].toString().isNotEmpty) {
@@ -261,12 +259,10 @@ class DataService {
                 itemMap[header[j].toString()] = row[j]?.value;
               }
               // Convert data types
-              DeviceType deviceType = DeviceType.values.firstWhere(
-                  (e) => e.name == itemMap['DeviceType'],
-                  orElse: () => DeviceType.Unknown);
-              AssetStatus assetStatus = AssetStatus.values.firstWhere(
-                  (e) => e.name == itemMap['AssetStatus'],
-                  orElse: () => AssetStatus.Unknown);
+              DeviceType deviceType = DeviceType.values
+                  .firstWhere((e) => e.name == itemMap['DeviceType']);
+              AssetStatus assetStatus = AssetStatus.values
+                  .firstWhere((e) => e.name == itemMap['AssetStatus']);
               DateTime? receivedDate;
               if (itemMap['ReceivedDate'] != null &&
                   itemMap['ReceivedDate'].toString().isNotEmpty) {

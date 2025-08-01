@@ -14,13 +14,11 @@ class ItemStatus extends StatelessWidget {
       AssetStatus.Active => AppColors.colorGreen,
       AssetStatus.Inactive => AppColors.colorOrange,
       AssetStatus.Disposed => AppColors.colorPink,
-      AssetStatus.Unknown => AppColors.colorAccent
     };
     final icon = switch (assetStatus) {
       AssetStatus.Active => Icons.check_circle,
       AssetStatus.Inactive => Icons.pause_circle,
       AssetStatus.Disposed => Icons.remove_circle,
-      AssetStatus.Unknown => Icons.help
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),

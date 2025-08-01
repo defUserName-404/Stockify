@@ -132,7 +132,7 @@ class ReportService {
                   ? 'Items by Device Type'
                   : 'Device Type Statistics'),
           if (deviceTypeCounts.isNotEmpty)
-            pw.Table.fromTextArray(
+            pw.TableHelper.fromTextArray(
               context: context,
               headers: ['Device Type', 'Count', 'Percentage'],
               data: deviceTypeCounts.entries.map((entry) {
@@ -202,7 +202,7 @@ class ReportService {
                   ? 'Items by Asset Status'
                   : 'Asset Status Statistics'),
           if (assetStatusCounts.isNotEmpty)
-            pw.Table.fromTextArray(
+            pw.TableHelper.fromTextArray(
               context: context,
               headers: ['Asset Status', 'Count', 'Percentage'],
               data: assetStatusCounts.entries.map((entry) {
@@ -262,7 +262,7 @@ class ReportService {
           // Disposed Items Table
           pw.Header(text: 'Disposed Items'),
           if (disposedItems.isNotEmpty)
-            pw.Table.fromTextArray(
+            pw.TableHelper.fromTextArray(
               context: context,
               headers: ['Asset No', 'Model No', 'Serial No', 'Device Type'],
               data: disposedItems

@@ -176,7 +176,8 @@ class ItemData extends DataTableSource {
             ),
           ),
         ),
-        DataCell(Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
+        DataCell(
+            Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
         DataCell(
           InkWell(
             onTap: () => onFilterByAssetStatus(item.assetStatus),
@@ -256,8 +257,6 @@ class ItemData extends DataTableSource {
         return Icons.mouse;
       case DeviceType.Speaker:
         return Icons.speaker;
-      default:
-        return Icons.device_unknown;
     }
   }
 

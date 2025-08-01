@@ -347,8 +347,6 @@ class _ChartsSectionState extends State<ChartsSection> {
         return AppColors.colorOrange;
       case AssetStatus.Disposed:
         return AppColors.colorPink;
-      case AssetStatus.Unknown:
-        return AppColors.colorTextSemiLight;
     }
   }
 }
