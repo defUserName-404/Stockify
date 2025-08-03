@@ -1,3 +1,5 @@
+enum NotificationType { warrantyExpiring, warrantyExpired }
+
 class AppNotification {
   final int id;
   final String title;
@@ -6,6 +8,7 @@ class AppNotification {
   final String? payload;
   final String? assetName;
   final int? itemId;
+  final NotificationType type;
 
   AppNotification({
     required this.id,
@@ -15,6 +18,7 @@ class AppNotification {
     this.payload,
     this.assetName,
     this.itemId,
+    required this.type,
   });
 
   Map<String, dynamic> toJson() => {
@@ -25,6 +29,7 @@ class AppNotification {
         'payload': payload,
         'assetName': assetName,
         'itemId': itemId,
+        'type': type.toString(),
       };
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
@@ -36,5 +41,9 @@ class AppNotification {
         payload: json['payload'],
         assetName: json['assetName'],
         itemId: json['itemId'],
+        type: NotificationType.values.firstWhere(
+          (e) => e.toString() == json['type'],
+          orElse: () => NotificationType.warrantyExpiring,
+        ),
       );
 }

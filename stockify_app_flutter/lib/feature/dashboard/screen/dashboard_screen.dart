@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
 import 'package:stockify_app_flutter/feature/dashboard/widget/charts_section.dart';
@@ -49,13 +50,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final notificationStorageService =
         Provider.of<NotificationStorageService>(context, listen: false);
     final expiringItems = _getExpiringItems();
-    final existingNotifications =
-        await notificationStorageService.getNotifications();
+    final expiredItems = _getExpiredItems();
+    final dismissedExpiringIds = await notificationStorageService
+        .getDismissedExpiringNotificationItemIds();
+    final dismissedExpiredIds = await notificationStorageService
+        .getDismissedExpiredNotificationItemIds();
+
     for (var item in expiringItems) {
-      if (!existingNotifications.any((n) => n.id == item.id)) {
+      if (!dismissedExpiringIds.contains(item.id)) {
         final notificationTitle = 'Warranty Expiring Soon!';
         final notificationBody =
-            'The warranty for ${item.assetNo} (${item.modelNo}) is expiring on ${item.warrantyDate.toLocal().toString().split(' ')[0]}.';
+            'The warranty for ${item.assetNo} (${item.modelNo}) is expiring on ${DateFormatter.extractDateFromDateTime(item.warrantyDate)}.';
         final notificationPayload = 'item_id_${item.id}';
         NotificationService().showNotification(
           id: item.id!,
@@ -65,14 +70,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
         notificationStorageService.addNotification(
           AppNotification(
-            id: item.id!,
-            title: notificationTitle,
-            body: notificationBody,
-            timestamp: DateTime.now(),
-            payload: notificationPayload,
-            assetName: item.assetNo,
-            itemId: item.id,
-          ),
+              id: item.id!,
+              title: notificationTitle,
+              body: notificationBody,
+              timestamp: DateTime.now(),
+              payload: notificationPayload,
+              assetName: item.assetNo,
+              itemId: item.id,
+              type: NotificationType.warrantyExpiring),
+        );
+      }
+    }
+    for (var item in expiredItems) {
+      if (!dismissedExpiredIds.contains(item.id)) {
+        final notificationTitle = 'Warranty Expired!';
+        final notificationBody =
+            'The warranty for ${item.assetNo} (${item.modelNo}) has expired on ${DateFormatter.extractDateFromDateTime(item.warrantyDate)}.';
+        final notificationPayload = 'item_id_${item.id}';
+        NotificationService().showNotification(
+          id: item.id!,
+          title: notificationTitle,
+          body: notificationBody,
+          payload: notificationPayload,
+        );
+        notificationStorageService.addNotification(
+          AppNotification(
+              id: item.id!,
+              title: notificationTitle,
+              body: notificationBody,
+              timestamp: DateTime.now(),
+              payload: notificationPayload,
+              assetName: item.assetNo,
+              itemId: item.id,
+              type: NotificationType.warrantyExpired),
         );
       }
     }
@@ -118,6 +148,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return _items.where((item) {
       return item.warrantyDate.isAfter(now) &&
           item.warrantyDate.difference(now).inDays <= 30;
+    }).toList();
+  }
+
+  List<Item> _getExpiredItems() {
+    final now = DateTime.now();
+    return _items.where((item) {
+      return item.warrantyDate.isBefore(now);
     }).toList();
   }
 

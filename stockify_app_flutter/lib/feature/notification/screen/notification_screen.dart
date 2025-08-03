@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
 import 'package:stockify_app_flutter/feature/notification/model/app_notification.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
@@ -120,10 +121,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           Text(notification.body),
                           const SizedBox(height: 8),
                           Text(
-                            notification.timestamp
-                                .toLocal()
-                                .toString()
-                                .split(' ')[0],
+                            DateFormatter.extractDateFromDateTime(
+                                notification.timestamp),
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ],
