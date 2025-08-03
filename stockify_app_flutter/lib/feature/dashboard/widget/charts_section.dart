@@ -5,7 +5,7 @@ import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
 import 'package:stockify_app_flutter/feature/item/model/item_filter_param.dart';
 
 import '../../../common/theme/colors.dart';
-import '../../../common/widget/sidebar/app_layout.dart';
+import '../../../common/widget/app_layout/app_layout.dart';
 
 class ChartsSection extends StatefulWidget {
   final Map<DeviceType, int> deviceTypeCounts;

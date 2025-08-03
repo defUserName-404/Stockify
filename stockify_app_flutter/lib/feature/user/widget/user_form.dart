@@ -162,12 +162,15 @@ class UserFormState extends State<UserForm> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         // Header
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(8), topRight: Radius.circular(8)),
             border: Border(
               bottom: BorderSide(
                 color: Theme.of(context).colorScheme.outline.withAlpha(20),
@@ -202,7 +205,7 @@ class UserFormState extends State<UserForm> {
           ),
         ),
         // Form Content
-        Expanded(
+        Flexible(
           child: Form(
             key: formKey,
             child: Scrollbar(
@@ -306,6 +309,10 @@ class UserFormState extends State<UserForm> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8),
+            ),
             border: Border(
               top: BorderSide(
                 color: Theme.of(context).colorScheme.outline.withAlpha(20),

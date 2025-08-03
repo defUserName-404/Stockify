@@ -284,6 +284,10 @@ class ItemFormState extends State<ItemForm> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+            ),
             border: Border(
               bottom: BorderSide(
                 color: Theme.of(context).colorScheme.outline.withAlpha(20),
@@ -318,7 +322,7 @@ class ItemFormState extends State<ItemForm> {
           ),
         ),
         // Form Content
-        Expanded(
+        Flexible(
           child: Form(
             key: formKey,
             child: Scrollbar(
@@ -692,6 +696,10 @@ class ItemFormState extends State<ItemForm> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8),
+            ),
             border: Border(
               top: BorderSide(
                 color: Theme.of(context).colorScheme.outline.withAlpha(20),
