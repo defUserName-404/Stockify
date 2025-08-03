@@ -8,7 +8,6 @@ class _AppLayoutSmall extends StatelessWidget {
   final Widget Function(int) getSelectedScreen;
 
   const _AppLayoutSmall({
-    super.key,
     required this.selectedIndex,
     required this.updateSelectedScreen,
     required this.getSelectedScreen,

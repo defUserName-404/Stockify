@@ -36,7 +36,7 @@ class _AppLayoutState extends State<AppLayout> {
   bool _showLabels = false;
   final double _minRailWidth = 80;
   final double _maxRailWidth = 250;
-  final double _minRailLabelThreshold = 100;
+  final double _minRailLabelThreshold = 150;
 
   @override
   void initState() {

@@ -14,7 +14,6 @@ class _AppLayoutLarge extends StatelessWidget {
   final Widget Function(int) getSelectedScreen;
 
   const _AppLayoutLarge({
-    super.key,
     required this.selectedIndex,
     required this.railWidth,
     required this.isExtended,

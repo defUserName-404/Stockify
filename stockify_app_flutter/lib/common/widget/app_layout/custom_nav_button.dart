@@ -42,71 +42,78 @@ class _CustomNavButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               onTap: onPressed,
               child: Container(
-                height: 48,
+                height: showLabel ? 48 : 64,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Icon(
-                          icon,
-                          size: 24,
-                          color: isSelected
-                              ? AppColors.colorAccent
-                              : colorScheme.onSurface,
-                        ),
-                        if (badge != null)
-                          Positioned(
-                            right: -6,
-                            top: -6,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: colorScheme.error,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Text(
-                                badge! > 99 ? '99+' : badge.toString(),
-                                style: TextStyle(
-                                  color: colorScheme.onError,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (showLabel && label != null) ...[
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          label!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.w400,
-                            color: isSelected
-                                ? AppColors.colorAccent
-                                : colorScheme.onSurface,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                child: showLabel
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _buildContent(context, colorScheme),
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _buildContent(context, colorScheme),
                       ),
-                    ],
-                  ],
-                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildContent(BuildContext context, ColorScheme colorScheme) {
+    return [
+      Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: isSelected ? AppColors.colorAccent : colorScheme.onSurface,
+          ),
+          if (badge != null)
+            Positioned(
+              right: -6,
+              top: -6,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: colorScheme.error,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 16,
+                  minHeight: 16,
+                ),
+                child: Text(
+                  badge! > 99 ? '99+' : badge.toString(),
+                  style: TextStyle(
+                    color: colorScheme.onError,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      ),
+      if (label != null) ...[
+        SizedBox(width: showLabel ? 12 : 0, height: showLabel ? 0 : 8),
+        if (showLabel)
+          Expanded(
+            child: Text(
+              label!,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color:
+                    isSelected ? AppColors.colorAccent : colorScheme.onSurface,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          )
+      ],
+    ];
   }
 }
