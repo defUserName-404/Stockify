@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stockify_app_flutter/common/widget/sidebar/app_layout.dart';
+import 'package:stockify_app_flutter/common/widget/app_layout/app_layout.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_service.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
 

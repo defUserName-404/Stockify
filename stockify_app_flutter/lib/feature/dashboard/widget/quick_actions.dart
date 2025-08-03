@@ -4,7 +4,7 @@ import 'package:stockify_app_flutter/common/data/service/data_service.dart';
 import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
 
 import '../../../common/theme/colors.dart';
-import '../../../common/widget/sidebar/app_layout.dart';
+import '../../../common/widget/app_layout/app_layout.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -17,10 +17,8 @@ class QuickActions extends StatelessWidget {
         double totalSpacing = 2 * 16; // two gaps per row of 3 buttons
         double buttonWidth =
             (constraints.maxWidth - totalSpacing) / 3; // 3 buttons per row
-
         // Fallback to full width if screen is too narrow
         if (buttonWidth < 200) buttonWidth = constraints.maxWidth;
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

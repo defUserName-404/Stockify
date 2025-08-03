@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stockify_app_flutter/common/widget/sidebar/app_layout.dart';
+import 'package:stockify_app_flutter/common/widget/app_layout/app_layout.dart';
 import 'package:stockify_app_flutter/feature/dashboard/widget/info_card.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/model/item_filter_param.dart';

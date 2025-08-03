@@ -5,7 +5,7 @@ import 'package:stockify_app_flutter/common/widget/animations/screen_transition.
 import 'package:stockify_app_flutter/feature/notification/model/app_notification.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
 
-import '../../../common/widget/sidebar/app_layout.dart';
+import '../../../common/widget/app_layout/app_layout.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
