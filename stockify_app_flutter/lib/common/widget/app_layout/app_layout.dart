@@ -84,13 +84,13 @@ class _AppLayoutState extends State<AppLayout> {
             body: LayoutBuilder(
               builder: (context, constraints) {
                 if (constraints.maxWidth < 600) {
-                  return AppLayoutSmall(
+                  return _AppLayoutSmall(
                     selectedIndex: _selectedIndex,
                     updateSelectedScreen: updateSelectedScreen,
                     getSelectedScreen: _getSelectedScreen,
                   );
                 } else {
-                  return AppLayoutLarge(
+                  return _AppLayoutLarge(
                     selectedIndex: _selectedIndex,
                     railWidth: _railWidth,
                     isExtended: _isExtended,

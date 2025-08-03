@@ -1,12 +1,13 @@
 part of 'app_layout.dart';
 
-class AppLayoutSmall extends StatelessWidget {
+class _AppLayoutSmall extends StatelessWidget {
   final int selectedIndex;
   final void Function(int,
-      {ItemFilterParams? itemFilterParams, bool openAddItemPanel}) updateSelectedScreen;
+      {ItemFilterParams? itemFilterParams,
+      bool openAddItemPanel}) updateSelectedScreen;
   final Widget Function(int) getSelectedScreen;
 
-  const AppLayoutSmall({
+  const _AppLayoutSmall({
     super.key,
     required this.selectedIndex,
     required this.updateSelectedScreen,

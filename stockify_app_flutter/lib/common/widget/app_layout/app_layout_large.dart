@@ -1,6 +1,6 @@
 part of 'app_layout.dart';
 
-class AppLayoutLarge extends StatelessWidget {
+class _AppLayoutLarge extends StatelessWidget {
   final int selectedIndex;
   final double railWidth;
   final bool isExtended;
@@ -9,10 +9,11 @@ class AppLayoutLarge extends StatelessWidget {
   final double maxRailWidth;
   final void Function(double) updateRailWidth;
   final void Function(int,
-      {ItemFilterParams? itemFilterParams, bool openAddItemPanel}) updateSelectedScreen;
+      {ItemFilterParams? itemFilterParams,
+      bool openAddItemPanel}) updateSelectedScreen;
   final Widget Function(int) getSelectedScreen;
 
-  const AppLayoutLarge({
+  const _AppLayoutLarge({
     super.key,
     required this.selectedIndex,
     required this.railWidth,
