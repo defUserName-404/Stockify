@@ -9,9 +9,6 @@ DIST_DIR="dist"
 APP_NAME="Stockify"
 APP_EXEC="$APP_NAME"
 LIB_NAME="libinventory.*"
-TAR_NAME="${APP_NAME}-linux.tar.gz"
-APP_OUT_DIR="$DIST_DIR/$APP_NAME"
-INSTALL_AFTER=false
 
 # === Parse args ===
 if [[ "$1" == "--install" ]]; then
@@ -22,7 +19,7 @@ fi
 wait_for() {
     local pid=$1
     local name=$2
-    local spin='|/-\\'
+    local spin='|/-\'
     local i=0
 
     echo "⏳ Waiting for $name..."
@@ -45,14 +42,27 @@ wait_for() {
 
 echo "🚀 Building $APP_NAME..."
 
-# === Step 1: Build Flutter App ===
+# === Step 1: Get Version ===
+echo "🔍 Getting version from pubspec.yaml..."
+APP_VERSION=$(grep 'version:' "$FRONTEND_DIR/pubspec.yaml" | awk '{print $2}' | cut -d'+' -f1)
+
+if [ -z "$APP_VERSION" ]; then
+    echo "❌ Version not found in pubspec.yaml"
+    exit 1
+fi
+echo "✅ Version found: $APP_VERSION"
+
+TAR_NAME="${APP_NAME}-linux-v${APP_VERSION}.tar.gz"
+APP_OUT_DIR="$DIST_DIR/$APP_NAME"
+
+# === Step 2: Build Flutter App ===
 echo "📦 Starting Flutter build..."
 cd "$FRONTEND_DIR"
 flutter build linux --release &
 FLUTTER_PID=$!
 cd ..
 
-# === Step 2: Build Go backend ===
+# === Step 3: Build Go backend ===
 echo "🔨 Starting Go backend build..."
 cd "$BACKEND_DIR"
 GOOS=linux GOARCH=amd64 go build -o libinventory.so -buildmode=c-shared ./src &
@@ -63,7 +73,7 @@ cd ..
 wait_for $FLUTTER_PID "Flutter build"
 wait_for $GO_PID "Go backend build"
 
-# === Step 3: Package Files ===
+# === Step 4: Package Files ===
 echo "📁 Setting up distribution directory..."
 rm -rf "$APP_OUT_DIR"
 mkdir -p "$APP_OUT_DIR/lib"
@@ -75,13 +85,13 @@ for file in "$BACKEND_DIR"/$LIB_NAME; do
 done
 shopt -u nullglob
 
-# === Step 4: Create .desktop file ===
+# === Step 5: Create .desktop file ===
 cat > "$APP_OUT_DIR/stockify.desktop" <<EOF
 [Desktop Entry]
 Name=Stockify
 Description=Inventory Management System
 GenericName=Inventory Management System
-Version=1.0.0
+Version=$APP_VERSION
 Keywords=Stockify;Inventory;Management;System
 Exec=\${HOME}/.local/share/Stockify/$APP_EXEC
 Icon=stockify
@@ -91,7 +101,7 @@ StartupWMClass=Stockify
 StartupNotify=true
 EOF
 
-# === Step 5: Installer Script ===
+# === Step 6: Installer Script ===
 cat > "$APP_OUT_DIR/install.sh" <<'EOF'
 #!/bin/bash
 set -e
@@ -131,15 +141,7 @@ EOF
 
 chmod +x "$APP_OUT_DIR/install.sh"
 
-# if $INSTALL_AFTER; then
-#   echo "📌 Running installer script..."
-#   cd "$APP_OUT_DIR"
-#   ./install.sh
-#   cd ..
-#   exit 0
-# fi
-
-# === Step 6: Package as tar.gz ===
+# === Step 7: Package as tar.gz ===
 echo "📦 Creating $TAR_NAME..."
 cd "$DIST_DIR"
 tar -czf "$TAR_NAME" "$APP_NAME"
@@ -147,7 +149,7 @@ cd ..
 
 echo "🎉 Package created at $DIST_DIR/$TAR_NAME"
 
-# === Step 7: Optional Installation ===
+# === Step 8: Optional Installation ===
 if $INSTALL_AFTER; then
   echo "📌 Running installer script..."
   cd "$APP_OUT_DIR"
