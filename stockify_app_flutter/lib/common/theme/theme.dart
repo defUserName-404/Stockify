@@ -130,6 +130,26 @@ class AppTheme {
         TextStyle(color: AppColors.colorTextDark),
       ),
     ),
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: AppColors.colorBackground,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      cancelButtonStyle: TextButton.styleFrom(
+        foregroundColor: AppColors.colorTextDark,
+        backgroundColor: AppColors.colorTextSemiLight,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+      confirmButtonStyle: TextButton.styleFrom(
+        foregroundColor: AppColors.colorAccent,
+        backgroundColor: AppColors.colorPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+    ),
   );
 
   static final dark = ThemeData(
@@ -243,6 +263,26 @@ class AppTheme {
           WidgetStateProperty.all<Color>(AppColors.colorTextSemiLight),
       textStyle: WidgetStateProperty.all<TextStyle>(
         TextStyle(color: AppColors.colorTextDark),
+      ),
+    ),
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: AppColors.colorBackgroundDark,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      cancelButtonStyle: TextButton.styleFrom(
+        foregroundColor: AppColors.colorTextDark,
+        backgroundColor: AppColors.colorTextSemiLight,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+      confirmButtonStyle: TextButton.styleFrom(
+        foregroundColor: AppColors.colorAccent,
+        backgroundColor: AppColors.colorPrimaryDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
       ),
     ),
   );
