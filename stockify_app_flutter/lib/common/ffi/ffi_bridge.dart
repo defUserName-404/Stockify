@@ -130,7 +130,7 @@ class FFIBridge {
 
   FFIBridge() {
     if (Platform.isWindows) {
-      _lib = DynamicLibrary.open("inventory.dll");
+      _lib = DynamicLibrary.open("libinventory.dll");
     } else if (Platform.isLinux) {
       _lib = DynamicLibrary.open("libinventory.so");
     } else if (Platform.isMacOS) {
