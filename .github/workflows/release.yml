@@ -17,12 +17,43 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.24.5'
+          cache: true
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.2'
           channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            stockify_app_flutter/.dart_tool
+            stockify_app_flutter/build
+          key: ${{ runner.os }}-flutter-${{ hashFiles('stockify_app_flutter/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/*.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
 
       - name: Install Linux dependencies
         run: |
@@ -65,18 +96,47 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.24.5'
+          cache: true
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.2'
           channel: 'stable'
+          cache: true
 
-      - name: Setup Inno Setup
+      - name: Add Inno Setup to PATH
         run: |
-          Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "innosetup.exe"
-          Start-Process -FilePath "innosetup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
           echo "C:\Program Files (x86)\Inno Setup 6" >> $env:GITHUB_PATH
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            stockify_app_flutter/.dart_tool
+            stockify_app_flutter/build
+          key: ${{ runner.os }}-flutter-${{ hashFiles('stockify_app_flutter/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Cache MSYS2
+        uses: actions/cache@v4
+        with:
+          path: C:\msys64
+          key: ${{ runner.os }}-msys2-${{ hashFiles('.github/workflows/*.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-msys2-
 
       - name: Enable Flutter Windows desktop
         run: flutter config --enable-windows-desktop
@@ -89,11 +149,18 @@ jobs:
         run: |
           echo "CGO_ENABLED=1" >> $env:GITHUB_ENV
 
-      - name: Install TDM-GCC for CGO
+      - name: Setup MinGW for CGO
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkg-config
+
+      - name: Add MinGW to PATH
         run: |
-          Invoke-WebRequest -Uri "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe" -OutFile "tdm-gcc.exe"
-          Start-Process -FilePath "tdm-gcc.exe" -ArgumentList "/S" -Wait
-          echo "C:\TDM-GCC-64\bin" >> $env:GITHUB_PATH
+          echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
 
       - name: Build Windows App
         run: |
