@@ -72,9 +72,9 @@ jobs:
           flutter-version: '3.29.2'
           channel: 'stable'
 
-      - name: Setup Inno Setup via Chocolatey
+      # Inno Setup is pre-installed on GitHub Actions Windows runners
+      - name: Add Inno Setup to PATH
         run: |
-          choco install innosetup -y
           echo "C:\Program Files (x86)\Inno Setup 6" >> $env:GITHUB_PATH
 
       - name: Enable Flutter Windows desktop
@@ -88,10 +88,18 @@ jobs:
         run: |
           echo "CGO_ENABLED=1" >> $env:GITHUB_ENV
 
-      - name: Install TDM-GCC for CGO
+      - name: Setup MinGW for CGO
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkg-config
+
+      - name: Add MinGW to PATH
         run: |
-          choco install tdm-gcc -y
-          echo "C:\TDM-GCC-64\bin" >> $env:GITHUB_PATH
+          echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
 
       - name: Build Windows App
         run: |
