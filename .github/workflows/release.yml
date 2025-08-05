@@ -72,10 +72,9 @@ jobs:
           flutter-version: '3.29.2'
           channel: 'stable'
 
-      - name: Setup Inno Setup
+      - name: Setup Inno Setup via Chocolatey
         run: |
-          Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "innosetup.exe"
-          Start-Process -FilePath "innosetup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
+          choco install innosetup -y
           echo "C:\Program Files (x86)\Inno Setup 6" >> $env:GITHUB_PATH
 
       - name: Enable Flutter Windows desktop
@@ -91,8 +90,7 @@ jobs:
 
       - name: Install TDM-GCC for CGO
         run: |
-          Invoke-WebRequest -Uri "https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm64-2/tdm64-gcc-10.3.0-2.exe" -OutFile "tdm-gcc.exe"
-          Start-Process -FilePath "tdm-gcc.exe" -ArgumentList "/S" -Wait
+          choco install tdm-gcc -y
           echo "C:\TDM-GCC-64\bin" >> $env:GITHUB_PATH
 
       - name: Build Windows App
