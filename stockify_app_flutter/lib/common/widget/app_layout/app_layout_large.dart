@@ -29,154 +29,20 @@ class _AppLayoutLarge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        Container(
-          width: railWidth,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            border: Border(
-              right: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withAlpha(20),
-                width: 1,
-              ),
-            ),
-          ),
-          child: Column(
-            children: [
-              // Header with toggle button
-              SizedBox(
-                height: 64,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _CustomNavButton(
-                        icon: Icons.menu,
-                        onPressed: () {
-                          updateRailWidth(
-                              isExtended ? minRailWidth : maxRailWidth);
-                        },
-                        isSelected: false,
-                        showLabel: false,
-                        tooltip: isExtended ? 'Collapse' : 'Expand',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              // Main navigation items
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Column(
-                    children: [
-                      _CustomNavButton(
-                        icon: selectedIndex == 0
-                            ? Icons.dashboard
-                            : Icons.dashboard_outlined,
-                        label: 'Dashboard',
-                        onPressed: () => updateSelectedScreen(0),
-                        isSelected: selectedIndex == 0,
-                        showLabel: showLabels,
-                        tooltip: 'Dashboard',
-                      ),
-                      const SizedBox(height: 4),
-                      _CustomNavButton(
-                        icon: selectedIndex == 1
-                            ? Icons.inventory_2
-                            : Icons.inventory_2_outlined,
-                        label: 'Items',
-                        onPressed: () => updateSelectedScreen(1),
-                        isSelected: selectedIndex == 1,
-                        showLabel: showLabels,
-                        tooltip: 'Items',
-                      ),
-                      const SizedBox(height: 4),
-                      _CustomNavButton(
-                        icon: selectedIndex == 2
-                            ? Icons.account_circle
-                            : Icons.account_circle_outlined,
-                        label: 'Users',
-                        onPressed: () => updateSelectedScreen(2),
-                        isSelected: selectedIndex == 2,
-                        showLabel: showLabels,
-                        tooltip: 'Users',
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Bottom section with notifications and settings
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Column(
-                  children: [
-                    const Divider(height: 1),
-                    const SizedBox(height: 8),
-                    Consumer<NotificationStorageService>(
-                      builder: (context, notificationService, child) {
-                        return FutureBuilder<List<AppNotification>>(
-                          future: notificationService.getNotifications(),
-                          builder: (context, snapshot) {
-                            final hasNotifications =
-                                snapshot.hasData && snapshot.data!.isNotEmpty;
-                            return _CustomNavButton(
-                              icon: selectedIndex == 3
-                                  ? (hasNotifications
-                                      ? Icons.notifications_active
-                                      : Icons.notifications_none)
-                                  : (hasNotifications
-                                      ? Icons.notifications_active_outlined
-                                      : Icons.notifications_none_outlined),
-                              label: 'Notifications',
-                              onPressed: () => updateSelectedScreen(3),
-                              isSelected: selectedIndex == 3,
-                              showLabel: showLabels,
-                              tooltip: 'Notifications',
-                              badge: hasNotifications
-                                  ? snapshot.data!.length
-                                  : null,
-                            );
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 4),
-                    _CustomNavButton(
-                      icon: selectedIndex == 4
-                          ? Icons.settings
-                          : Icons.settings_outlined,
-                      label: 'Settings',
-                      onPressed: () => updateSelectedScreen(4),
-                      isSelected: selectedIndex == 4,
-                      showLabel: showLabels,
-                      tooltip: 'Settings',
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        _Sidebar(
+          selectedIndex: selectedIndex,
+          railWidth: railWidth,
+          isExtended: isExtended,
+          showLabels: showLabels,
+          minRailWidth: minRailWidth,
+          maxRailWidth: maxRailWidth,
+          updateRailWidth: updateRailWidth,
+          updateSelectedScreen: updateSelectedScreen,
         ),
-        // Resize handle
-        GestureDetector(
-          onHorizontalDragUpdate: (details) {
-            updateRailWidth(railWidth + details.primaryDelta!);
-          },
-          child: MouseRegion(
-            cursor: SystemMouseCursors.resizeLeftRight,
-            child: Center(
-              child: Container(
-                width: 2,
-                height: double.infinity,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outline.withAlpha(20),
-                  borderRadius: BorderRadius.circular(1),
-                ),
-              ),
-            ),
-          ),
+        _ResizeHandle(
+          railWidth: railWidth,
+          updateRailWidth: updateRailWidth,
         ),
-        // Main content area
         Expanded(
           child: Padding(
             padding:
@@ -185,6 +51,60 @@ class _AppLayoutLarge extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// Main Navigation Section
+class _NavigationSection extends StatelessWidget {
+  final int selectedIndex;
+  final bool showLabels;
+  final void Function(int,
+      {ItemFilterParams? itemFilterParams,
+      bool openAddItemPanel}) updateSelectedScreen;
+
+  const _NavigationSection({
+    required this.selectedIndex,
+    required this.showLabels,
+    required this.updateSelectedScreen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (showLabels) ...[
+            _SectionLabel(label: 'MAIN'),
+            const SizedBox(height: 8),
+          ],
+          _NavButton(
+            icon: Icons.dashboard_rounded,
+            label: 'Dashboard',
+            onPressed: () => updateSelectedScreen(0),
+            isSelected: selectedIndex == 0,
+            showLabel: showLabels,
+          ),
+          const SizedBox(height: 4),
+          _NavButton(
+            icon: Icons.inventory_2_rounded,
+            label: 'Items',
+            onPressed: () => updateSelectedScreen(1),
+            isSelected: selectedIndex == 1,
+            showLabel: showLabels,
+          ),
+          const SizedBox(height: 4),
+          _NavButton(
+            icon: Icons.people_rounded,
+            label: 'Users',
+            onPressed: () => updateSelectedScreen(2),
+            isSelected: selectedIndex == 2,
+            showLabel: showLabels,
+          ),
+        ],
+      ),
     );
   }
 }

@@ -427,6 +427,8 @@ class _ItemScreenState extends State<ItemScreen> {
       onTap: () => _onSort(sortKey),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 4.0,
         children: [
           Text(title),
           if (provider.filterParams.sortBy == sortKey)
@@ -434,7 +436,7 @@ class _ItemScreenState extends State<ItemScreen> {
               provider.filterParams.sortOrder == 'ASC'
                   ? Icons.arrow_upward
                   : Icons.arrow_downward,
-              size: 16,
+              size: 12,
             )
         ],
       ),
