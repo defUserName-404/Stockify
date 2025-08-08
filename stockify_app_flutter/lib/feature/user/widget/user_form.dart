@@ -173,6 +173,11 @@ class UserFormState extends State<UserForm> {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: {
+        AppShortcuts.save: VoidCallbackIntent(() {
+          if (!_isViewOnly) {
+            _saveUser();
+          }
+        }),
         AppShortcuts.editItem: VoidCallbackIntent(() {
           if (_isViewOnly) {
             setState(() {
