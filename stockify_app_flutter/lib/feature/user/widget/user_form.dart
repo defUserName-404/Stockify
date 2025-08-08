@@ -179,7 +179,12 @@ class UserFormState extends State<UserForm> {
               _isViewOnly = false;
             });
           }
-        })
+        }),
+        AppShortcuts.save: VoidCallbackIntent(() {
+          if (!_isViewOnly) {
+            _saveUser();
+          }
+        }),
       },
       child: Actions(
         actions: {

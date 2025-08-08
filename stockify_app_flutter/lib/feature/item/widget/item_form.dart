@@ -292,7 +292,12 @@ class ItemFormState extends State<ItemForm> {
               _isViewOnly = false;
             });
           }
-        })
+        }),
+        AppShortcuts.save: VoidCallbackIntent(() {
+          if (!_isViewOnly) {
+            _saveItem();
+          }
+        }),
       },
       child: Actions(
         actions: {
