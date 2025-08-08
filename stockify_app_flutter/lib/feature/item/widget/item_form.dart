@@ -7,6 +7,7 @@ import 'package:stockify_app_flutter/feature/item/model/item.dart';
 import 'package:stockify_app_flutter/feature/item/util/item_validator.dart';
 import 'package:stockify_app_flutter/feature/user/model/user.dart';
 
+import '../../../common/shortcuts/app_shortcuts.dart';
 import '../../../common/theme/colors.dart';
 
 class ItemForm extends StatefulWidget {
@@ -14,6 +15,7 @@ class ItemForm extends StatefulWidget {
   final Function(Item) onSave;
   final VoidCallback onCancel;
   final List<User> usersList;
+  final bool isViewOnly;
 
   const ItemForm({
     super.key,
@@ -21,6 +23,7 @@ class ItemForm extends StatefulWidget {
     required this.onSave,
     required this.onCancel,
     required this.usersList,
+    this.isViewOnly = false,
   });
 
   @override
@@ -46,14 +49,18 @@ class ItemFormState extends State<ItemForm> {
   DateTime? _selectedReceivedDate;
   User? _assignedUser;
   final FocusNode _assetNoFocusNode = FocusNode();
+  late bool _isViewOnly;
 
   @override
   void initState() {
     super.initState();
+    _isViewOnly = widget.isViewOnly;
     _initializeControllers();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _assetNoFocusNode.requestFocus();
-    });
+    if (!_isViewOnly) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _assetNoFocusNode.requestFocus();
+      });
+    }
   }
 
   @override
@@ -179,8 +186,8 @@ class ItemFormState extends State<ItemForm> {
         TextFormField(
           controller: controller,
           validator: validator,
-          onTap: onTap,
-          readOnly: readOnly,
+          onTap: _isViewOnly ? null : onTap,
+          readOnly: readOnly || _isViewOnly,
           keyboardType: keyboardType,
           maxLines: maxLines,
           focusNode: focusNode,
@@ -269,7 +276,7 @@ class ItemFormState extends State<ItemForm> {
               child: Text(getDisplayText(item)),
             );
           }).toList(),
-          onChanged: onChanged,
+          onChanged: _isViewOnly ? null : onChanged,
         ),
       ],
     );
@@ -277,456 +284,525 @@ class ItemFormState extends State<ItemForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Header
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
-            ),
-            border: Border(
-              bottom: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withAlpha(20),
-              ),
-            ),
+    return Shortcuts(
+      shortcuts: {
+        AppShortcuts.editItem: VoidCallbackIntent(() {
+          if (_isViewOnly) {
+            setState(() {
+              _isViewOnly = false;
+            });
+          }
+        })
+      },
+      child: Actions(
+        actions: {
+          VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
+            onInvoke: (intent) => intent.callback(),
           ),
-          child: Row(
+        },
+        child: FocusScope(
+          autofocus: true,
+          child: Column(
             children: [
-              Icon(
-                widget.editingItem == null
-                    ? Icons.add_circle_outline
-                    : Icons.edit_outlined,
-                color: AppColors.colorAccent,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                widget.editingItem == null ? 'Add New Item' : 'Edit Item',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              const Spacer(),
-              InkWell(
-                onTap: widget.onCancel,
-                child: Icon(
-                  Icons.close,
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Form Content
-        Flexible(
-          child: Form(
-            key: formKey,
-            child: Scrollbar(
-              controller: _scrollController,
-              child: SingleChildScrollView(
-                controller: _scrollController,
+              // Header
+              Container(
                 padding: const EdgeInsets.all(20),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isWide = constraints.maxWidth > 400;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Basic Information Section
-                        _buildSectionTitle('Basic Information'),
-                        if (isWide)
-                          Row(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                  ),
+                  border: Border(
+                    bottom: BorderSide(
+                      color:
+                          Theme.of(context).colorScheme.outline.withAlpha(20),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _isViewOnly
+                          ? Icons.remove_red_eye_outlined
+                          : (widget.editingItem == null
+                              ? Icons.add_circle_outline
+                              : Icons.edit_outlined),
+                      color: AppColors.colorAccent,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      _isViewOnly
+                          ? 'Item Details'
+                          : (widget.editingItem == null
+                              ? 'Add New Item'
+                              : 'Edit Item'),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (_isViewOnly)
+                      TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isViewOnly = false;
+                          });
+                        },
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Edit'),
+                      ),
+                    const SizedBox(width: 16),
+                    InkWell(
+                      onTap: widget.onCancel,
+                      child: const Icon(
+                        Icons.close,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Form Content
+              Flexible(
+                child: Form(
+                  key: formKey,
+                  child: Scrollbar(
+                    controller: _scrollController,
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(20),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isWide = constraints.maxWidth > 400;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Asset Number',
-                                  controller: _assetInputController,
-                                  validator: ItemInputValidator.validateAssetNo,
-                                  focusNode: _assetNoFocusNode,
+                              // Basic Information Section
+                              _buildSectionTitle('Basic Information'),
+                              if (isWide)
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Asset Number',
+                                        controller: _assetInputController,
+                                        validator:
+                                            ItemInputValidator.validateAssetNo,
+                                        focusNode: _assetNoFocusNode,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Model Number',
+                                        controller: _modelInputController,
+                                        validator:
+                                            ItemInputValidator.validateModelNo,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Column(
+                                  children: [
+                                    _buildFormField(
+                                      label: 'Asset Number',
+                                      controller: _assetInputController,
+                                      validator:
+                                          ItemInputValidator.validateAssetNo,
+                                      focusNode: _assetNoFocusNode,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildFormField(
+                                      label: 'Model Number',
+                                      controller: _modelInputController,
+                                      validator:
+                                          ItemInputValidator.validateModelNo,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Model Number',
-                                  controller: _modelInputController,
-                                  validator: ItemInputValidator.validateModelNo,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            children: [
-                              _buildFormField(
-                                label: 'Asset Number',
-                                controller: _assetInputController,
-                                validator: ItemInputValidator.validateAssetNo,
-                                focusNode: _assetNoFocusNode,
-                              ),
                               const SizedBox(height: 16),
-                              _buildFormField(
-                                label: 'Model Number',
-                                controller: _modelInputController,
-                                validator: ItemInputValidator.validateModelNo,
-                              ),
-                            ],
-                          ),
-                        const SizedBox(height: 16),
-                        if (isWide)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Serial Number',
-                                  controller: _serialInputController,
-                                  validator:
-                                      ItemInputValidator.validateSerialNo,
+                              if (isWide)
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Serial Number',
+                                        controller: _serialInputController,
+                                        validator:
+                                            ItemInputValidator.validateSerialNo,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildDropdownField<DeviceType>(
+                                        label: 'Device Type',
+                                        value: _selectedDeviceType,
+                                        items: DeviceType.values,
+                                        getDisplayText: (type) => type.name,
+                                        validator: ItemInputValidator
+                                            .validateDeviceType,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _selectedDeviceType = value;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Column(
+                                  children: [
+                                    _buildFormField(
+                                      label: 'Serial Number',
+                                      controller: _serialInputController,
+                                      validator:
+                                          ItemInputValidator.validateSerialNo,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildDropdownField<DeviceType>(
+                                      label: 'Device Type',
+                                      value: _selectedDeviceType,
+                                      items: DeviceType.values,
+                                      getDisplayText: (type) => type.name,
+                                      validator:
+                                          ItemInputValidator.validateDeviceType,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _selectedDeviceType = value;
+                                        });
+                                      },
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildDropdownField<DeviceType>(
-                                  label: 'Device Type',
-                                  value: _selectedDeviceType,
-                                  items: DeviceType.values,
-                                  getDisplayText: (type) => type.name,
-                                  validator:
-                                      ItemInputValidator.validateDeviceType,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedDeviceType = value;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            children: [
-                              _buildFormField(
-                                label: 'Serial Number',
-                                controller: _serialInputController,
-                                validator: ItemInputValidator.validateSerialNo,
-                              ),
                               const SizedBox(height: 16),
-                              _buildDropdownField<DeviceType>(
-                                label: 'Device Type',
-                                value: _selectedDeviceType,
-                                items: DeviceType.values,
-                                getDisplayText: (type) => type.name,
+                              if (isWide)
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Received Date',
+                                        controller: TextEditingController(
+                                          text: _selectedReceivedDate != null
+                                              ? DateFormatter
+                                                  .extractDateFromDateTime(
+                                                      _selectedReceivedDate!)
+                                              : "",
+                                        ),
+                                        readOnly: true,
+                                        suffixIcon:
+                                            const Icon(Icons.calendar_today),
+                                        onTap: () async {
+                                          DateTime? pickedDate =
+                                              await showDatePicker(
+                                            context: context,
+                                            initialDate:
+                                                _selectedReceivedDate ??
+                                                    DateTime.now(),
+                                            firstDate: DateTime(1970),
+                                            lastDate: DateTime(2038),
+                                          );
+                                          if (pickedDate != null) {
+                                            setState(() {
+                                              _selectedReceivedDate =
+                                                  pickedDate;
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Warranty Date',
+                                        controller: TextEditingController(
+                                          text: _selectedWarrantyDate != null
+                                              ? DateFormatter
+                                                  .extractDateFromDateTime(
+                                                      _selectedWarrantyDate!)
+                                              : "",
+                                        ),
+                                        readOnly: true,
+                                        validator: ItemInputValidator
+                                            .validateWarrantyDate,
+                                        suffixIcon:
+                                            const Icon(Icons.calendar_today),
+                                        onTap: () async {
+                                          DateTime? pickedDate =
+                                              await showDatePicker(
+                                            context: context,
+                                            initialDate:
+                                                _selectedWarrantyDate ??
+                                                    DateTime.now(),
+                                            firstDate: DateTime(1970),
+                                            lastDate: DateTime(2038),
+                                          );
+                                          if (pickedDate != null) {
+                                            setState(() {
+                                              _selectedWarrantyDate =
+                                                  pickedDate;
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Column(
+                                  children: [
+                                    _buildFormField(
+                                      label: 'Received Date',
+                                      controller: TextEditingController(
+                                        text: _selectedReceivedDate != null
+                                            ? DateFormatter
+                                                .extractDateFromDateTime(
+                                                    _selectedReceivedDate!)
+                                            : "",
+                                      ),
+                                      readOnly: true,
+                                      suffixIcon:
+                                          const Icon(Icons.calendar_today),
+                                      onTap: () async {
+                                        DateTime? pickedDate =
+                                            await showDatePicker(
+                                          context: context,
+                                          initialDate: _selectedReceivedDate ??
+                                              DateTime.now(),
+                                          firstDate: DateTime(1970),
+                                          lastDate: DateTime(2038),
+                                        );
+                                        if (pickedDate != null) {
+                                          setState(() {
+                                            _selectedReceivedDate = pickedDate;
+                                          });
+                                        }
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildFormField(
+                                      label: 'Warranty Date',
+                                      controller: TextEditingController(
+                                        text: _selectedWarrantyDate != null
+                                            ? DateFormatter
+                                                .extractDateFromDateTime(
+                                                    _selectedWarrantyDate!)
+                                            : "",
+                                      ),
+                                      readOnly: true,
+                                      validator: ItemInputValidator
+                                          .validateWarrantyDate,
+                                      suffixIcon:
+                                          const Icon(Icons.calendar_today),
+                                      onTap: () async {
+                                        DateTime? pickedDate =
+                                            await showDatePicker(
+                                          context: context,
+                                          initialDate: _selectedWarrantyDate ??
+                                              DateTime.now(),
+                                          firstDate: DateTime(1970),
+                                          lastDate: DateTime(2038),
+                                        );
+                                        if (pickedDate != null) {
+                                          setState(() {
+                                            _selectedWarrantyDate = pickedDate;
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              const SizedBox(height: 16),
+                              _buildDropdownField<AssetStatus>(
+                                label: 'Asset Status',
+                                value: _selectedAssetStatus,
+                                items: AssetStatus.values,
+                                getDisplayText: (status) => status.name,
                                 validator:
-                                    ItemInputValidator.validateDeviceType,
+                                    ItemInputValidator.validateAssetStatus,
                                 onChanged: (value) {
                                   setState(() {
-                                    _selectedDeviceType = value;
+                                    _selectedAssetStatus = value;
                                   });
                                 },
                               ),
-                            ],
-                          ),
-                        const SizedBox(height: 16),
-                        if (isWide)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Received Date',
-                                  controller: TextEditingController(
-                                    text: _selectedReceivedDate != null
-                                        ? DateFormatter.extractDateFromDateTime(
-                                            _selectedReceivedDate!)
-                                        : "",
-                                  ),
-                                  readOnly: true,
-                                  suffixIcon: const Icon(Icons.calendar_today),
-                                  onTap: () async {
-                                    DateTime? pickedDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: _selectedReceivedDate ??
-                                          DateTime.now(),
-                                      firstDate: DateTime(1970),
-                                      lastDate: DateTime(2038),
-                                    );
-                                    if (pickedDate != null) {
-                                      setState(() {
-                                        _selectedReceivedDate = pickedDate;
-                                      });
-                                    }
-                                  },
+                              // Network Configuration Section
+                              _buildSectionTitle('Network Configuration'),
+                              if (isWide)
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Host Name',
+                                        controller: _hostNameInputController,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'IP Address',
+                                        controller: _ipPortInputController,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Column(
+                                  children: [
+                                    _buildFormField(
+                                      label: 'Host Name',
+                                      controller: _hostNameInputController,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildFormField(
+                                      label: 'IP Address',
+                                      controller: _ipPortInputController,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Warranty Date',
-                                  controller: TextEditingController(
-                                    text: _selectedWarrantyDate != null
-                                        ? DateFormatter.extractDateFromDateTime(
-                                            _selectedWarrantyDate!)
-                                        : "",
-                                  ),
-                                  readOnly: true,
-                                  validator:
-                                      ItemInputValidator.validateWarrantyDate,
-                                  suffixIcon: const Icon(Icons.calendar_today),
-                                  onTap: () async {
-                                    DateTime? pickedDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: _selectedWarrantyDate ??
-                                          DateTime.now(),
-                                      firstDate: DateTime(1970),
-                                      lastDate: DateTime(2038),
-                                    );
-                                    if (pickedDate != null) {
-                                      setState(() {
-                                        _selectedWarrantyDate = pickedDate;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            children: [
+                              const SizedBox(height: 16),
                               _buildFormField(
-                                label: 'Received Date',
-                                controller: TextEditingController(
-                                  text: _selectedReceivedDate != null
-                                      ? DateFormatter.extractDateFromDateTime(
-                                          _selectedReceivedDate!)
-                                      : "",
+                                label: 'MAC Address',
+                                controller: _macAddressInputController,
+                              ),
+                              const SizedBox(height: 16),
+                              if (isWide)
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Switch Port',
+                                        controller: _switchPortInputController,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Switch IP Address',
+                                        controller:
+                                            _switchIpAddressInputController,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Column(
+                                  children: [
+                                    _buildFormField(
+                                      label: 'Switch Port',
+                                      controller: _switchPortInputController,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildFormField(
+                                      label: 'Switch IP Address',
+                                      controller:
+                                          _switchIpAddressInputController,
+                                    ),
+                                  ],
                                 ),
-                                readOnly: true,
-                                suffixIcon: const Icon(Icons.calendar_today),
-                                onTap: () async {
-                                  DateTime? pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate:
-                                        _selectedReceivedDate ?? DateTime.now(),
-                                    firstDate: DateTime(1970),
-                                    lastDate: DateTime(2038),
-                                  );
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      _selectedReceivedDate = pickedDate;
-                                    });
-                                  }
+                              // System Information Section
+                              _buildSectionTitle('System Information'),
+                              if (isWide)
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'OS Version',
+                                        controller: _osVersionInputController,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildFormField(
+                                        label: 'Face Plate Name',
+                                        controller:
+                                            _facePlateNameInputController,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Column(
+                                  children: [
+                                    _buildFormField(
+                                      label: 'OS Version',
+                                      controller: _osVersionInputController,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildFormField(
+                                      label: 'Face Plate Name',
+                                      controller: _facePlateNameInputController,
+                                    ),
+                                  ],
+                                ),
+                              const SizedBox(height: 16),
+                              _buildDropdownField<User>(
+                                label: 'Assigned User',
+                                value: _assignedUser,
+                                items: widget.usersList,
+                                getDisplayText: (user) => user.userName,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _assignedUser = value;
+                                  });
                                 },
                               ),
-                              const SizedBox(height: 16),
-                              _buildFormField(
-                                label: 'Warranty Date',
-                                controller: TextEditingController(
-                                  text: _selectedWarrantyDate != null
-                                      ? DateFormatter.extractDateFromDateTime(
-                                          _selectedWarrantyDate!)
-                                      : "",
-                                ),
-                                readOnly: true,
-                                validator:
-                                    ItemInputValidator.validateWarrantyDate,
-                                suffixIcon: const Icon(Icons.calendar_today),
-                                onTap: () async {
-                                  DateTime? pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate:
-                                        _selectedWarrantyDate ?? DateTime.now(),
-                                    firstDate: DateTime(1970),
-                                    lastDate: DateTime(2038),
-                                  );
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      _selectedWarrantyDate = pickedDate;
-                                    });
-                                  }
-                                },
-                              ),
+                              const SizedBox(height: 32),
                             ],
-                          ),
-                        const SizedBox(height: 16),
-                        _buildDropdownField<AssetStatus>(
-                          label: 'Asset Status',
-                          value: _selectedAssetStatus,
-                          items: AssetStatus.values,
-                          getDisplayText: (status) => status.name,
-                          validator: ItemInputValidator.validateAssetStatus,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedAssetStatus = value;
-                            });
-                          },
-                        ),
-                        // Network Configuration Section
-                        _buildSectionTitle('Network Configuration'),
-                        if (isWide)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Host Name',
-                                  controller: _hostNameInputController,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'IP Address',
-                                  controller: _ipPortInputController,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            children: [
-                              _buildFormField(
-                                label: 'Host Name',
-                                controller: _hostNameInputController,
-                              ),
-                              const SizedBox(height: 16),
-                              _buildFormField(
-                                label: 'IP Address',
-                                controller: _ipPortInputController,
-                              ),
-                            ],
-                          ),
-                        const SizedBox(height: 16),
-                        _buildFormField(
-                          label: 'MAC Address',
-                          controller: _macAddressInputController,
-                        ),
-                        const SizedBox(height: 16),
-                        if (isWide)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Switch Port',
-                                  controller: _switchPortInputController,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Switch IP Address',
-                                  controller: _switchIpAddressInputController,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            children: [
-                              _buildFormField(
-                                label: 'Switch Port',
-                                controller: _switchPortInputController,
-                              ),
-                              const SizedBox(height: 16),
-                              _buildFormField(
-                                label: 'Switch IP Address',
-                                controller: _switchIpAddressInputController,
-                              ),
-                            ],
-                          ),
-                        // System Information Section
-                        _buildSectionTitle('System Information'),
-                        if (isWide)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'OS Version',
-                                  controller: _osVersionInputController,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildFormField(
-                                  label: 'Face Plate Name',
-                                  controller: _facePlateNameInputController,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            children: [
-                              _buildFormField(
-                                label: 'OS Version',
-                                controller: _osVersionInputController,
-                              ),
-                              const SizedBox(height: 16),
-                              _buildFormField(
-                                label: 'Face Plate Name',
-                                controller: _facePlateNameInputController,
-                              ),
-                            ],
-                          ),
-                        const SizedBox(height: 16),
-                        _buildDropdownField<User>(
-                          label: 'Assigned User',
-                          value: _assignedUser,
-                          items: widget.usersList,
-                          getDisplayText: (user) => user.userName,
-                          onChanged: (value) {
-                            setState(() {
-                              _assignedUser = value;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 32),
-                      ],
-                    );
-                  },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-        // Action Buttons
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(8),
-            ),
-            border: Border(
-              top: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withAlpha(20),
-              ),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              AppButton(
-                onPressed: widget.onCancel,
-                icon: Icons.cancel,
-                iconColor: AppColors.colorTextDark,
-                text: 'Cancel',
-                backgroundColor: AppColors.colorTextSemiLight,
-                foregroundColor: AppColors.colorTextDark,
-              ),
-              const SizedBox(width: 16),
-              AppButton(
-                onPressed: _saveItem,
-                icon: widget.editingItem == null ? Icons.add : Icons.save,
-                text: widget.editingItem == null ? 'Add Item' : 'Save Changes',
-              ),
+              // Action Buttons
+              if (!_isViewOnly)
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
+                    border: Border(
+                      top: BorderSide(
+                        color:
+                            Theme.of(context).colorScheme.outline.withAlpha(20),
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      AppButton(
+                        onPressed: widget.onCancel,
+                        icon: Icons.cancel,
+                        iconColor: AppColors.colorTextDark,
+                        text: 'Cancel',
+                        backgroundColor: AppColors.colorTextSemiLight,
+                        foregroundColor: AppColors.colorTextDark,
+                      ),
+                      const SizedBox(width: 16),
+                      AppButton(
+                        onPressed: _saveItem,
+                        icon:
+                            widget.editingItem == null ? Icons.add : Icons.save,
+                        text: widget.editingItem == null
+                            ? 'Add Item'
+                            : 'Save Changes',
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

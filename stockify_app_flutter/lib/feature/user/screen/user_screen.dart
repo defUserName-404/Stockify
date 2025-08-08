@@ -10,7 +10,6 @@ import 'package:stockify_app_flutter/feature/user/service/user_service_implement
 import 'package:stockify_app_flutter/feature/user/widget/user_form.dart';
 
 import '../../../common/widget/custom_snackbar.dart';
-import '../../item/widget/item_details_text.dart';
 import '../../user/model/user.dart';
 import '../service/user_service.dart';
 
@@ -45,17 +44,17 @@ class _UserScreenState extends State<UserScreen> {
 
   void _initializeUserDataSource() {
     _userDataSource = UserData(
-        context: context,
-        onEdit: (user) => _openUserFormDialog(user: user),
-        filterParams: _filterParams,
-        rowsPerPage: _rowsPerPage,
-        onView: (user) => _showViewDetailsDialog(user),
-        onDelete: (user) => _showDeleteConfirmationDialog(user),
-        getSelectedRowIndex: () => _selectedRowIndex,
-        setSelectedRowIndex: (index) {
-          setState(() {
-            _selectedRowIndex = index;
-          });
+      context: context,
+      onEdit: (user) => _openUserFormDialog(user: user),
+      filterParams: _filterParams,
+      rowsPerPage: _rowsPerPage,
+      onView: (user) => _showViewDetailsDialog(user),
+      onDelete: (user) => _showDeleteConfirmationDialog(user),
+      getSelectedRowIndex: () => _selectedRowIndex,
+      setSelectedRowIndex: (index) {
+        setState(() {
+          _selectedRowIndex = index;
+        });
       },
     );
   }
@@ -138,28 +137,21 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   void _showViewDetailsDialog(User user) {
-    AppDialogs.showDetailsDialog(
+    showDialog(
       context: context,
-      title: 'User Details',
-      icon: Icons.person_outline,
-      content: SingleChildScrollView(
-        child: Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: [
-            ItemDetailsText(label: 'User Name', itemText: '${user.userName}'),
-            if (user.designation != null)
-              ItemDetailsText(
-                  label: 'Designation', itemText: '${user.designation}'),
-            if (user.sapId != null)
-              ItemDetailsText(label: 'SAP ID', itemText: '${user.sapId}'),
-            if (user.ipPhone != null)
-              ItemDetailsText(label: 'IP Phone', itemText: '${user.ipPhone!}'),
-            if (user.roomNo != null)
-              ItemDetailsText(label: 'Room No', itemText: '${user.roomNo!}'),
-            if (user.floor != null)
-              ItemDetailsText(label: 'Floor No', itemText: '${user.floor}'),
-          ],
+      builder: (context) => Dialog(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width > 800
+              ? MediaQuery.of(context).size.width / 2
+              : MediaQuery.of(context).size.width * 0.9,
+          child: UserForm(
+            editingUser: user,
+            onSave: (_) {},
+            onCancel: () {
+              Navigator.of(context).pop();
+            },
+            isViewOnly: true,
+          ),
         ),
       ),
     );
@@ -195,7 +187,8 @@ class _UserScreenState extends State<UserScreen> {
                 VoidCallbackIntent(() => _searchFocusNode.requestFocus()),
             AppShortcuts.openFilter:
                 VoidCallbackIntent(() => _showFilterDialog()),
-            AppShortcuts.addNew: VoidCallbackIntent(() => _openUserFormDialog()),
+            AppShortcuts.addNew:
+                VoidCallbackIntent(() => _openUserFormDialog()),
             AppShortcuts.arrowDown: VoidCallbackIntent(() {
               int newIndex = _selectedRowIndex;
               if (newIndex < _userDataSource.rowCount - 1) {
@@ -279,8 +272,7 @@ class _UserScreenState extends State<UserScreen> {
                     onSearch: _onSearchChanged,
                     searchController: _searchInputController,
                     searchFocusNode: _searchFocusNode,
-                    searchHint:
-                        'Search for users by their User Name or SAP ID',
+                    searchHint: 'Search for users by their User Name or SAP ID',
                   ),
                   Expanded(
                     child: SingleChildScrollView(
@@ -310,6 +302,7 @@ class _UserScreenState extends State<UserScreen> {
                                 ];
                               }
                             }
+
                             return PaginatedDataTable(
                               key: _paginatedDataTableKey,
                               initialFirstRowIndex: _firstRowIndex,
@@ -319,12 +312,11 @@ class _UserScreenState extends State<UserScreen> {
                                   _selectedRowIndex = rowIndex;
                                 });
                               },
-                              headingRowColor:
-                                  WidgetStateProperty.all<Color>(
-                                      Theme.of(context)
-                                          .colorScheme
-                                          .primaryContainer
-                                          .withAlpha(10)),
+                              headingRowColor: WidgetStateProperty.all<Color>(
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer
+                                      .withAlpha(10)),
                               showCheckboxColumn: false,
                               showEmptyRows: false,
                               availableRowsPerPage: const [10, 20, 50],
