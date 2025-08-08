@@ -21,6 +21,7 @@ class AppShortcuts {
   static const deleteItem = SingleActivator(LogicalKeyboardKey.delete);
   static const cancel = SingleActivator(LogicalKeyboardKey.escape);
   static const submit = SingleActivator(LogicalKeyboardKey.enter);
+  static const save = SingleActivator(LogicalKeyboardKey.keyS, control: true);
 
   // Sorting & Filtering
   static const sortAsc = SingleActivator(LogicalKeyboardKey.arrowUp, alt: true);
@@ -89,6 +90,8 @@ final List<Shortcut> shortcutList = [
       description: 'Delete Item/User',
       combination: 'Delete',
       icon: Icons.delete),
+  Shortcut(
+      description: 'Save Item/User', combination: 'Ctrl + S', icon: Icons.save),
   Shortcut(
       description: 'Sort Ascending',
       combination: 'Alt + Up Arrow',

@@ -286,6 +286,11 @@ class ItemFormState extends State<ItemForm> {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: {
+        AppShortcuts.save: VoidCallbackIntent(() {
+          if (!_isViewOnly) {
+            _saveItem();
+          }
+        }),
         AppShortcuts.editItem: VoidCallbackIntent(() {
           if (_isViewOnly) {
             setState(() {
