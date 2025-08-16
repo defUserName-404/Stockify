@@ -253,46 +253,76 @@ func DeleteItemById(id C.ulonglong) {
 func GetFilteredItems(
 	deviceType *C.char,
 	assetStatus *C.char,
+	warrantyDate C.longlong,
+	warrantyDateFilterType *C.char,
 	assignedToID C.ulonglong,
+	isExpiring C.char,
 	search *C.char,
 	sortBy *C.char,
 	sortOrder *C.char,
 ) *C.char {
-	searchStr := C.GoString(search)
-	sortByStr := C.GoString(sortBy)
-	sortOrderStr := C.GoString(sortOrder)
-	assignedToIDVal := uint64(assignedToID)
-
 	params := model.ItemFilterParams{
-		Search:    searchStr,
-		SortBy:    sortByStr,
-		SortOrder: sortOrderStr,
+		Search:    cStringToGo(search),
+		SortBy:    cStringToGo(sortBy),
+		SortOrder: cStringToGo(sortOrder),
+		IsExpiring: isExpiring == 1,
 	}
 
-	if dt := C.GoString(deviceType); dt != "" {
-		tmp := model.DeviceType(dt)
-		params.DeviceType = &tmp
-	}
-	if as := C.GoString(assetStatus); as != "" {
-		tmp := model.AssetStatus(as)
-		params.AssetStatus = &tmp
-	}
-	if assignedToIDVal != 0 {
-		params.AssignedToID = &assignedToIDVal
+	if deviceType != nil {
+		dtStr := C.GoString(deviceType)
+		if dtStr != "" {
+			dt := model.DeviceType(dtStr)
+			params.DeviceType = &dt
+		}
 	}
 
-	items, err := itemService.GetFilteredItems(params)
+	if assetStatus != nil {
+		asStr := C.GoString(assetStatus)
+		if asStr != "" {
+			as := model.AssetStatus(asStr)
+			params.AssetStatus = &as
+		}
+	}
+
+	if warrantyDate != 0 {
+		wd := int64(warrantyDate)
+		params.WarrantyDate = &wd
+	}
+
+	if warrantyDateFilterType != nil {
+		wdftStr := C.GoString(warrantyDateFilterType)
+		if wdftStr != "" {
+			wdft := model.WarrantyDateFilterType(wdftStr)
+			params.WarrantyDateFilterType = &wdft
+		}
+	}
+
+	if assignedToID > 0 {
+		id := uint64(assignedToID)
+		params.AssignedToID = &id
+	}
+
+	items, err := itemRepository.GetFilteredItems(params)
 	if err != nil {
-		return jsonError("Failed to filter items")
+		return jsonError("Failed to get filtered items")
 	}
-	jsonData, err := json.Marshal(items)
+
+	jsonBytes, err := json.Marshal(items)
 	if err != nil {
 		return jsonError("Failed to marshal items")
 	}
-	return C.CString(string(jsonData))
+
+	return C.CString(string(jsonBytes))
 }
 
 //export FreeCString
 func FreeCString(str *C.char) {
 	C.free(unsafe.Pointer(str))
+}
+
+func cStringToGo(cstr *C.char) string {
+	if cstr == nil {
+		return ""
+	}
+	return C.GoString(cstr)
 }

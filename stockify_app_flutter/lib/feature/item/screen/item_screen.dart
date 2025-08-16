@@ -56,14 +56,11 @@ class _ItemScreenState extends State<ItemScreen> {
     _userService = UserServiceImplementation.instance;
     _searchInputController = TextEditingController();
     _fetchUsers();
-
+    _initializeItemDataSource();
     // Initialize provider after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<ItemProvider>();
       provider.initialize(widget.filterParams);
-
-      _initializeItemDataSource();
-
       if (widget.itemId != null) {
         final item = _itemService.getItem(widget.itemId!);
         _showViewDetailsDialog(item);

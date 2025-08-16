@@ -154,6 +154,7 @@ class ItemRepository {
     final warrantyDate = _toUnixTimestamp(params.warrantyDate);
     final warrantyDateFilterTypePtr = _toUtf8(params.warrantyDateFilterType?.name);
     final assignedToID = params.assignedTo?.id ?? 0;
+    final isExpiring = params.isExpiring ? 1 : 0;
     final sortByPtr = _toUtf8(params.sortBy);
     final sortOrderPtr = _toUtf8(params.sortOrder);
     final resultPtr = _ffi.getFilteredItems(
@@ -162,6 +163,7 @@ class ItemRepository {
       warrantyDate,
       warrantyDateFilterTypePtr,
       assignedToID,
+      isExpiring,
       searchPtr,
       sortByPtr,
       sortOrderPtr,
