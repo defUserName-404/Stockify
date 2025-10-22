@@ -28,6 +28,7 @@ func init() {
 	log.Println("Using SQLite DB at:", dbPath)
 	// Step 4: Connect
 	DB, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	DB = DB.Debug() // Enable debug mode
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
