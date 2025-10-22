@@ -3,7 +3,6 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 // Define C function signatures
-
 typedef AddUserC = Void Function(
   Pointer<Utf8> userName,
   Pointer<Utf8> designation,

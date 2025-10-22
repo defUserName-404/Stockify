@@ -30,60 +30,46 @@ class _ActionsCellState extends State<_ActionsCell> {
 }
 
 class ItemData extends DataTableSource {
-  final ItemService _itemService = ItemServiceImplementation.instance;
-  List<Item> _filteredItems = [];
   final BuildContext context;
+  final ItemProvider provider;
   final void Function(Item) onEdit;
   final void Function(Item) onView;
   final void Function(Item) onDelete;
-  final void Function(DeviceType) onFilterByDeviceType;
-  final void Function(AssetStatus) onFilterByAssetStatus;
-  ItemFilterParams _filterParams;
-  final int Function() getSelectedRowIndex;
-  final Function(int) setSelectedRowIndex;
-  final int rowsPerPage;
   double screenWidth;
 
   ItemData({
     required this.context,
+    required this.provider,
     required this.onEdit,
     required this.onView,
     required this.onDelete,
-    required this.onFilterByDeviceType,
-    required this.onFilterByAssetStatus,
-    required this.getSelectedRowIndex,
-    required this.setSelectedRowIndex,
-    required ItemFilterParams filterParams,
-    required this.rowsPerPage,
     this.screenWidth = 600,
-  }) : _filterParams = filterParams {
-    refreshData();
+  }) {
+    // Listen to provider changes
+    provider.addListener(_onProviderChanged);
   }
 
-  void updateFilterParams(ItemFilterParams params) {
-    _filterParams = params;
-    refreshData();
-  }
-
-  void refreshData() {
-    _filteredItems = _itemService.getFilteredItems(_filterParams);
+  void _onProviderChanged() {
     notifyListeners();
   }
 
-  void notifySelectionChanged() {
-    notifyListeners();
-  }
-
-  Item getRowData(int index) {
-    return _filteredItems[index];
+  @override
+  void dispose() {
+    provider.removeListener(_onProviderChanged);
+    super.dispose();
   }
 
   @override
   DataRow getRow(int index) {
-    final item = _filteredItems[index];
-    final isSelected = getSelectedRowIndex() == index;
+    if (index >= provider.filteredItems.length) {
+      return DataRow(cells: []);
+    }
+
+    final item = provider.filteredItems[index];
+    final isSelected = provider.selectedRowIndex == index;
     final isEven = index.isEven;
     final theme = Theme.of(context);
+
     return DataRow.byIndex(
       index: index,
       selected: isSelected,
@@ -96,10 +82,7 @@ class ItemData extends DataTableSource {
             : theme.colorScheme.onSurface.withAlpha(2);
       }),
       onSelectChanged: (_) {
-        if (index >= 0 && index < _filteredItems.length) {
-          setSelectedRowIndex(index);
-        }
-        notifyListeners();
+        provider.setSelectedRowIndex(index);
       },
       cells: _getCells(item, isSelected),
     );
@@ -111,7 +94,7 @@ class ItemData extends DataTableSource {
         DataCell(Text(item.assetNo)),
         DataCell(
           InkWell(
-            onTap: () => onFilterByDeviceType(item.deviceType),
+            onTap: () => provider.filterByDeviceType(item.deviceType),
             child: Chip(
               avatar: Icon(_getDeviceTypeIcon(item.deviceType),
                   size: 16, color: _getDeviceTypeColor(item.deviceType)),
@@ -133,7 +116,7 @@ class ItemData extends DataTableSource {
         DataCell(Text(item.modelNo)),
         DataCell(
           InkWell(
-            onTap: () => onFilterByDeviceType(item.deviceType),
+            onTap: () => provider.filterByDeviceType(item.deviceType),
             child: Chip(
               avatar: Icon(_getDeviceTypeIcon(item.deviceType),
                   size: 16, color: _getDeviceTypeColor(item.deviceType)),
@@ -149,7 +132,7 @@ class ItemData extends DataTableSource {
         ),
         DataCell(
           InkWell(
-            onTap: () => onFilterByAssetStatus(item.assetStatus),
+            onTap: () => provider.filterByAssetStatus(item.assetStatus),
             child: ItemStatus(assetStatus: item.assetStatus),
           ),
         ),
@@ -162,7 +145,7 @@ class ItemData extends DataTableSource {
         DataCell(Text(item.serialNo)),
         DataCell(
           InkWell(
-            onTap: () => onFilterByDeviceType(item.deviceType),
+            onTap: () => provider.filterByDeviceType(item.deviceType),
             child: Chip(
               avatar: Icon(_getDeviceTypeIcon(item.deviceType),
                   size: 16, color: _getDeviceTypeColor(item.deviceType)),
@@ -180,7 +163,7 @@ class ItemData extends DataTableSource {
             Text(DateFormatter.extractDateFromDateTime(item.warrantyDate))),
         DataCell(
           InkWell(
-            onTap: () => onFilterByAssetStatus(item.assetStatus),
+            onTap: () => provider.filterByAssetStatus(item.assetStatus),
             child: ItemStatus(assetStatus: item.assetStatus),
           ),
         ),
@@ -215,7 +198,7 @@ class ItemData extends DataTableSource {
   }
 
   @override
-  int get rowCount => _filteredItems.length;
+  int get rowCount => provider.filteredItems.length;
 
   @override
   bool get isRowCountApproximate => false;
