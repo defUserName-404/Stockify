@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stockify_app_flutter/common/widget/app_button.dart';
 
-import '../../../common/theme/colors.dart';
+import '../theme/colors.dart';
 
 class PageHeader extends StatelessWidget {
   final VoidCallback onAddNew;

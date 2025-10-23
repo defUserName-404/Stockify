@@ -6,7 +6,7 @@ import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
 import 'package:stockify_app_flutter/common/widget/app_dialogs.dart';
 import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
-import 'package:stockify_app_flutter/common/widget/responsive/page_header.dart';
+import 'package:stockify_app_flutter/common/widget/page_header.dart';
 import 'package:stockify_app_flutter/feature/item/provider/item_provider.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
@@ -16,6 +16,7 @@ import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 
 import '../../../common/widget/action_widget.dart';
+import '../../../common/widget/filter_chips_bar.dart';
 import '../../user/model/user.dart';
 import '../model/device_type.dart';
 import '../model/item.dart';
@@ -284,46 +285,41 @@ class _ItemScreenState extends State<ItemScreen> {
                         searchHint:
                             'Search by Asset No, Model, or Serial No...',
                       ),
-                      if (provider.hasActiveFilters)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          child: Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: [
-                              if (provider.filterParams.deviceType != null)
-                                Chip(
-                                  label: Text(
-                                      'Device: ${provider.filterParams.deviceType!.name}'),
-                                  onDeleted: () =>
-                                      provider.clearDeviceTypeFilter(),
-                                ),
-                              if (provider.filterParams.assetStatus != null)
-                                Chip(
-                                  label: Text(
-                                      'Status: ${provider.filterParams.assetStatus!.name}'),
-                                  onDeleted: () =>
-                                      provider.clearAssetStatusFilter(),
-                                ),
-                              if (provider.filterParams.warrantyDate != null)
-                                Chip(
-                                  label: Text(
-                                      'Warranty Date: ${DateFormatter.extractDateFromDateTime(provider.filterParams.warrantyDate!)} (${provider.filterParams.warrantyDateFilterType!.name})'),
-                                  onDeleted: () =>
-                                      provider.clearWarrantyDateFilter(),
-                                ),
-                              if (provider.filterParams.assignedTo != null)
-                                Chip(
-                                  label: Text(
-                                      'Assigned To: ${provider.filterParams.assignedTo!.userName}'),
-                                  onDeleted: () =>
-                                      provider.clearAssignedToFilter(),
-                                ),
-                            ],
-                          ),
-                        ),
+                      FilterChipsBar(
+                        chips: [
+                          if (provider.filterParams.deviceType != null)
+                            FilterChipData(
+                              label:
+                                  'Device: ${provider.filterParams.deviceType?.name}',
+                              onDeleted: () => provider.clearDeviceTypeFilter(),
+                            ),
+                          if (provider.filterParams.assetStatus != null)
+                            FilterChipData(
+                              label:
+                                  'Asset Status: ${provider.filterParams.assetStatus?.name}',
+                              onDeleted: () =>
+                                  provider.clearAssetStatusFilter(),
+                            ),
+                          if (provider.filterParams.warrantyDate != null)
+                            FilterChipData(
+                              label:
+                                  'Warranty Date: ${DateFormatter.extractDateFromDateTime(provider.filterParams.warrantyDate!)} (${provider.filterParams.warrantyDateFilterType!.name})',
+                              onDeleted: () =>
+                                  provider.clearWarrantyDateFilter(),
+                            ),
+                          if (provider.filterParams.assignedTo != null)
+                            FilterChipData(
+                              label:
+                                  'Assigned to: ${provider.filterParams.assignedTo?.userName}',
+                              onDeleted: () => provider.clearAssignedToFilter(),
+                            ),
+                          if (provider.filterParams.isExpiring)
+                            FilterChipData(
+                              label: 'Expiring in 30 days',
+                              onDeleted: () => provider.clearIsExpiringFilter(),
+                            ),
+                        ],
+                      ),
                       Expanded(
                         child: SingleChildScrollView(
                           child: SizedBox(

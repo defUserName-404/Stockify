@@ -123,6 +123,11 @@ class ItemProvider extends ChangeNotifier {
     refreshData();
   }
 
+  void clearIsExpiringFilter() {
+    _filterParams = _filterParams.copyWith(isExpiring: false);
+    refreshData();
+  }
+
   // Reset all filters
   void resetFilters() {
     _filterParams = ItemFilterParams();
