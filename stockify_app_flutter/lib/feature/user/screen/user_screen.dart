@@ -4,7 +4,7 @@ import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
 import 'package:stockify_app_flutter/common/widget/animations/screen_transition.dart';
 import 'package:stockify_app_flutter/common/widget/app_dialogs.dart';
-import 'package:stockify_app_flutter/common/widget/responsive/page_header.dart';
+import 'package:stockify_app_flutter/common/widget/page_header.dart';
 import 'package:stockify_app_flutter/feature/user/model/user_filter_param.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/user/widget/user_form.dart';

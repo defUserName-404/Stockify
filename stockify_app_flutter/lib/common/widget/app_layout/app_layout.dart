@@ -6,16 +6,35 @@ import 'package:stockify_app_flutter/feature/notification/screen/notification_sc
 import 'package:stockify_app_flutter/feature/user/screen/user_screen.dart';
 
 import '../../../feature/dashboard/screen/dashboard_screen.dart';
+import '../../../feature/item/model/asset_status.dart';
 import '../../../feature/item/model/item_filter_param.dart';
 import '../../../feature/notification/model/app_notification.dart';
 import '../../../feature/notification/service/notification_storage_service.dart';
 import '../../../feature/settings/screen/settings_screen.dart';
 import '../../shared-preference/shared_preference_service.dart';
-import '../../theme/colors.dart';
 
 part 'app_layout_large.dart';
 part 'app_layout_small.dart';
-part 'custom_nav_button.dart';
+
+part 'nav_button.dart';
+
+part 'sidebar/bottom_navigation_section.dart';
+
+part 'sidebar/header_toggle_button.dart';
+
+part 'sidebar/notification_badge.dart';
+
+part 'sidebar/sidebar.dart';
+
+part 'sidebar/sidebar_header.dart';
+
+part 'sidebar/resize_handle.dart';
+
+part 'sidebar/section_label.dart';
+
+part 'sidebar/navigation_section.dart';
+
+part 'sidebar/sub_nav_bar.dart';
 
 class AppLayout extends StatefulWidget {
   const AppLayout({super.key});
@@ -100,6 +119,7 @@ class _AppLayoutState extends State<AppLayout> {
                     updateRailWidth: _updateRailWidth,
                     updateSelectedScreen: updateSelectedScreen,
                     getSelectedScreen: _getSelectedScreen,
+                    currentFilterParams: _currentFilterParams,
                   );
                 }
               },
