@@ -105,6 +105,16 @@ class _ItemScreenState extends State<ItemScreen> {
   }
 
   @override
+  void didUpdateWidget(ItemScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.filterParams != oldWidget.filterParams) {
+      context
+          .read<ItemProvider>()
+          .updateFilterParams(widget.filterParams ?? ItemFilterParams());
+    }
+  }
+
+  @override
   void dispose() {
     _searchInputController.dispose();
     _searchFocusNode.dispose();

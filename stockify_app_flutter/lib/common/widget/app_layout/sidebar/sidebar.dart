@@ -11,6 +11,7 @@ class _Sidebar extends StatelessWidget {
   final void Function(int,
       {ItemFilterParams? itemFilterParams,
       bool openAddItemPanel}) updateSelectedScreen;
+  final ItemFilterParams? currentFilterParams;
 
   const _Sidebar({
     required this.selectedIndex,
@@ -21,6 +22,7 @@ class _Sidebar extends StatelessWidget {
     required this.maxRailWidth,
     required this.updateRailWidth,
     required this.updateSelectedScreen,
+    this.currentFilterParams,
   });
 
   @override
@@ -54,6 +56,7 @@ class _Sidebar extends StatelessWidget {
               selectedIndex: selectedIndex,
               showLabels: showLabels,
               updateSelectedScreen: updateSelectedScreen,
+              currentFilterParams: currentFilterParams,
             ),
           ),
           _BottomNavigationSection(

@@ -12,6 +12,7 @@ class _AppLayoutLarge extends StatelessWidget {
       {ItemFilterParams? itemFilterParams,
       bool openAddItemPanel}) updateSelectedScreen;
   final Widget Function(int) getSelectedScreen;
+  final ItemFilterParams? currentFilterParams;
 
   const _AppLayoutLarge({
     required this.selectedIndex,
@@ -23,6 +24,7 @@ class _AppLayoutLarge extends StatelessWidget {
     required this.updateRailWidth,
     required this.updateSelectedScreen,
     required this.getSelectedScreen,
+    this.currentFilterParams,
   });
 
   @override
@@ -38,6 +40,7 @@ class _AppLayoutLarge extends StatelessWidget {
           maxRailWidth: maxRailWidth,
           updateRailWidth: updateRailWidth,
           updateSelectedScreen: updateSelectedScreen,
+          currentFilterParams: currentFilterParams,
         ),
         _ResizeHandle(
           railWidth: railWidth,
@@ -51,60 +54,6 @@ class _AppLayoutLarge extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// Main Navigation Section
-class _NavigationSection extends StatelessWidget {
-  final int selectedIndex;
-  final bool showLabels;
-  final void Function(int,
-      {ItemFilterParams? itemFilterParams,
-      bool openAddItemPanel}) updateSelectedScreen;
-
-  const _NavigationSection({
-    required this.selectedIndex,
-    required this.showLabels,
-    required this.updateSelectedScreen,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (showLabels) ...[
-            _SectionLabel(label: 'MAIN'),
-            const SizedBox(height: 8),
-          ],
-          _NavButton(
-            icon: Icons.dashboard_rounded,
-            label: 'Dashboard',
-            onPressed: () => updateSelectedScreen(0),
-            isSelected: selectedIndex == 0,
-            showLabel: showLabels,
-          ),
-          const SizedBox(height: 4),
-          _NavButton(
-            icon: Icons.inventory_2_rounded,
-            label: 'Items',
-            onPressed: () => updateSelectedScreen(1),
-            isSelected: selectedIndex == 1,
-            showLabel: showLabels,
-          ),
-          const SizedBox(height: 4),
-          _NavButton(
-            icon: Icons.people_rounded,
-            label: 'Users',
-            onPressed: () => updateSelectedScreen(2),
-            isSelected: selectedIndex == 2,
-            showLabel: showLabels,
-          ),
-        ],
-      ),
     );
   }
 }
