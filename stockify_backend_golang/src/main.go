@@ -257,15 +257,17 @@ func GetFilteredItems(
 	warrantyDateFilterType *C.char,
 	assignedToID C.ulonglong,
 	isExpiring C.char,
+	isExpired C.char,
 	search *C.char,
 	sortBy *C.char,
 	sortOrder *C.char,
 ) *C.char {
 	params := model.ItemFilterParams{
-		Search:    cStringToGo(search),
-		SortBy:    cStringToGo(sortBy),
-		SortOrder: cStringToGo(sortOrder),
+		Search:     cStringToGo(search),
+		SortBy:     cStringToGo(sortBy),
+		SortOrder:  cStringToGo(sortOrder),
 		IsExpiring: isExpiring == 1,
+		IsExpired:  isExpired == 1,
 	}
 
 	if deviceType != nil {

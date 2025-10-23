@@ -82,26 +82,32 @@ func (r *itemRepository) GetFilteredItems(params model.ItemFilterParams) ([]mode
 		switch *params.WarrantyDateFilterType {
 		case model.Day:
 			// Same day
-			startOfDay := time.Date(filterDate.Year(), filterDate.Month(), filterDate.Day(), 0, 0, 0, 0, filterDate.Location())
-			endOfDay := startOfDay.Add(24 * time.Hour)
-			query = query.Where("warranty_date >= ? AND warranty_date < ?", startOfDay.Unix(), endOfDay.Unix())
+			query = query.Where("DATE(warranty_date) = DATE(?)", filterDate)
 		case model.Month:
-			// Same month
-			startOfMonth := time.Date(filterDate.Year(), filterDate.Month(), 1, 0, 0, 0, 0, filterDate.Location())
-			endOfMonth := startOfMonth.AddDate(0, 1, 0)
-			query = query.Where("warranty_date >= ? AND warranty_date < ?", startOfMonth.Unix(), endOfMonth.Unix())
+			// Same month and year
+			query = query.Where("EXTRACT(YEAR FROM warranty_date) = ? AND EXTRACT(MONTH FROM warranty_date) = ?",
+				filterDate.Year(), int(filterDate.Month()))
 		case model.Year:
 			// Same year
-			startOfYear := time.Date(filterDate.Year(), 1, 1, 0, 0, 0, 0, filterDate.Location())
-			endOfYear := startOfYear.AddDate(1, 0, 0)
-			query = query.Where("warranty_date >= ? AND warranty_date < ?", startOfYear.Unix(), endOfYear.Unix())
+			query = query.Where("EXTRACT(YEAR FROM warranty_date) = ?", filterDate.Year())
 		}
 	}
 
-	// IsExpiring filter
+	// IsExpiring filter (within 30 days but NOT yet expired)
 	if params.IsExpiring {
-		thirtyDaysFromNow := time.Now().AddDate(0, 0, 30)
-		query = query.Where("warranty_date <= ?", thirtyDaysFromNow.Unix())
+		now := time.Now()
+		// Normalize to start of today (ignore time)
+		today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		thirtyDaysFromNow := today.AddDate(0, 0, 30)
+		// Compare only dates: warranty_date > today AND warranty_date <= today+30
+		query = query.Where("DATE(warranty_date) > DATE(?) AND DATE(warranty_date) <= DATE(?)", today, thirtyDaysFromNow)
+	}
+
+	// IsExpired filter
+	if params.IsExpired {
+		now := time.Now()
+		today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		query = query.Where("DATE(warranty_date) < DATE(?)", today)
 	}
 
 	// Sorting
