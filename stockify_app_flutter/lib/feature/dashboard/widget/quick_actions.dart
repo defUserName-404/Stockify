@@ -1,10 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/data/service/data_service.dart';
 import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
 
 import '../../../common/theme/colors.dart';
-import '../../../common/widget/app_layout/app_layout.dart';
+import '../../../common/widget/app_layout/provider/app_layout_provider.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -40,8 +41,10 @@ class QuickActions extends StatelessWidget {
                   icon: Icons.add_circle_outline,
                   color: AppColors.colorAccent,
                   onTap: () {
-                    AppLayout.navigatorKey.currentState
-                        ?.updateSelectedScreen(1, openAddItemPanel: true);
+                    final appLayoutProvider =
+                        Provider.of<AppLayoutProvider>(context, listen: false);
+                    appLayoutProvider.updateSelectedScreen(1,
+                        openAddItemPanel: true);
                   },
                 ),
                 _buildActionButton(
@@ -88,8 +91,9 @@ class QuickActions extends StatelessWidget {
                   icon: Icons.people_outline,
                   color: AppColors.colorAccent,
                   onTap: () {
-                    AppLayout.navigatorKey.currentState
-                        ?.updateSelectedScreen(2);
+                    final appLayoutProvider =
+                        Provider.of<AppLayoutProvider>(context, listen: false);
+                    appLayoutProvider.updateSelectedScreen(2);
                   },
                 ),
               ],

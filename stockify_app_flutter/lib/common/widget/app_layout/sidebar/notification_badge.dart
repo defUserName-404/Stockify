@@ -1,4 +1,4 @@
-part of '../app_layout.dart';
+part of '../widgets/app_layout.dart';
 
 class _NotificationBadge extends StatelessWidget {
   final int count;

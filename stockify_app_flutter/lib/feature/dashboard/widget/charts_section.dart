@@ -1,11 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
 import 'package:stockify_app_flutter/feature/item/model/item_filter_param.dart';
 
 import '../../../common/theme/colors.dart';
-import '../../../common/widget/app_layout/app_layout.dart';
+import '../../../common/widget/app_layout/provider/app_layout_provider.dart';
 
 class ChartsSection extends StatefulWidget {
   final Map<DeviceType, int> deviceTypeCounts;
@@ -315,8 +316,9 @@ class _ChartsSectionState extends State<ChartsSection> {
   }
 
   void _navigateToItems(ItemFilterParams filterParams) {
-    AppLayout.navigatorKey.currentState
-        ?.updateSelectedScreen(1, itemFilterParams: filterParams);
+    final appLayoutProvider =
+        Provider.of<AppLayoutProvider>(context, listen: false);
+    appLayoutProvider.updateSelectedScreen(1, itemFilterParams: filterParams);
   }
 
   Color _getDeviceTypeColor(DeviceType type) {

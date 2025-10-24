@@ -1,35 +1,14 @@
-part of '../app_layout.dart';
+part of '../widgets/app_layout.dart';
 
 class _Sidebar extends StatelessWidget {
-  final int selectedIndex;
-  final double railWidth;
-  final bool isExtended;
-  final bool showLabels;
-  final double minRailWidth;
-  final double maxRailWidth;
-  final void Function(double) updateRailWidth;
-  final void Function(int,
-      {ItemFilterParams? itemFilterParams,
-      bool openAddItemPanel}) updateSelectedScreen;
-  final ItemFilterParams? currentFilterParams;
-
-  const _Sidebar({
-    required this.selectedIndex,
-    required this.railWidth,
-    required this.isExtended,
-    required this.showLabels,
-    required this.minRailWidth,
-    required this.maxRailWidth,
-    required this.updateRailWidth,
-    required this.updateSelectedScreen,
-    this.currentFilterParams,
-  });
+  const _Sidebar();
 
   @override
   Widget build(BuildContext context) {
+    final appLayoutProvider = Provider.of<AppLayoutProvider>(context);
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      width: railWidth,
+      width: appLayoutProvider.railWidth,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
@@ -42,28 +21,21 @@ class _Sidebar extends StatelessWidget {
       child: Column(
         children: [
           _SidebarHeader(
-            showLabels: showLabels,
-            isExtended: isExtended,
+            showLabels: appLayoutProvider.showLabels,
+            isExtended: appLayoutProvider.isExtended,
             onToggle: () {
-              updateRailWidth(isExtended ? minRailWidth : maxRailWidth);
+              appLayoutProvider.updateRailWidth(appLayoutProvider.isExtended
+                  ? appLayoutProvider.minRailWidth
+                  : appLayoutProvider.maxRailWidth);
             },
           ),
           Divider(
               height: 1,
               color: colorScheme.outlineVariant.withValues(alpha: 0.2)),
-          Expanded(
-            child: _NavigationSection(
-              selectedIndex: selectedIndex,
-              showLabels: showLabels,
-              updateSelectedScreen: updateSelectedScreen,
-              currentFilterParams: currentFilterParams,
-            ),
+          const Expanded(
+            child: _NavigationSection(),
           ),
-          _BottomNavigationSection(
-            selectedIndex: selectedIndex,
-            showLabels: showLabels,
-            updateSelectedScreen: updateSelectedScreen,
-          ),
+          const _BottomNavigationSection(),
         ],
       ),
     );

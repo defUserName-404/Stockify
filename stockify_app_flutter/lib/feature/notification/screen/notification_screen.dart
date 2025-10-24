@@ -5,7 +5,7 @@ import 'package:stockify_app_flutter/common/widget/animations/screen_transition.
 import 'package:stockify_app_flutter/feature/notification/model/app_notification.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
 
-import '../../../common/widget/app_layout/app_layout.dart';
+import '../../../common/widget/app_layout/provider/app_layout_provider.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -133,8 +133,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                       onTap: () {
                         if (notification.itemId != null) {
-                          AppLayout.navigatorKey.currentState
-                              ?.updateSelectedScreen(1);
+                          final appLayoutProvider =
+                              Provider.of<AppLayoutProvider>(context,
+                                  listen: false);
+                          appLayoutProvider.updateSelectedScreen(1);
                         }
                       },
                     ),

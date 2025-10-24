@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stockify_app_flutter/common/widget/app_layout/app_layout.dart';
+import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/widget/app_layout/provider/app_layout_provider.dart';
 import 'package:stockify_app_flutter/feature/dashboard/widget/info_card.dart';
 import 'package:stockify_app_flutter/feature/item/model/asset_status.dart';
 import 'package:stockify_app_flutter/feature/item/model/item_filter_param.dart';
@@ -22,6 +23,8 @@ class InfoCardsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLayoutProvider =
+        Provider.of<AppLayoutProvider>(context, listen: false);
     final cards = [
       InfoCard(
         title: 'Total Items',
@@ -29,8 +32,7 @@ class InfoCardsGrid extends StatelessWidget {
         icon: Icons.inventory_2,
         color: AppColors.colorBlue,
         index: 0,
-        onTap: () =>
-            AppLayout.navigatorKey.currentState?.updateSelectedScreen(1),
+        onTap: () => appLayoutProvider.updateSelectedScreen(1),
       ),
       InfoCard(
         title: 'Total Users',
@@ -38,8 +40,7 @@ class InfoCardsGrid extends StatelessWidget {
         icon: Icons.people,
         color: AppColors.colorGreen,
         index: 1,
-        onTap: () =>
-            AppLayout.navigatorKey.currentState?.updateSelectedScreen(2),
+        onTap: () => appLayoutProvider.updateSelectedScreen(2),
       ),
       InfoCard(
         title: 'Items Nearing Warranty',
@@ -47,7 +48,7 @@ class InfoCardsGrid extends StatelessWidget {
         icon: Icons.warning,
         color: AppColors.colorOrange,
         index: 2,
-        onTap: () => AppLayout.navigatorKey.currentState?.updateSelectedScreen(
+        onTap: () => appLayoutProvider.updateSelectedScreen(
           1,
           itemFilterParams: ItemFilterParams(isExpiring: true),
         ),
@@ -58,7 +59,7 @@ class InfoCardsGrid extends StatelessWidget {
         icon: Icons.delete,
         color: AppColors.colorPink,
         index: 3,
-        onTap: () => AppLayout.navigatorKey.currentState?.updateSelectedScreen(
+        onTap: () => appLayoutProvider.updateSelectedScreen(
           1,
           itemFilterParams: ItemFilterParams(assetStatus: AssetStatus.Disposed),
         ),
