@@ -18,7 +18,7 @@ class AppLayoutProvider extends ChangeNotifier {
   final double _minRailWidth = 80;
   final double _maxRailWidth = 250;
   final double _minRailLabelThreshold = 150;
-  SharedPreferences? _prefs;
+  final SharedPreferences _prefs;
 
   int get selectedIndex => _selectedIndex;
 
@@ -36,8 +36,11 @@ class AppLayoutProvider extends ChangeNotifier {
 
   double get maxRailWidth => _maxRailWidth;
 
-  AppLayoutProvider() {
-    _railWidth = 80.0;
+  AppLayoutProvider(SharedPreferencesService sharedPreferencesService)
+      : _prefs = sharedPreferencesService.prefs {
+    _railWidth = _prefs.getDouble('railWidth') ?? 80.0;
+    _isExtended = _railWidth > _minRailWidth;
+    _showLabels = _railWidth > _minRailLabelThreshold;
   }
 
   void updateSelectedScreen(int index,
@@ -56,15 +59,8 @@ class AppLayoutProvider extends ChangeNotifier {
     _railWidth = newWidth.clamp(_minRailWidth, _maxRailWidth);
     _showLabels = _railWidth > _minRailLabelThreshold;
     _isExtended = _railWidth > _minRailWidth;
-    _prefs?.setDouble('railWidth', _railWidth);
+    _prefs.setDouble('railWidth', _railWidth);
     notifyListeners();
-  }
-
-  void update(SharedPreferencesService sharedPreferencesService) {
-    _prefs = sharedPreferencesService.prefs;
-    _railWidth = _prefs?.getDouble('railWidth') ?? 80.0;
-    _isExtended = _railWidth > _minRailWidth;
-    _showLabels = _railWidth > _minRailLabelThreshold;
   }
 
   Widget getSelectedScreen() {

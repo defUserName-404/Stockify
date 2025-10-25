@@ -4,23 +4,26 @@ import 'package:stockify_app_flutter/common/shared-preference/shared_preferences
 
 import '../theme.dart';
 
-class ThemeController extends ChangeNotifier {
+class ThemeProvider extends ChangeNotifier {
   ThemeData _themeData = AppTheme.light;
-  SharedPreferences? _prefs;
+  final SharedPreferences _prefs;
 
   ThemeData get themeData => _themeData;
 
-  ThemeController();
+  ThemeProvider(SharedPreferencesService sharedPreferencesService)
+      : _prefs = sharedPreferencesService.prefs {
+    _loadTheme();
+  }
 
   void _loadTheme() {
-    bool isDarkMode = _prefs?.getBool('isDarkMode') ?? false;
+    bool isDarkMode = _prefs.getBool('isDarkMode') ?? false;
     _themeData = isDarkMode ? AppTheme.dark : AppTheme.light;
     notifyListeners();
   }
 
   void setThemeData(ThemeData themeData) {
     _themeData = themeData;
-    _prefs?.setBool('isDarkMode', themeData == AppTheme.dark);
+    _prefs.setBool('isDarkMode', themeData == AppTheme.dark);
     notifyListeners();
   }
 
@@ -30,10 +33,5 @@ class ThemeController extends ChangeNotifier {
     } else {
       setThemeData(AppTheme.light);
     }
-  }
-
-  void update(SharedPreferencesService sharedPreferencesService) {
-    _prefs = sharedPreferencesService.prefs;
-    _loadTheme();
   }
 }

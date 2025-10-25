@@ -7,7 +7,7 @@ import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
 
 import '../../../common/data/service/data_service.dart';
 import '../../../common/theme/colors.dart';
-import '../../../common/theme/controller/theme_controller.dart';
+import '../../../common/theme/provider/theme_provider.dart';
 import '../../../common/theme/theme.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -31,7 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeController>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
     final dataService = DataService.instance;
     return Scaffold(
       appBar: AppBar(
