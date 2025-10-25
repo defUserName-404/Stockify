@@ -3,13 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
 import 'package:stockify_app_flutter/common/theme/colors.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
+import 'package:stockify_app_flutter/common/widget/hover_actions_cell.dart';
 import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
 import 'package:stockify_app_flutter/feature/item/provider/item_provider.dart';
+import 'package:stockify_app_flutter/feature/item/widget/item_context_menu.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 
 class ItemTableView extends StatefulWidget {
-   final Function(Item) onEdit;
+  final Function(Item) onEdit;
   final Function(Item) onView;
   final Function(Item) onDelete;
   final Function(String) onSort;
@@ -153,35 +155,6 @@ class _ItemTableViewState extends State<ItemTableView> {
   }
 }
 
-class _ActionsCell extends StatefulWidget {
-  final bool isSelected;
-  final List<Widget> actions;
-
-  const _ActionsCell({required this.isSelected, required this.actions});
-
-  @override
-  State<_ActionsCell> createState() => _ActionsCellState();
-}
-
-class _ActionsCellState extends State<_ActionsCell> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool showActions = widget.isSelected || _isHovered;
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: showActions
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: widget.actions,
-            )
-          : const Icon(Icons.more_horiz),
-    );
-  }
-}
-
 class ItemData extends DataTableSource {
   final BuildContext context;
   final ItemProvider provider;
@@ -221,6 +194,22 @@ class ItemData extends DataTableSource {
     final isSelected = provider.selectedRowIndex == index;
     final isEven = index.isEven;
     final theme = Theme.of(context);
+    final cells = _getCells(item, isSelected);
+    final wrappedCells = cells.map((cell) {
+      if (cell.child is HoverActionsCell) return cell; // Don't wrap the actions
+      return DataCell(
+        ItemContextMenu(
+          item: item,
+          onView: onView,
+          onEdit: onEdit,
+          onDelete: onDelete,
+          child: cell.child,
+        ),
+        onTap: cell.onTap,
+        placeholder: cell.placeholder,
+        showEditIcon: cell.showEditIcon,
+      );
+    }).toList();
     return DataRow.byIndex(
       index: index,
       selected: isSelected,
@@ -235,7 +224,7 @@ class ItemData extends DataTableSource {
       onSelectChanged: (_) {
         provider.setSelectedRowIndex(index);
       },
-      cells: _getCells(item, isSelected),
+      cells: wrappedCells,
     );
   }
 
@@ -324,7 +313,7 @@ class ItemData extends DataTableSource {
   }
 
   DataCell _buildActionsCell(Item item, bool isSelected) {
-    return DataCell(_ActionsCell(
+    return DataCell(HoverActionsCell(
       isSelected: isSelected,
       actions: [
         ActionWidget(
@@ -415,3 +404,4 @@ class ItemData extends DataTableSource {
     }
   }
 }
+

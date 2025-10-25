@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
+import 'package:stockify_app_flutter/common/widget/hover_actions_cell.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
 import 'package:stockify_app_flutter/feature/item/provider/item_provider.dart';
+import 'package:stockify_app_flutter/feature/item/widget/item_context_menu.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 
 class ItemCardView extends StatelessWidget {
@@ -24,11 +26,17 @@ class ItemCardView extends StatelessWidget {
       itemCount: provider.filteredItems.length,
       itemBuilder: (context, index) {
         final item = provider.filteredItems[index];
-        return _ItemCardItem(
+        return ItemContextMenu(
           item: item,
-          onTap: () => onView(item),
-          onEdit: () => onEdit(item),
-          onDelete: () => onDelete(item),
+          onView: onView,
+          onEdit: onEdit,
+          onDelete: onDelete,
+          child: _ItemCardItem(
+            item: item,
+            onTap: () => onView(item),
+            onEdit: () => onEdit(item),
+            onDelete: () => onDelete(item),
+          ),
         );
       },
     );
@@ -62,8 +70,8 @@ class _ItemCardItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ItemStatus(assetStatus: item.assetStatus),
-                  Row(
-                    children: [
+                  HoverActionsCell(
+                    actions: [
                       ActionWidget(icon: Icons.remove_red_eye, onTap: onTap, message: 'View'),
                       const SizedBox(width: 10),
                       ActionWidget(icon: Icons.edit, onTap: onEdit, message: 'Edit'),

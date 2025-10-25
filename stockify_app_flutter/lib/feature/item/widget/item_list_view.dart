@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/widget/action_widget.dart';
+import 'package:stockify_app_flutter/common/widget/hover_actions_cell.dart';
 import 'package:stockify_app_flutter/feature/item/model/item.dart';
 import 'package:stockify_app_flutter/feature/item/provider/item_provider.dart';
+import 'package:stockify_app_flutter/feature/item/widget/item_context_menu.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 
 class ItemListView extends StatelessWidget {
@@ -18,11 +20,17 @@ class ItemListView extends StatelessWidget {
       itemCount: provider.filteredItems.length,
       itemBuilder: (context, index) {
         final item = provider.filteredItems[index];
-        return _ItemListItem(
+        return ItemContextMenu(
           item: item,
-          onTap: () => onView(item),
-          onEdit: () => onEdit(item),
-          onDelete: () => onDelete(item),
+          onView: onView,
+          onEdit: onEdit,
+          onDelete: onDelete,
+          child: _ItemListItem(
+            item: item,
+            onTap: () => onView(item),
+            onEdit: () => onEdit(item),
+            onDelete: () => onDelete(item),
+          ),
         );
       },
     );
@@ -47,11 +55,17 @@ class _ItemListItem extends StatelessWidget {
         children: [
           ItemStatus(assetStatus: item.assetStatus),
           const SizedBox(width: 10),
-          ActionWidget(icon: Icons.remove_red_eye, onTap: onTap, message: 'View'),
-          const SizedBox(width: 10),
-          ActionWidget(icon: Icons.edit, onTap: onEdit, message: 'Edit'),
-          const SizedBox(width: 10),
-          ActionWidget(icon: Icons.delete, onTap: onDelete, message: 'Delete'),
+          HoverActionsCell(
+            actions: [
+              ActionWidget(
+                  icon: Icons.remove_red_eye, onTap: onTap, message: 'View'),
+              const SizedBox(width: 10),
+              ActionWidget(icon: Icons.edit, onTap: onEdit, message: 'Edit'),
+              const SizedBox(width: 10),
+              ActionWidget(
+                  icon: Icons.delete, onTap: onDelete, message: 'Delete'),
+            ],
+          ),
         ],
       ),
       onTap: onTap,
