@@ -7,22 +7,22 @@ import 'package:stockify_app_flutter/common/widget/animations/screen_transition.
 import 'package:stockify_app_flutter/common/widget/app_dialogs.dart';
 import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
 import 'package:stockify_app_flutter/common/widget/page_header.dart';
+import 'package:stockify_app_flutter/feature/item/model/item_view_type.dart';
 import 'package:stockify_app_flutter/feature/item/provider/item_provider.dart';
+import 'package:stockify_app_flutter/feature/item/provider/view_type_provider.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service.dart';
 import 'package:stockify_app_flutter/feature/item/service/item_service_implementation.dart';
 import 'package:stockify_app_flutter/feature/item/widget/item_form.dart';
-import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service.dart';
 import 'package:stockify_app_flutter/feature/user/service/user_service_implementation.dart';
 
-import '../../../common/widget/action_widget.dart';
 import '../../../common/widget/filter_chips_bar.dart';
 import '../../user/model/user.dart';
-import '../model/device_type.dart';
 import '../model/item.dart';
 import '../model/item_filter_param.dart';
-
-part '../widget/item_datatable.dart';
+import '../widget/item_card_view.dart';
+import '../widget/item_list_view.dart';
+import '../widget/item_table_view.dart';
 
 class ItemScreen extends StatefulWidget {
   final ItemFilterParams? filterParams;
@@ -43,7 +43,6 @@ class ItemScreen extends StatefulWidget {
 class _ItemScreenState extends State<ItemScreen> {
   late final ItemService _itemService;
   late final UserService _userService;
-  late ItemData _itemDataSource;
   final FocusNode _searchFocusNode = FocusNode();
   late final TextEditingController _searchInputController;
   List<User> _usersList = [];
@@ -57,8 +56,6 @@ class _ItemScreenState extends State<ItemScreen> {
     _userService = UserServiceImplementation.instance;
     _searchInputController = TextEditingController();
     _fetchUsers();
-    _initializeItemDataSource();
-    // Initialize provider after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<ItemProvider>();
       provider.initialize(widget.filterParams);
@@ -75,17 +72,6 @@ class _ItemScreenState extends State<ItemScreen> {
     setState(() {
       _usersList = _userService.getAllUsers();
     });
-  }
-
-  void _initializeItemDataSource() {
-    final provider = context.read<ItemProvider>();
-    _itemDataSource = ItemData(
-      context: context,
-      provider: provider,
-      onEdit: (item) => _openItemFormDialog(item: item),
-      onView: (item) => _showViewDetailsDialog(item),
-      onDelete: (item) => _showDeleteConfirmationDialog(item),
-    );
   }
 
   void _onSearchChanged(String query) {
@@ -215,6 +201,7 @@ class _ItemScreenState extends State<ItemScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final viewTypeProvider = context.watch<ViewTypeProvider>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Items'),
@@ -287,14 +274,29 @@ class _ItemScreenState extends State<ItemScreen> {
                   child: Column(
                     children: <Widget>[
                       PageHeader(
-                        onAddNew: () => _openItemFormDialog(),
-                        onFilter: _showFilterDialog,
-                        onSearch: _onSearchChanged,
-                        searchController: _searchInputController,
-                        searchFocusNode: _searchFocusNode,
-                        searchHint:
-                            'Search by Asset No, Model, or Serial No...',
-                      ),
+                          onAddNew: () => _openItemFormDialog(),
+                          onFilter: _showFilterDialog,
+                          onSearch: _onSearchChanged,
+                          searchController: _searchInputController,
+                          searchFocusNode: _searchFocusNode,
+                          searchHint:
+                              'Search by Asset No, Model, or Serial No...',
+                          viewSwitcher: ToggleButtons(
+                            isSelected: [
+                              viewTypeProvider.viewType == ItemViewType.table,
+                              viewTypeProvider.viewType == ItemViewType.list,
+                              viewTypeProvider.viewType == ItemViewType.card,
+                            ],
+                            onPressed: (index) {
+                              viewTypeProvider
+                                  .setViewType(ItemViewType.values[index]);
+                            },
+                            children: const [
+                              Icon(Icons.table_rows),
+                              Icon(Icons.view_list),
+                              Icon(Icons.grid_view),
+                            ],
+                          )),
                       FilterChipsBar(
                         chips: [
                           if (provider.filterParams.deviceType != null)
@@ -331,42 +333,24 @@ class _ItemScreenState extends State<ItemScreen> {
                         ],
                       ),
                       Expanded(
-                        child: SingleChildScrollView(
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                _itemDataSource.screenWidth =
-                                    constraints.maxWidth;
-                                return PaginatedDataTable(
-                                  key: _paginatedDataTableKey,
-                                  initialFirstRowIndex: provider.firstRowIndex,
-                                  onPageChanged: (rowIndex) {
-                                    provider.onPageChanged(rowIndex);
-                                  },
-                                  headingRowColor:
-                                      WidgetStateProperty.all<Color>(
-                                          Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer
-                                              .withAlpha(10)),
-                                  showCheckboxColumn: false,
-                                  showEmptyRows: false,
-                                  availableRowsPerPage: const [10, 20, 50],
-                                  onRowsPerPageChanged: (int? value) {
-                                    if (value != null) {
-                                      provider.setRowsPerPage(value);
-                                    }
-                                  },
-                                  rowsPerPage: provider.rowsPerPage,
-                                  columns: _getColumns(
-                                      constraints.maxWidth, provider),
-                                  source: _itemDataSource,
-                                );
-                              },
+                        child: switch (viewTypeProvider.viewType) {
+                          ItemViewType.table => ItemTableView(
+                              onView: _showViewDetailsDialog,
+                              onEdit: (item) => _openItemFormDialog(item: item),
+                              onDelete: _showDeleteConfirmationDialog,
+                              onSort: _onSort,
                             ),
-                          ),
-                        ),
+                          ItemViewType.list => ItemListView(
+                              onView: _showViewDetailsDialog,
+                              onEdit: (item) => _openItemFormDialog(item: item),
+                              onDelete: _showDeleteConfirmationDialog,
+                            ),
+                          ItemViewType.card => ItemCardView(
+                              onView: _showViewDetailsDialog,
+                              onEdit: (item) => _openItemFormDialog(item: item),
+                              onDelete: _showDeleteConfirmationDialog,
+                            ),
+                        },
                       ),
                     ],
                   ),
@@ -375,80 +359,6 @@ class _ItemScreenState extends State<ItemScreen> {
             );
           },
         ),
-      ),
-    );
-  }
-
-  List<DataColumn> _getColumns(double maxWidth, ItemProvider provider) {
-    List<DataColumn> columns = [];
-    if (maxWidth < 600) {
-      columns = [
-        DataColumn(
-            label: _buildSortableHeader('Asset No', 'asset_no', provider),
-            onSort: (columnIndex, ascending) => _onSort('asset_no')),
-        DataColumn(
-            label: _buildSortableHeader('Device Type', 'device_type', provider),
-            onSort: (columnIndex, ascending) => _onSort('device_type')),
-        const DataColumn(label: Text('Actions')),
-      ];
-    } else if (maxWidth < 900) {
-      columns = [
-        DataColumn(
-            label: _buildSortableHeader('Asset No', 'asset_no', provider),
-            onSort: (columnIndex, ascending) => _onSort('asset_no')),
-        DataColumn(
-            label: _buildSortableHeader('Model No', 'model_no', provider),
-            onSort: (columnIndex, ascending) => _onSort('model_no')),
-        DataColumn(
-            label: _buildSortableHeader('Device Type', 'device_type', provider),
-            onSort: (columnIndex, ascending) => _onSort('device_type')),
-        DataColumn(
-            label:
-                _buildSortableHeader('Asset Status', 'asset_status', provider),
-            onSort: (columnIndex, ascending) => _onSort('asset_status')),
-        const DataColumn(label: Text('Actions')),
-      ];
-    } else {
-      columns = [
-        DataColumn(
-            label: _buildSortableHeader('Asset No', 'asset_no', provider),
-            onSort: (columnIndex, ascending) => _onSort('asset_no')),
-        DataColumn(
-            label: _buildSortableHeader('Model No', 'model_no', provider),
-            onSort: (columnIndex, ascending) => _onSort('model_no')),
-        DataColumn(
-            label: _buildSortableHeader('Serial No', 'serial_no', provider),
-            onSort: (columnIndex, ascending) => _onSort('serial_no')),
-        const DataColumn(label: Text('Device Type')),
-        DataColumn(
-            label: _buildSortableHeader(
-                'Warranty Date', 'warranty_date', provider),
-            onSort: (columnIndex, ascending) => _onSort('warranty_date')),
-        const DataColumn(label: Text('Asset Status')),
-        const DataColumn(label: Text('Actions')),
-      ];
-    }
-    return columns;
-  }
-
-  Widget _buildSortableHeader(
-      String title, String sortKey, ItemProvider provider) {
-    return InkWell(
-      onTap: () => _onSort(sortKey),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        spacing: 4.0,
-        children: [
-          Text(title),
-          if (provider.filterParams.sortBy == sortKey)
-            Icon(
-              provider.filterParams.sortOrder == 'ASC'
-                  ? Icons.arrow_upward
-                  : Icons.arrow_downward,
-              size: 12,
-            )
-        ],
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:stockify_app_flutter/common/widget/app_layout/provider/app_layout_provider.dart';
 import 'package:stockify_app_flutter/common/widget/app_layout/widgets/app_layout.dart';
 import 'package:stockify_app_flutter/feature/item/provider/item_provider.dart';
+import 'package:stockify_app_flutter/feature/item/provider/view_type_provider.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_service.dart';
 import 'package:stockify_app_flutter/feature/notification/service/notification_storage_service.dart';
 
@@ -21,6 +22,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => sharedPrefsService),
     ChangeNotifierProvider(create: (_) => notificationStorageService),
     ChangeNotifierProvider(create: (_) => ItemProvider()),
+    ChangeNotifierProvider(create: (_) => ViewTypeProvider()),
     ChangeNotifierProvider(
         create: (context) => AppLayoutProvider(
             Provider.of<SharedPrefsService>(context, listen: false)))

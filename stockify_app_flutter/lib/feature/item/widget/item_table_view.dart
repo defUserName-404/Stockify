@@ -1,4 +1,157 @@
-part of '../screen/item_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stockify_app_flutter/common/helpers/date_formatter.dart';
+import 'package:stockify_app_flutter/common/theme/colors.dart';
+import 'package:stockify_app_flutter/common/widget/action_widget.dart';
+import 'package:stockify_app_flutter/feature/item/model/device_type.dart';
+import 'package:stockify_app_flutter/feature/item/model/item.dart';
+import 'package:stockify_app_flutter/feature/item/provider/item_provider.dart';
+import 'package:stockify_app_flutter/feature/item/widget/item_status.dart';
+
+class ItemTableView extends StatefulWidget {
+   final Function(Item) onEdit;
+  final Function(Item) onView;
+  final Function(Item) onDelete;
+  final Function(String) onSort;
+
+  const ItemTableView({
+    super.key,
+    required this.onEdit,
+    required this.onView,
+    required this.onDelete,
+    required this.onSort,
+  });
+
+  @override
+  State<ItemTableView> createState() => _ItemTableViewState();
+}
+
+class _ItemTableViewState extends State<ItemTableView> {
+  late ItemData _itemDataSource;
+  final GlobalKey<PaginatedDataTableState> _paginatedDataTableKey =
+      GlobalKey<PaginatedDataTableState>();
+
+  @override
+  void initState() {
+    super.initState();
+    final provider = context.read<ItemProvider>();
+    _itemDataSource = ItemData(
+      context: context,
+      provider: provider,
+      onEdit: widget.onEdit,
+      onView: widget.onView,
+      onDelete: widget.onDelete,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<ItemProvider>();
+    return SingleChildScrollView(
+      child: SizedBox(
+        width: double.infinity,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            _itemDataSource.screenWidth = constraints.maxWidth;
+            return PaginatedDataTable(
+              key: _paginatedDataTableKey,
+              initialFirstRowIndex: provider.firstRowIndex,
+              onPageChanged: (rowIndex) {
+                provider.onPageChanged(rowIndex);
+              },
+              headingRowColor: WidgetStateProperty.all<Color>(
+                  Theme.of(context).colorScheme.primaryContainer.withAlpha(10)),
+              showCheckboxColumn: false,
+              showEmptyRows: false,
+              availableRowsPerPage: const [10, 20, 50],
+              onRowsPerPageChanged: (int? value) {
+                if (value != null) {
+                  provider.setRowsPerPage(value);
+                }
+              },
+              rowsPerPage: provider.rowsPerPage,
+              columns: _getColumns(constraints.maxWidth, provider),
+              source: _itemDataSource,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  List<DataColumn> _getColumns(double maxWidth, ItemProvider provider) {
+    List<DataColumn> columns = [];
+    if (maxWidth < 600) {
+      columns = [
+        DataColumn(
+            label: _buildSortableHeader('Asset No', 'asset_no', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('asset_no')),
+        DataColumn(
+            label: _buildSortableHeader('Device Type', 'device_type', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('device_type')),
+        const DataColumn(label: Text('Actions')),
+      ];
+    } else if (maxWidth < 900) {
+      columns = [
+        DataColumn(
+            label: _buildSortableHeader('Asset No', 'asset_no', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('asset_no')),
+        DataColumn(
+            label: _buildSortableHeader('Model No', 'model_no', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('model_no')),
+        DataColumn(
+            label: _buildSortableHeader('Device Type', 'device_type', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('device_type')),
+        DataColumn(
+            label:
+                _buildSortableHeader('Asset Status', 'asset_status', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('asset_status')),
+        const DataColumn(label: Text('Actions')),
+      ];
+    } else {
+      columns = [
+        DataColumn(
+            label: _buildSortableHeader('Asset No', 'asset_no', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('asset_no')),
+        DataColumn(
+            label: _buildSortableHeader('Model No', 'model_no', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('model_no')),
+        DataColumn(
+            label: _buildSortableHeader('Serial No', 'serial_no', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('serial_no')),
+        const DataColumn(label: Text('Device Type')),
+        DataColumn(
+            label: _buildSortableHeader(
+                'Warranty Date', 'warranty_date', provider),
+            onSort: (columnIndex, ascending) => widget.onSort('warranty_date')),
+        const DataColumn(label: Text('Asset Status')),
+        const DataColumn(label: Text('Actions')),
+      ];
+    }
+    return columns;
+  }
+
+  Widget _buildSortableHeader(
+      String title, String sortKey, ItemProvider provider) {
+    return InkWell(
+      onTap: () => widget.onSort(sortKey),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(title),
+          if (provider.filterParams.sortBy == sortKey)
+            Icon(
+              provider.filterParams.sortOrder == 'ASC'
+                  ? Icons.arrow_upward
+                  : Icons.arrow_downward,
+              size: 12,
+            )
+        ],
+      ),
+    );
+  }
+}
 
 class _ActionsCell extends StatefulWidget {
   final bool isSelected;
@@ -64,12 +217,10 @@ class ItemData extends DataTableSource {
     if (index >= provider.filteredItems.length) {
       return DataRow(cells: []);
     }
-
     final item = provider.filteredItems[index];
     final isSelected = provider.selectedRowIndex == index;
     final isEven = index.isEven;
     final theme = Theme.of(context);
-
     return DataRow.byIndex(
       index: index,
       selected: isSelected,
