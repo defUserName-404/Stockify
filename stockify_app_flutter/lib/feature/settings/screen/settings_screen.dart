@@ -6,7 +6,6 @@ import 'package:stockify_app_flutter/common/widget/animations/screen_transition.
 import 'package:stockify_app_flutter/common/widget/custom_snackbar.dart';
 
 import '../../../common/data/service/data_service.dart';
-import '../../../common/shared-preference/shared_preference_service.dart';
 import '../../../common/theme/colors.dart';
 import '../../../common/theme/controller/theme_controller.dart';
 import '../../../common/theme/theme.dart';
@@ -32,8 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final sharedPrefs = Provider.of<SharedPrefsService>(context);
-    final themeProvider = Provider.of<ThemeController>(context, listen: false);
+    final themeProvider = Provider.of<ThemeController>(context);
     final dataService = DataService.instance;
     return Scaffold(
       appBar: AppBar(
@@ -49,11 +47,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: const Text('Dark Mode'),
               subtitle: const Text('Toggle dark mode'),
               trailing: Switch(
-                value: sharedPrefs.isDarkMode,
+                value: themeProvider.themeData == AppTheme.dark,
                 onChanged: (isDarkMode) {
-                  sharedPrefs.toggleDarkMode(isDarkMode);
-                  themeProvider.setThemeData(
-                      isDarkMode ? AppTheme.dark : AppTheme.light);
+                  themeProvider.toggleTheme();
                 },
               ),
             ),

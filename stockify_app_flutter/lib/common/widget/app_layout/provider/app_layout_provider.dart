@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stockify_app_flutter/common/shared-preference/shared_preference_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stockify_app_flutter/common/shared-preference/shared_preferences_service.dart';
 import 'package:stockify_app_flutter/feature/dashboard/screen/dashboard_screen.dart';
 import 'package:stockify_app_flutter/feature/item/model/item_filter_param.dart';
 import 'package:stockify_app_flutter/feature/item/screen/item_screen.dart';
@@ -17,24 +18,30 @@ class AppLayoutProvider extends ChangeNotifier {
   final double _minRailWidth = 80;
   final double _maxRailWidth = 250;
   final double _minRailLabelThreshold = 150;
-  final SharedPrefsService _sharedPrefs;
+  SharedPreferences? _prefs;
 
   int get selectedIndex => _selectedIndex;
+
   ItemFilterParams? get currentFilterParams => _currentFilterParams;
+
   bool get openAddItemPanel => _openAddItemPanel;
+
   double get railWidth => _railWidth;
+
   bool get isExtended => _isExtended;
+
   bool get showLabels => _showLabels;
+
   double get minRailWidth => _minRailWidth;
+
   double get maxRailWidth => _maxRailWidth;
 
-  AppLayoutProvider(this._sharedPrefs) {
-    _railWidth = _sharedPrefs.railWidth;
-    _isExtended = _railWidth > _minRailWidth;
-    _showLabels = _railWidth > _minRailLabelThreshold;
+  AppLayoutProvider() {
+    _railWidth = 80.0;
   }
 
-  void updateSelectedScreen(int index, {ItemFilterParams? itemFilterParams, bool openAddItemPanel = false}) {
+  void updateSelectedScreen(int index,
+      {ItemFilterParams? itemFilterParams, bool openAddItemPanel = false}) {
     _selectedIndex = index;
     if (index != 1) {
       _currentFilterParams = null;
@@ -49,8 +56,15 @@ class AppLayoutProvider extends ChangeNotifier {
     _railWidth = newWidth.clamp(_minRailWidth, _maxRailWidth);
     _showLabels = _railWidth > _minRailLabelThreshold;
     _isExtended = _railWidth > _minRailWidth;
-    _sharedPrefs.setRailWidth(_railWidth);
+    _prefs?.setDouble('railWidth', _railWidth);
     notifyListeners();
+  }
+
+  void update(SharedPreferencesService sharedPreferencesService) {
+    _prefs = sharedPreferencesService.prefs;
+    _railWidth = _prefs?.getDouble('railWidth') ?? 80.0;
+    _isExtended = _railWidth > _minRailWidth;
+    _showLabels = _railWidth > _minRailLabelThreshold;
   }
 
   Widget getSelectedScreen() {
