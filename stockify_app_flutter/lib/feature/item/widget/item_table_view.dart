@@ -196,7 +196,7 @@ class ItemData extends DataTableSource {
     final theme = Theme.of(context);
     final cells = _getCells(item, isSelected);
     final wrappedCells = cells.map((cell) {
-      if (cell.child is HoverActionsCell) return cell; // Don't wrap the actions
+      if (cell.child is HoverActionsCell) return cell;
       return DataCell(
         ItemContextMenu(
           item: item,
