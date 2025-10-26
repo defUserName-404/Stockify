@@ -1,4 +1,4 @@
-part of '../app_layout.dart';
+part of '../widgets/app_layout.dart';
 
 class _SidebarHeader extends StatelessWidget {
   final bool showLabels;

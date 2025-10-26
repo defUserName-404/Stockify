@@ -1,47 +1,38 @@
 part of 'app_layout.dart';
 
 class _AppLayoutSmall extends StatelessWidget {
-  final int selectedIndex;
-  final void Function(int,
-      {ItemFilterParams? itemFilterParams,
-      bool openAddItemPanel}) updateSelectedScreen;
-  final Widget Function(int) getSelectedScreen;
-
-  const _AppLayoutSmall({
-    required this.selectedIndex,
-    required this.updateSelectedScreen,
-    required this.getSelectedScreen,
-  });
+  const _AppLayoutSmall();
 
   @override
   Widget build(BuildContext context) {
+    final appLayoutProvider = Provider.of<AppLayoutProvider>(context);
     return Column(
       children: [
         Expanded(
           child: Padding(
             padding:
                 const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-            child: getSelectedScreen(selectedIndex),
+            child: appLayoutProvider.getSelectedScreen(),
           ),
         ),
         BottomNavigationBar(
-          currentIndex: selectedIndex,
-          onTap: updateSelectedScreen,
+          currentIndex: appLayoutProvider.selectedIndex,
+          onTap: (index) => appLayoutProvider.updateSelectedScreen(index),
           items: [
             BottomNavigationBarItem(
-              icon: Icon(selectedIndex == 0
+              icon: Icon(appLayoutProvider.selectedIndex == 0
                   ? Icons.dashboard
                   : Icons.dashboard_outlined),
               label: 'Dashboard',
             ),
             BottomNavigationBarItem(
-              icon: Icon(selectedIndex == 1
+              icon: Icon(appLayoutProvider.selectedIndex == 1
                   ? Icons.inventory_2
                   : Icons.inventory_2_outlined),
               label: 'Items',
             ),
             BottomNavigationBarItem(
-              icon: Icon(selectedIndex == 2
+              icon: Icon(appLayoutProvider.selectedIndex == 2
                   ? Icons.account_circle
                   : Icons.account_circle_outlined),
               label: 'Users',
@@ -56,7 +47,7 @@ class _AppLayoutSmall extends StatelessWidget {
                           snapshot.hasData && snapshot.data!.isNotEmpty;
                       return Stack(
                         children: [
-                          Icon(selectedIndex == 3
+                          Icon(appLayoutProvider.selectedIndex == 3
                               ? (hasNotifications
                                   ? Icons.notifications_active
                                   : Icons.notifications_none)
@@ -82,8 +73,7 @@ class _AppLayoutSmall extends StatelessWidget {
                                       ? '9+'
                                       : snapshot.data!.length.toString(),
                                   style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onError,
+                                    color: Theme.of(context).colorScheme.onError,
                                     fontSize: 8,
                                   ),
                                   textAlign: TextAlign.center,
@@ -99,7 +89,7 @@ class _AppLayoutSmall extends StatelessWidget {
               label: 'Notifications',
             ),
             BottomNavigationBarItem(
-              icon: Icon(selectedIndex == 4
+              icon: Icon(appLayoutProvider.selectedIndex == 4
                   ? Icons.settings
                   : Icons.settings_outlined),
               label: 'Settings',

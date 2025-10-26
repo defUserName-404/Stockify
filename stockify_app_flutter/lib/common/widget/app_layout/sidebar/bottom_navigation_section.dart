@@ -1,20 +1,11 @@
-part of '../app_layout.dart';
+part of '../widgets/app_layout.dart';
 
 class _BottomNavigationSection extends StatelessWidget {
-  final int selectedIndex;
-  final bool showLabels;
-  final void Function(int,
-      {ItemFilterParams? itemFilterParams,
-      bool openAddItemPanel}) updateSelectedScreen;
-
-  const _BottomNavigationSection({
-    required this.selectedIndex,
-    required this.showLabels,
-    required this.updateSelectedScreen,
-  });
+  const _BottomNavigationSection();
 
   @override
   Widget build(BuildContext context) {
+    final appLayoutProvider = Provider.of<AppLayoutProvider>(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -30,8 +21,8 @@ class _BottomNavigationSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (showLabels) ...[
-                _SectionLabel(label: 'SYSTEM'),
+              if (appLayoutProvider.showLabels) ...[
+                const _SectionLabel(label: 'SYSTEM'),
                 const SizedBox(height: 8),
               ],
               Consumer<NotificationStorageService>(
@@ -42,14 +33,15 @@ class _BottomNavigationSection extends StatelessWidget {
                       final hasNotifications =
                           snapshot.hasData && snapshot.data!.isNotEmpty;
                       final notificationCount =
-                      hasNotifications ? snapshot.data!.length : 0;
+                          hasNotifications ? snapshot.data!.length : 0;
 
                       return _NavButton(
                         icon: Icons.notifications_rounded,
                         label: 'Notifications',
-                        onPressed: () => updateSelectedScreen(3),
-                        isSelected: selectedIndex == 3,
-                        showLabel: showLabels,
+                        onPressed: () =>
+                            appLayoutProvider.updateSelectedScreen(3),
+                        isSelected: appLayoutProvider.selectedIndex == 3,
+                        showLabel: appLayoutProvider.showLabels,
                         badge: notificationCount > 0 ? notificationCount : null,
                       );
                     },
@@ -60,9 +52,9 @@ class _BottomNavigationSection extends StatelessWidget {
               _NavButton(
                 icon: Icons.settings_rounded,
                 label: 'Settings',
-                onPressed: () => updateSelectedScreen(4),
-                isSelected: selectedIndex == 4,
-                showLabel: showLabels,
+                onPressed: () => appLayoutProvider.updateSelectedScreen(4),
+                isSelected: appLayoutProvider.selectedIndex == 4,
+                showLabel: appLayoutProvider.showLabels,
               ),
             ],
           ),

@@ -10,6 +10,7 @@ class PageHeader extends StatelessWidget {
   final TextEditingController searchController;
   final FocusNode searchFocusNode;
   final String searchHint;
+  final Widget? viewSwitcher;
 
   const PageHeader(
       {super.key,
@@ -18,7 +19,8 @@ class PageHeader extends StatelessWidget {
       required this.onSearch,
       required this.searchController,
       required this.searchFocusNode,
-      required this.searchHint});
+      required this.searchHint,
+      this.viewSwitcher});
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,10 @@ class PageHeader extends StatelessWidget {
             child: _buildSearchBar(context),
           ),
           const SizedBox(width: 16.0),
+          if (viewSwitcher != null) ...[
+            viewSwitcher!,
+            const SizedBox(width: 16.0),
+          ],
           _buildActionButtons(context),
         ],
       ),
@@ -55,7 +61,15 @@ class PageHeader extends StatelessWidget {
         children: [
           _buildSearchBar(context),
           const SizedBox(height: 16.0),
-          _buildActionButtons(context),
+          Row(
+            children: [
+              if (viewSwitcher != null) ...[
+                viewSwitcher!,
+                const SizedBox(width: 16.0),
+              ],
+              Expanded(child: _buildActionButtons(context)),
+            ],
+          ),
         ],
       ),
     );
