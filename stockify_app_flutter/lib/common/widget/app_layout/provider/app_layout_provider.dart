@@ -15,6 +15,7 @@ class AppLayoutProvider extends ChangeNotifier {
   late double _railWidth;
   bool _isExtended = false;
   bool _showLabels = false;
+
   final double _minRailWidth = 80;
   final double _maxRailWidth = 250;
   final double _minRailLabelThreshold = 150;
@@ -38,7 +39,7 @@ class AppLayoutProvider extends ChangeNotifier {
 
   AppLayoutProvider(SharedPreferencesService sharedPreferencesService)
       : _prefs = sharedPreferencesService.prefs {
-    _railWidth = _prefs.getDouble('railWidth') ?? 80.0;
+    _railWidth = _prefs.getDouble('railWidth') ?? _minRailWidth;
     _isExtended = _railWidth > _minRailWidth;
     _showLabels = _railWidth > _minRailLabelThreshold;
   }
@@ -46,11 +47,7 @@ class AppLayoutProvider extends ChangeNotifier {
   void updateSelectedScreen(int index,
       {ItemFilterParams? itemFilterParams, bool openAddItemPanel = false}) {
     _selectedIndex = index;
-    if (index != 1) {
-      _currentFilterParams = null;
-    } else {
-      _currentFilterParams = itemFilterParams;
-    }
+    _currentFilterParams = index == 1 ? itemFilterParams : null;
     _openAddItemPanel = openAddItemPanel;
     notifyListeners();
   }
@@ -69,8 +66,9 @@ class AppLayoutProvider extends ChangeNotifier {
         return const DashboardScreen();
       case 1:
         return ItemScreen(
-            filterParams: _currentFilterParams,
-            openAddItemPanel: _openAddItemPanel);
+          filterParams: _currentFilterParams,
+          openAddItemPanel: _openAddItemPanel,
+        );
       case 2:
         return UserScreen();
       case 3:
@@ -78,7 +76,7 @@ class AppLayoutProvider extends ChangeNotifier {
       case 4:
         return const SettingsScreen();
       default:
-        return const Center(child: Text("Page not found"));
+        return const Center(child: Text('Page not found'));
     }
   }
 }
