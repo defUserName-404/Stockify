@@ -25,6 +25,86 @@ class SettingsScreen extends StatelessWidget {
 class _SettingsScreenContent extends StatelessWidget {
   const _SettingsScreenContent();
 
+  void _showImportResultDialog(BuildContext context, ImportResult result) {
+    showDialog(
+      context: context,
+      builder: (context) =>
+          AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  result.hasErrors && result.successCount == 0
+                      ? Icons.error_outline
+                      : result.hasErrors
+                      ? Icons.warning_amber_rounded
+                      : Icons.check_circle_outline,
+                  color: result.hasErrors && result.successCount == 0
+                      ? Colors.red
+                      : result.hasErrors
+                      ? Colors.orange
+                      : Colors.green,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  result.hasErrors && result.successCount == 0
+                      ? 'Import Failed'
+                      : result.hasErrors
+                      ? 'Import Completed with Errors'
+                      : 'Import Successful',
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Total Rows: ${result.totalRows}'),
+                  Text('Successfully Imported: ${result.successCount}',
+                      style: const TextStyle(color: Colors.green)),
+                  if (result.updatedCount > 0)
+                    Text('Updated: ${result.updatedCount}',
+                        style: const TextStyle(color: Colors.blue)),
+                  if (result.errorCount > 0)
+                    Text('Errors: ${result.errorCount}',
+                        style: const TextStyle(color: Colors.red)),
+                  if (result.warnings.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    const Text('Warnings:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    ...result.warnings.take(5).map((w) =>
+                        Text('• $w',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.orange))),
+                    if (result.warnings.length > 5)
+                      Text('... and ${result.warnings.length - 5} more',
+                          style: const TextStyle(fontSize: 12)),
+                  ],
+                  if (result.errors.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    const Text('Errors:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    ...result.errors.take(5).map((e) =>
+                        Text('• ${e.toString()}',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.red))),
+                    if (result.errors.length > 5)
+                      Text('... and ${result.errors.length - 5} more errors',
+                          style: const TextStyle(fontSize: 12)),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<SettingsProvider>(context);
@@ -44,18 +124,28 @@ class _SettingsScreenContent extends StatelessWidget {
               icon: Icons.upload_file,
               title: 'Import Data',
               subtitle:
-                  'Select the file format of your imported data. Please note that this will not overwrite any existing data.',
+              'Select the file format to import. Excel files must be in .xlsx format (not .xls).',
               buttons: [
                 ImportExportButton(
                   text: 'CSV',
                   onPressed: () async {
                     try {
-                      await provider.importFromCsv();
-                      CustomSnackBar.show(
-                        context: context,
-                        message: 'Items imported successfully from CSV!',
-                        type: SnackBarType.success,
+                      final result = await provider.importFromCsvWithOptions(
+                        ImportOptions(skipErrors: true),
                       );
+
+                      if (result.isSuccess) {
+                        CustomSnackBar.show(
+                          context: context,
+                          message:
+                          'Successfully imported ${result.successCount} items!',
+                          type: SnackBarType.success,
+                        );
+                      }
+
+                      if (result.hasErrors || result.warnings.isNotEmpty) {
+                        _showImportResultDialog(context, result);
+                      }
                     } catch (e) {
                       CustomSnackBar.show(
                         context: context,
@@ -71,12 +161,22 @@ class _SettingsScreenContent extends StatelessWidget {
                   text: 'Excel',
                   onPressed: () async {
                     try {
-                      await provider.importFromExcel();
-                      CustomSnackBar.show(
-                        context: context,
-                        message: 'Items imported successfully from Excel!',
-                        type: SnackBarType.success,
+                      final result = await provider.importFromExcelWithOptions(
+                        ImportOptions(skipErrors: true),
                       );
+
+                      if (result.isSuccess) {
+                        CustomSnackBar.show(
+                          context: context,
+                          message:
+                          'Successfully imported ${result.successCount} items!',
+                          type: SnackBarType.success,
+                        );
+                      }
+
+                      if (result.hasErrors || result.warnings.isNotEmpty) {
+                        _showImportResultDialog(context, result);
+                      }
                     } catch (e) {
                       CustomSnackBar.show(
                         context: context,
