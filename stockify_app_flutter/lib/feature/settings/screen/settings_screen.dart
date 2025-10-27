@@ -10,6 +10,9 @@ import 'package:stockify_app_flutter/feature/settings/widget/generate_report_til
 import 'package:stockify_app_flutter/feature/settings/widget/import_export_buttons.dart';
 import 'package:stockify_app_flutter/feature/settings/widget/keyboard_shortcuts_tile.dart';
 
+import '../widget/about_dialog.dart';
+import '../widget/help_dialog.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -133,7 +136,6 @@ class _SettingsScreenContent extends StatelessWidget {
                       final result = await provider.importFromCsvWithOptions(
                         ImportOptions(skipErrors: true),
                       );
-
                       if (result.isSuccess) {
                         CustomSnackBar.show(
                           context: context,
@@ -142,7 +144,6 @@ class _SettingsScreenContent extends StatelessWidget {
                           type: SnackBarType.success,
                         );
                       }
-
                       if (result.hasErrors || result.warnings.isNotEmpty) {
                         _showImportResultDialog(context, result);
                       }
@@ -164,7 +165,6 @@ class _SettingsScreenContent extends StatelessWidget {
                       final result = await provider.importFromExcelWithOptions(
                         ImportOptions(skipErrors: true),
                       );
-
                       if (result.isSuccess) {
                         CustomSnackBar.show(
                           context: context,
@@ -173,7 +173,6 @@ class _SettingsScreenContent extends StatelessWidget {
                           type: SnackBarType.success,
                         );
                       }
-
                       if (result.hasErrors || result.warnings.isNotEmpty) {
                         _showImportResultDialog(context, result);
                       }
@@ -236,6 +235,18 @@ class _SettingsScreenContent extends StatelessWidget {
                   imageAsset: 'assets/icons/microsoft-excel-icon-logo.png',
                 ),
               ],
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('About'),
+              subtitle: const Text('Learn more about the Stockify app'),
+              onTap: () => showAboutAppDialog(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.help_outline),
+              title: const Text('Help'),
+              subtitle: const Text('Get help and answers to frequently asked questions'),
+              onTap: () => showHelpDialog(context),
             ),
           ],
         ),
