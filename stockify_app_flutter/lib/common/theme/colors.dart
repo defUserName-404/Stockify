@@ -24,4 +24,5 @@ class AppColors {
   static const Color colorTextLight = Color(0xFFE2E2E2);
   static const Color colorTextSemiLight = Color(0xFFADADAD);
   static const Color colorTextDark = Color(0xFF292828);
+  static const Color kSecondaryTextColor = Color(0xFF6170AD);
 }
