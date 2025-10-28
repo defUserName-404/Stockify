@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _CardHeader extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -32,19 +33,19 @@ class _CardHeader extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.color
-                        ?.withOpacity(0.7),
-                  ),
+                        color: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.color
+                            ?.withOpacity(0.7),
+                      ),
                 ),
               ],
             ),

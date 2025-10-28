@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _KeyboardShortcutsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

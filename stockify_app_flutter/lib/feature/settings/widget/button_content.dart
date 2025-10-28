@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _ButtonContent extends StatelessWidget {
   final String imageAsset;
   final String label;

@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _SettingsSection extends StatelessWidget {
   final String title;
   final List<Widget> children;

@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _HelpContent extends StatelessWidget {
   const _HelpContent();
 
@@ -8,20 +9,20 @@ class _HelpContent extends StatelessWidget {
       {
         'question': 'How do I add a new item to the inventory?',
         'answer':
-        'To add a new item, navigate to the "Inventory" screen and click on the "Add Item" button. '
-            'Fill in the required details such as item name, quantity, and price, then save.',
+            'To add a new item, navigate to the "Inventory" screen and click on the "Add Item" button. '
+                'Fill in the required details such as item name, quantity, and price, then save.',
       },
       {
         'question': 'Can I import my existing inventory data?',
         'answer':
-        'Yes, you can import your inventory data from a CSV or Excel file. '
-            'Go to the "Settings" screen and use the "Import Data" feature.',
+            'Yes, you can import your inventory data from a CSV or Excel file. '
+                'Go to the "Settings" screen and use the "Import Data" feature.',
       },
       {
         'question': 'How do I generate a sales report?',
         'answer':
-        'To generate a sales report, go to the "Reports" screen, select the desired date range and other filters, '
-            'and click on the "Generate Report" button.',
+            'To generate a sales report, go to the "Reports" screen, select the desired date range and other filters, '
+                'and click on the "Generate Report" button.',
       },
     ];
 
@@ -31,12 +32,12 @@ class _HelpContent extends StatelessWidget {
         Text(
           'Frequently Asked Questions:',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 16),
         ...faqs.map(
-              (faq) => Padding(
+          (faq) => Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,8 +55,8 @@ class _HelpContent extends StatelessWidget {
                       child: Text(
                         faq['question']!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ),
                   ],
@@ -91,8 +92,8 @@ class _HelpContent extends StatelessWidget {
                 child: Text(
                   'For more assistance, contact support@stockifyapp.com',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontStyle: FontStyle.italic,
-                  ),
+                        fontStyle: FontStyle.italic,
+                      ),
                 ),
               ),
             ],

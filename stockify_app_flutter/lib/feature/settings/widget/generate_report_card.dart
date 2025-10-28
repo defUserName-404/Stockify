@@ -1,14 +1,14 @@
 part of '../screen/settings_screen.dart';
+
 class _GenerateReportCard extends StatelessWidget {
   const _GenerateReportCard();
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<SettingsProvider>(context);
-
     return _SettingsCard(
       child: _CardHeader(
-        icon: Icons.picture_as_pdf,
+        icon: Icons.picture_as_pdf_outlined,
         title: 'Generate Report',
         subtitle: 'Generate a PDF report of the inventory',
         trailing: IconButton(

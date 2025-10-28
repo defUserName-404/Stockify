@@ -10,33 +10,19 @@ import '../../../common/theme/provider/theme_provider.dart';
 import '../../../common/theme/theme.dart';
 
 part '../widget/about_content.dart';
-
 part '../widget/action_button.dart';
-
 part '../widget/button_content.dart';
-
 part '../widget/card_header.dart';
-
 part '../widget/dark_mode_card.dart';
-
 part '../widget/data_management_card.dart';
-
 part '../widget/expandable_card.dart';
-
 part '../widget/generate_report_card.dart';
-
 part '../widget/help_content.dart';
-
 part '../widget/import_result_dialog.dart';
-
 part '../widget/keyboard_shortcuts_card.dart';
-
 part '../widget/keyboard_shortcuts_content.dart';
-
 part '../widget/result_stat.dart';
-
 part '../widget/settings_card.dart';
-
 part '../widget/settings_section.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -65,7 +51,6 @@ class _SettingsScreenContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<SettingsProvider>(context);
     final isDesktop = MediaQuery.of(context).size.width > 800;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -102,7 +87,7 @@ class _SettingsScreenContent extends StatelessWidget {
                   title: 'Data Management',
                   children: [
                     _DataManagementCard(
-                      icon: Icons.upload_file,
+                      icon: Icons.upload_file_outlined,
                       title: 'Import Data',
                       subtitle:
                           'Select the file format to import. Excel files must be in .xlsx format (not .xls).',
@@ -130,7 +115,7 @@ class _SettingsScreenContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     _DataManagementCard(
-                      icon: Icons.download_for_offline,
+                      icon: Icons.download_for_offline_outlined,
                       title: 'Export Data',
                       subtitle: 'Select the file format of your exported data.',
                       actions: [

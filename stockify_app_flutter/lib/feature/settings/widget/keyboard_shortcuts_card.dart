@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _KeyboardShortcutsCard extends StatefulWidget {
   const _KeyboardShortcutsCard();
 
@@ -15,7 +16,7 @@ class _KeyboardShortcutsCardState extends State<_KeyboardShortcutsCard> {
       child: Column(
         children: [
           _CardHeader(
-            icon: Icons.keyboard_sharp,
+            icon: Icons.keyboard_outlined,
             title: 'Keyboard Shortcuts',
             subtitle: 'View all available keyboard shortcuts',
             trailing: Icon(

@@ -27,7 +27,6 @@ class _ActionButton extends StatelessWidget {
         child: _ButtonContent(imageAsset: imageAsset, label: label),
       );
     }
-
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(

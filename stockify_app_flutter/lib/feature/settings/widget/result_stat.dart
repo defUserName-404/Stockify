@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _ResultStat extends StatelessWidget {
   final String label;
   final String value;

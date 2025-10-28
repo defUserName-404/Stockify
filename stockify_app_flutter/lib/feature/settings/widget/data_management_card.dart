@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _DataManagementCard extends StatelessWidget {
   final IconData icon;
   final String title;

@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _DarkModeCard extends StatelessWidget {
   const _DarkModeCard();
 
@@ -6,10 +7,9 @@ class _DarkModeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.themeData == AppTheme.dark;
-
     return _SettingsCard(
       child: _CardHeader(
-        icon: isDarkMode ? Icons.dark_mode : Icons.light_mode,
+        icon: isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
         title: 'Dark Mode',
         subtitle:
         isDarkMode ? 'Dark theme is enabled' : 'Light theme is enabled',

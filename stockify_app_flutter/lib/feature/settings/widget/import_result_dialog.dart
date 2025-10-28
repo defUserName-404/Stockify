@@ -1,4 +1,5 @@
 part of '../screen/settings_screen.dart';
+
 class _ImportResultDialog extends StatelessWidget {
   final ImportResult result;
 
@@ -14,13 +15,13 @@ class _ImportResultDialog extends StatelessWidget {
             result.hasErrors && result.successCount == 0
                 ? Icons.error_outline
                 : result.hasErrors
-                ? Icons.warning_amber_rounded
-                : Icons.check_circle_outline,
+                    ? Icons.warning_amber_rounded
+                    : Icons.check_circle_outline,
             color: result.hasErrors && result.successCount == 0
                 ? Colors.red
                 : result.hasErrors
-                ? Colors.orange
-                : Colors.green,
+                    ? Colors.orange
+                    : Colors.green,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -28,8 +29,8 @@ class _ImportResultDialog extends StatelessWidget {
               result.hasErrors && result.successCount == 0
                   ? 'Import Failed'
                   : result.hasErrors
-                  ? 'Import Completed with Errors'
-                  : 'Import Successful',
+                      ? 'Import Completed with Errors'
+                      : 'Import Successful',
               style: const TextStyle(fontSize: 18),
             ),
           ),
@@ -70,16 +71,16 @@ class _ImportResultDialog extends StatelessWidget {
               const SizedBox(height: 8),
               ...result.warnings.take(5).map(
                     (w) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    '• $w',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange,
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        '• $w',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
               if (result.warnings.length > 5)
                 Text(
                   '... and ${result.warnings.length - 5} more',
@@ -95,16 +96,16 @@ class _ImportResultDialog extends StatelessWidget {
               const SizedBox(height: 8),
               ...result.errors.take(5).map(
                     (e) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    '• ${e.toString()}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.red,
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        '• ${e.toString()}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.red,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
               if (result.errors.length > 5)
                 Text(
                   '... and ${result.errors.length - 5} more errors',
