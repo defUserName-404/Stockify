@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stockify_app_flutter/common/data/service/data_service.dart';
 
@@ -95,7 +96,15 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> generateReport() async {
     _setLoading(true);
     try {
-      await _dataService.generatePdfReport();
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Report',
+        fileName: 'inventory_report.pdf',
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+      if (outputFile != null) {
+        await _dataService.generatePdfReport(filePath: outputFile);
+      }
     } finally {
       _setLoading(false);
     }
